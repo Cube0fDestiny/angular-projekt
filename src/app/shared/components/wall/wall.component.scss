@@ -1,0 +1,92 @@
+/* Wall Component - COMPLETELY NEUTRAL */
+:host {
+  display: block;
+  width: 100%;
+  /* NO text-align here at all! */
+}
+
+.wall-container {
+  width: 100%;
+}
+
+/* Create post section - explicitly left */
+.create-post-section {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Posts list */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Individual posts are left by default */
+
+/* Empty state - use flexbox to center only this element */
+.empty-wall {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers horizontally */
+  justify-content: center; /* Centers vertically */
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+  text-align: center; /* Fallback for text */
+}
+
+.empty-wall .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-wall h3 {
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.empty-wall p {
+  color: #6c757d;
+}
+
+/* Load more - use flexbox to center only this */
+.load-more {
+  margin: 30px 0;
+  display: flex;
+  justify-content: center; /* Centers the button */
+}
+
+.load-more-btn {
+  padding: 12px 30px;
+  background: #4267B2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  /* No display: inline-block needed with flex parent */
+}
+
+.load-more-btn:hover {
+  background: #365899;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 103, 178, 0.3);
+}
+
+.load-more-btn:active {
+  transform: translateY(0);
+}
+
+/* End of feed - center only this */
+.end-of-feed {
+  padding: 20px;
+  color: #6c757d;
+  font-size: 14px;
+  border-top: 1px solid #dee2e6;
+  margin-top: 20px;
+  text-align: center; /* This only affects this element */
+}

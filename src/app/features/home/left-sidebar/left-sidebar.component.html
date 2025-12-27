@@ -1,0 +1,89 @@
+<div class="left-sidebar">
+  
+  <!-- User Profile Shortcut -->
+  <div class="user-shortcut" *ngIf="currentUser" routerLink="/profile">
+    <img [src]="currentUser.avatar" alt="Profile" class="user-avatar">
+    <span class="user-name">{{ currentUser.name }}</span>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="section quick-actions">
+    <h3 class="section-title">Shortcuts</h3>
+    <div class="actions-list">
+      <button 
+        *ngFor="let action of quickActions"
+        class="action-btn"
+        (click)="onQuickAction(action.action)">
+        <span class="action-icon">{{ action.icon }}</span>
+        <span class="action-label">{{ action.label }}</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Your Groups -->
+  <div class="section groups-section">
+    <div class="section-header">
+      <h3 class="section-title">Your Groups</h3>
+      <button class="see-all">See All</button>
+    </div>
+    
+    <div class="groups-list">
+      <div 
+        *ngFor="let group of groups"
+        class="group-item"
+        [class.joined]="group.isJoined"
+        (click)="onGroupClick(group)">
+        
+        <div class="group-icon">{{ group.icon }}</div>
+        
+        <div class="group-info">
+          <h4 class="group-name">{{ group.name }}</h4>
+          <div class="group-meta">
+            <span class="group-type">{{ group.type }}</span>
+           <!-- <span class="group-members">👥 {{ group.members | number }}</span>-->
+          </div>
+        </div>
+        
+        <button 
+          class="join-btn"
+          [class.joined]="group.isJoined"
+          (click)="joinGroup(group.id); $event.stopPropagation()">
+          {{ group.isJoined ? 'Joined' : 'Join' }}
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Organizations -->
+  <div class="section orgs-section" *ngIf="organizations.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">Organizations</h3>
+    </div>
+    
+    <div class="orgs-list">
+      <div 
+        *ngFor="let org of organizations"
+        class="org-item"
+        (click)="onOrgClick(org)">
+        
+        <div class="org-icon">{{ org.icon }}</div>
+        
+        <div class="org-info">
+          <h4 class="org-name">{{ org.name }}</h4>
+          <div class="org-meta">
+            <span class="org-category">{{ org.category }}</span>
+            <span class="org-members">{{ org.members }} members</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer Links -->
+  <div class="sidebar-footer">
+    <a href="#" class="footer-link">Privacy</a>
+    <a href="#" class="footer-link">Terms</a>
+    <a href="#" class="footer-link">Advertising</a>
+    <a href="#" class="footer-link">Help</a>
+  </div>
+</div>

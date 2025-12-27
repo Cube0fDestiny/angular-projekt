@@ -1,0 +1,136 @@
+<div class="right-sidebar">
+  
+  <!-- Online Friends -->
+  <div class="section online-friends" *ngIf="onlineFriends.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">Online Friends</h3>
+      <span class="online-count">{{ onlineFriends.length }} online</span>
+    </div>
+    
+    <div class="friends-list">
+      <div 
+        *ngFor="let friend of onlineFriends"
+        class="friend-item"
+        (click)="onFriendClick(friend)">
+        
+        <div class="friend-avatar">
+          <img [src]="friend.avatar" [alt]="friend.name">
+          <span class="online-status"></span>
+        </div>
+        
+        <div class="friend-info">
+          <h4 class="friend-name">{{ friend.name }}</h4>
+          <span class="friend-status">{{ friend.lastActive }}</span>
+        </div>
+        
+        <button 
+          class="message-btn"
+          (click)="sendMessage(friend.id); $event.stopPropagation()">
+          💬
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Friend Requests -->
+  <div class="section friend-requests" *ngIf="friendRequests.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">Friend Requests</h3>
+      <span class="count">{{ friendRequests.length }} new</span>
+    </div>
+    
+    <div class="requests-list">
+      <div *ngFor="let request of friendRequests" class="request-item">
+        <img [src]="request.avatar" [alt]="request.name" class="request-avatar">
+        
+        <div class="request-info">
+          <h4 class="request-name">{{ request.name }}</h4>
+          <span class="mutual-friends">{{ request.mutualFriends }} mutual friends</span>
+        </div>
+        
+        <div class="request-actions">
+          <button 
+            class="accept-btn"
+            (click)="acceptRequest(request.id)">
+            Confirm
+          </button>
+          <button 
+            class="reject-btn"
+            (click)="rejectRequest(request.id)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Profiles -->
+  <div class="section recent-profiles">
+    <div class="section-header">
+      <h3 class="section-title">People You May Know</h3>
+    </div>
+    
+    <div class="profiles-list">
+      <div 
+        *ngFor="let profile of recentProfiles"
+        class="profile-item"
+        (click)="onFriendClick(profile)">
+        
+        <img [src]="profile.avatar" [alt]="profile.name" class="profile-avatar">
+        
+        <div class="profile-info">
+          <h4 class="profile-name">{{ profile.name }}</h4>
+          <span class="profile-meta">
+            {{ profile.mutualFriends }} mutual friends
+          </span>
+        </div>
+        
+        <button class="add-friend-btn">Add Friend</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Birthdays -->
+  <div class="section birthdays" *ngIf="birthdays.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">🎉 Birthdays</h3>
+    </div>
+    
+    <div class="birthdays-list">
+      <div *ngFor="let birthday of birthdays" class="birthday-item">
+        <img [src]="birthday.avatar" [alt]="birthday.name" class="birthday-avatar">
+        
+        <div class="birthday-info">
+          <span class="birthday-text">
+            <strong>{{ birthday.name }}</strong>
+            {{ birthday.today ? 'has a birthday today!' : 'birthday is ' + birthday.date }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sponsored -->
+  <div class="section sponsored" *ngIf="sponsored.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">Sponsored</h3>
+    </div>
+    
+    <div class="sponsored-list">
+      <div *ngFor="let ad of sponsored" class="sponsored-item">
+        <img [src]="ad.image" [alt]="ad.title" class="sponsored-image">
+        
+        <div class="sponsored-info">
+          <h4 class="sponsored-title">{{ ad.title }}</h4>
+          <p class="sponsored-desc">{{ ad.description }}</p>
+          <a [href]="ad.link" class="sponsored-link">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <p class="copyright">© 2024 DEV 2 Social</p>
+  </div>
+</div>

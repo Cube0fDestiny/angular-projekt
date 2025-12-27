@@ -1,0 +1,118 @@
+<div class="post-card" [class.with-image]="post.imageUrl">
+  
+  <!-- Post Header -->
+  <div class="post-header">
+    <img [src]="post.author.avatar" [alt]="post.author.name" class="author-avatar">
+    
+    <div class="author-info">
+      <div class="author-name">{{ post.author.name }}</div>
+      <div class="post-meta">
+        <span class="post-time">{{ timeAgo }}</span>
+        <span *ngIf="post.location" class="post-location">📍 {{ post.location }}</span>
+        <span *ngIf="post.isEdited" class="edited">(edited)</span>
+      </div>
+    </div>
+    
+    <button class="more-options" *ngIf="currentUserId === post.author.id">
+      ⋮
+    </button>
+  </div>
+  
+  <!-- Post Content -->
+  <div class="post-content">
+    <p class="post-text">{{ post.content }}</p>
+    
+    <!-- Post Image -->
+    <img 
+      *ngIf="post.imageUrl" 
+      [src]="post.imageUrl" 
+      [alt]="'Image in post by ' + post.author.name"
+      class="post-image" >
+  </div>
+  
+  <!-- Post Stats -->
+  <div class="post-stats" *ngIf="post.likes > 0 || post.comments.length > 0 || post.shares > 0">
+    <div class="stats-left">
+      <span *ngIf="post.likes > 0" class="likes-count">
+        👍 {{ post.likes }}
+      </span>
+      <span *ngIf="post.comments.length > 0" class="comments-count">
+        💬 {{ post.comments.length }}
+      </span>
+    </div>
+    <div class="stats-right">
+      <span *ngIf="post.shares > 0" class="shares-count">
+        🔄 {{ post.shares }} shares
+      </span>
+    </div>
+  </div>
+  
+  <!-- Post Actions -->
+  <div class="post-actions" *ngIf="showActions">
+    <button 
+      class="action-btn like-btn" 
+      [class.liked]="isLikedByCurrentUser"
+      (click)="onLike()">
+      <span class="action-icon">{{ isLikedByCurrentUser ? '❤️' : '🤍' }}</span>
+      <span class="action-text">Like</span>
+    </button>
+    
+    <button class="action-btn comment-btn" (click)="toggleComments()">
+      <span class="action-icon">💬</span>
+      <span class="action-text">Comment</span>
+    </button>
+    
+    <button class="action-btn share-btn" (click)="share.emit(post.id)">
+      <span class="action-icon">🔄</span>
+      <span class="action-text">Share</span>
+    </button>
+  </div>
+  
+  <!-- Comment Input -->
+  <div class="comment-input" *ngIf="showActions">
+    <img 
+      [src]="post.author.avatar" 
+      [alt]="post.author.name" 
+      class="commenter-avatar">
+    
+    <div class="input-container">
+      <input 
+        type="text"  
+        placeholder="Write a comment..."
+        (keyup.enter)="addComment()"
+        class="comment-input-field">
+      
+      <button 
+        class="post-comment-btn"
+        [disabled]="!newComment.trim()"
+        (click)="addComment()">
+        Post
+      </button>
+    </div>
+  </div>
+  
+  <!-- Comments Section -->
+  <div class="comments-section" *ngIf="showComments && post.comments.length > 0">
+    <div class="comment" *ngFor="let comment of post.comments">
+      <img [src]="comment.author.avatar" [alt]="comment.author.name" class="comment-avatar">
+      
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author">{{ comment.author.name }}</span>
+          <span class="comment-time">{{ timeAgo }}</span>
+        </div>
+        
+        <p class="comment-text">{{ comment.text }}</p>
+        
+        <div class="comment-actions">
+          <button class="comment-like-btn" (click)="likeComment(comment.id)">
+            Like
+          </button>
+          <button class="comment-reply-btn">
+            Reply
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

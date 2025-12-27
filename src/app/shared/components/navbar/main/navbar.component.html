@@ -1,0 +1,45 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <div class="navbar-logo" (click)="setActive('home')">
+      <span class="logo-icon">f</span>
+      <span class="logo-text">facebook</span>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Szukaj na Facebooku"
+      >
+    </div>
+
+    <!-- Main Navigation (tylko wizualnie) -->
+    <div class="nav-items">
+      <div 
+        *ngFor="let item of navItems" 
+        class="nav-item"
+        [class.active]="activeItem === item.id"
+        (click)="setActive(item.id)"
+      >
+        <span class="nav-icon">{{item.icon}}</span>
+        <span *ngIf="item.badge" class="nav-badge">{{item.badge}}</span>
+      </div>
+      
+    </div>
+
+    <!-- User Menu -->
+    <div class="user-menu">
+      <div> loser menu</div>
+      <div class="user-info" (click)="setActive('profile')">
+        <img [src]="currentUser.avatar" alt="Avatar" class="user-avatar"> 
+        
+        <span class="user-name">{{currentUser.name}}</span>
+        <profile-dropdown> </profile-dropdown>
+      
+      </div>
+    </div>
+  </div>
+</nav>

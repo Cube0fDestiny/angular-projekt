@@ -1,0 +1,40 @@
+<div class="wall-container">
+  
+  <!-- Create New Post (optional) -->
+  <div class="create-post-section" *ngIf="showCreatePost">
+   <!-- <app-create-post (postCreated)="addPost($event)"></app-create-post>
+  -->
+  </div>
+  
+  <!-- Posts List -->
+  <div class="posts-list">
+    
+    <!-- Empty State -->
+    <div *ngIf="posts.length === 0" class="empty-wall">
+      <div class="empty-icon">📝</div>
+      <h3>No posts yet</h3>
+      <p>Be the first to share something!</p>
+    </div>
+    
+    <!-- Posts -->
+  <app-post-card
+      *ngFor="let post of displayedPosts"
+      [post]="post"
+      (like)="onLike(post.id)"
+      (comment)="onComment(post.id, $event.text)"
+      (share)="onShare(post.id)"
+      (delete)="removePost(post.id)">
+    </app-post-card> 
+    <!-- Load More Button -->
+    <div *ngIf="showLoadMore && hasMorePosts" class="load-more">
+      <button (click)="loadMore()" class="load-more-btn">
+        Load More Posts ({{ posts.length - displayedPosts.length }} remaining)
+      </button>
+    </div>
+    
+    <!-- End of Feed -->
+    <div *ngIf="!hasMorePosts && posts.length > 0" class="end-of-feed">
+      <p>🎉 You've seen all {{ posts.length }} posts!</p>
+    </div>
+  </div>
+</div>

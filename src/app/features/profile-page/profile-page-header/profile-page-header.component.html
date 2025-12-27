@@ -1,0 +1,91 @@
+<div class="profile-header">
+  <!-- Cover Photo -->
+  <div class="cover-photo" [style.background-image]="'url(' + coverImage + ')'">
+    <button class="edit-cover-btn" *ngIf="isOwnProfile">✏️ Edit Cover</button>
+  </div>
+  
+  <!-- Header Content -->
+  <div class="header-content">
+    <!-- Profile Picture -->
+    <div class="profile-picture-container">
+      <img 
+        [src]="user.avatar" 
+        [alt]="user.name" 
+        class="profile-picture">
+      <button class="edit-picture-btn" *ngIf="isOwnProfile">✏️</button>
+    </div>
+    
+    <!-- Profile Info -->
+    <div class="profile-info">
+      <h1 class="profile-name">{{ user.name }}</h1>
+      <p class="profile-bio" *ngIf="user.bio">{{ user.bio }}</p>
+      
+      <!-- Stats -->
+      <div class="profile-stats">
+        <div class="stat">
+          <strong>{{ stats.friends || 0 }}</strong>
+          <span>Friends</span>
+        </div>
+        <div class="stat">
+          <strong>{{ stats.posts || 0 }}</strong>
+          <span>Posts</span>
+        </div>
+        <div class="stat">
+          <strong>{{ stats.photos || 0 }}</strong>
+          <span>Photos</span>
+        </div>
+      </div>
+      
+      <!-- 3 BUTTONS (Dynamic based on relationship) -->
+      <div class="profile-actions">
+        
+        <!-- SELF PROFILE -->
+        <ng-container *ngIf="isOwnProfile">
+          <button class="btn-primary" (click)="onEditProfile()">
+            ✏️ Edit Profile
+          </button>
+          <button class="btn-secondary" (click)="onAddStory()">
+            📖 Add to Story
+          </button>
+          <button class="btn-secondary" (click)="onViewAs()">
+            👁️ View As
+          </button>
+        </ng-container>
+        
+        <!-- FRIEND'S PROFILE -->
+        <ng-container *ngIf="isFriend && !isOwnProfile">
+          <button class="btn-primary" (click)="onMessage()">
+            💬 Message
+          </button>
+          <button class="btn-secondary" (click)="onUnfriend()">
+            👥 Friends
+          </button>
+          <button class="btn-secondary" (click)="onMore()">
+            ⋮ More
+          </button>
+        </ng-container>
+        
+        <!-- STRANGER'S PROFILE -->
+        <ng-container *ngIf="!isFriend && !isOwnProfile">
+          <button class="btn-primary" (click)="onAddFriend()">
+            👥 Add Friend
+          </button>
+          <button class="btn-secondary" (click)="onMessage()">
+            💬 Message
+          </button>
+          <button class="btn-secondary" (click)="onMore()">
+            ⋮ More
+          </button>
+        </ng-container>
+        
+      </div>
+    </div>
+    
+    <!-- Additional Actions (right side) -->
+    <div class="header-actions">
+      <button class="icon-btn">📁</button>
+      <button class="icon-btn">🔍</button>
+      <button class="icon-btn">⋮</button>
+    </div>
+  </div>
+</div>

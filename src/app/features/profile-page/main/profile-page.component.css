@@ -1,0 +1,27 @@
+.profile-layout-container {
+  display: inline-block; /* ← Allows neighbouring */
+  vertical-align: top;   /* ← Aligns properly */
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.content-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+}
+
+ 
+
+sidebar-column {
+  flex: 0 0 50%; /* Takes exactly 50% width */
+  padding: 20px;
+  box-sizing: border-box; /* Includes padding in width calculation */
+  background: #f0f2f5; /* Optional */
+}
+
+.wall-column { 
+     
+}
