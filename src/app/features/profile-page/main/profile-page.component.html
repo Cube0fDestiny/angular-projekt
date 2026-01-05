@@ -1,27 +1,18 @@
-<app-navbar></app-navbar>
-<app-profile-header></app-profile-header>
-<div class="profile-container"> 
-  <div class="profile-content">
-    <!-- Left 50% --> 
-      <app-profile-sidebar></app-profile-sidebar> 
-    
-    <!-- Right 50% --> 
- 
-      <app-wall></app-wall> 
-  </div>
-</div> 
-
-<app-wall></app-wall>
-<div class="profile">
-  <h1>Profile Page</h1>
-  
-  <div *ngIf="user">
-    <h2>User ID: {{ userId }}</h2>
-    <h3>Name: {{ user.name }}</h3>
-    <img [src]="user.avatar" width="100">
-    <p>Bio: {{ user.bio }}</p>
-    
-    <!-- The page WILL change depending on which user was clicked! -->
-    <p>This is {{ userId === userService.currentUser?.id ? 'YOUR' : 'someone else\'s' }} profile</p>
+<div style="background-color: #F9F5F0;">
+  <app-navbar></app-navbar>
+  <app-profile-header></app-profile-header>
+  <div class="profile-container">
+      <table style="width: 80%; border-collapse: collapse;  margin: 0 auto; border: none;">
+        <tr>
+          <!-- Profile Sidebar -->
+          <td style="width:30%; vertical-align: top; border: none;">
+            <app-profile-sidebar></app-profile-sidebar> 
+          </td>
+          <!-- Profile Wall -->
+          <td style="width:50%; vertical-align: top; padding: 20px; border: none;">
+            <app-wall></app-wall>
+          </td>
+        </tr>
+      </table>
   </div>
 </div>

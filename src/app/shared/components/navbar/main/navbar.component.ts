@@ -32,8 +32,8 @@ export class NavbarComponent implements OnInit {
     { id: 'home', label: 'Strona główna', icon: '🏠' },
     { id: 'friends', label: 'Znajomi', icon: '👥', badge: 5 },
     { id: 'messages', label: 'Wiadomości', icon: '💬', badge: 12 },
-    { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 },
-    { id: 'profile', label: 'Profil', icon: '👤' }
+    { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 }
+    //, { id: 'profile', label: 'Profil', icon: '👤' }
   ];
   isDropdownOpen = false;
   activeItem = 'home';

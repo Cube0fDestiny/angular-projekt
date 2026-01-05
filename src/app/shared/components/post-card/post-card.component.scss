@@ -1,11 +1,11 @@
 .post-card {
-  background: white;
+  background: #F2EAD3;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
-  padding: 16px;
   transition: transform 0.2s, box-shadow 0.2s;
-  
+  overflow: hidden;
+
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
@@ -18,34 +18,54 @@
   }
 }
 
+.post-card > .post-image {
+  display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: cover;
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .post-header {
+  padding: 16px;
   display: flex;
   align-items: center;
   margin-bottom: 12px;
   
   .author-avatar {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 12px;
-    border: 2px solid #f0f2f5;
   }
   
   .author-info {
     flex: 1;
-    
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
     .author-name {
-      font-weight: 600;
-      color: #1c1e21;
-      margin-bottom: 4px;
+      font-weight: 700;
+      color: #344F1F;
+      font-size: x-large;
     }
     
     .post-meta {
+      margin-left: auto;
+      margin-top: 32px;
       display: flex;
       gap: 8px;
-      font-size: 13px;
-      color: #65676b;
+      font-size: small;
+      color: #344F1F;
       
       .post-location {
         display: flex;
@@ -54,7 +74,7 @@
       }
       
       .edited {
-        color: #8a8d91;
+        color: #344F1F;
       }
     }
   }
@@ -75,56 +95,42 @@
 }
 
 .post-content {
-  .post-text {
-    font-size: 15px;
-    line-height: 1.4;
-    color: #1c1e21;
-    margin-bottom: 12px;
-    white-space: pre-wrap;
-  }
-  
-  .post-image {
-    width: 100%;
-    max-height: 500px;
-    border-radius: 8px;
-    object-fit: cover;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    
-    &:hover {
-      opacity: 0.95;
-    }
-  }
+  padding: 0 16px 16px;
+  margin-left: 64px;
+  margin-right: 32px;
 }
 
 .post-stats {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 12px 0;
-  border-top: 1px solid #f0f2f5;
-  border-bottom: 1px solid #f0f2f5;
-  margin: 12px 0;
+  padding: 0 16px 16px;
+  margin-left: 64px;
+  margin-right: 32px;
   font-size: 14px;
-  color: #65676b;
+  color: #F2EAD3;
   
-  .stats-left {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .likes-count, .comments-count {
+  .likes-count, .comments-count, .shares-count {
+    background: #344F1F;
     display: flex;
     align-items: center;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-inline: 16px;
+    margin-bottom: 8px;
+    font-size: medium;
+    font-weight: 700;
     gap: 4px;
   }
 }
 
 .post-actions {
   display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f2f5;
+  justify-content:space-between;
+  padding: 0 16px 16px;
+  margin-left: 64px;
+  margin-right: 32px;
   margin-bottom: 12px;
   
   .action-btn {
@@ -135,21 +141,24 @@
     background: none;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #65676b;
+    font-size: large;
+    font-weight: 700;
+    background-color: #F4991A;
+    color:#F2EAD3;
+    
     cursor: pointer;
     transition: all 0.2s;
     
     &:hover {
-      background: #f0f2f5;
+      color: #344F1F;
     }
     
     &.liked {
-      color: #f91880;
+      background-color: #344F1F;
       
       &:hover {
-        background: rgba(249, 24, 128, 0.1);
+        background-color: #F2EAD3;
+        color: #344F1F;
       }
     }
     
@@ -170,6 +179,7 @@
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    margin-left: 16px;
   }
   
   .input-container {
@@ -180,29 +190,32 @@
     .comment-input-field {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #e4e6eb;
+      border: 1px solid #F2EAD3;
+      color:#344F1F;
       border-radius: 20px;
       font-size: 14px;
-      background: #f0f2f5;
+      background: white;
       
       &:focus {
         outline: none;
         background: white;
-        border-color: #bcc0c4;
+        border-color: #F4991A;
       }
     }
     
     .post-comment-btn {
       padding: 8px 16px;
-      background: #4267B2;
-      color: white;
+      margin-right: 16px;
+      background: #F4991A;
+      color: #F2EAD3;
       border: none;
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
       
       &:hover:not(:disabled) {
-        background: #365899;
+        background: #F4991A;
+        color: #344F1F;
       }
       
       &:disabled {
@@ -216,7 +229,9 @@
 .comments-section {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f2f5;
+  margin-right: 16px;
+  margin-bottom: 16px;
+
   
   .comment {
     display: flex;
@@ -232,12 +247,13 @@
       height: 32px;
       border-radius: 50%;
       object-fit: cover;
+      margin-left: 16px;
       align-self: flex-start;
     }
     
     .comment-content {
       flex: 1;
-      background: #f0f2f5;
+      background: white;
       padding: 8px 12px;
       border-radius: 18px;
       
@@ -249,18 +265,18 @@
         .comment-author {
           font-weight: 600;
           font-size: 13px;
-          color: #1c1e21;
+          color: #344F1F;
         }
         
         .comment-time {
           font-size: 11px;
-          color: #65676b;
+          color: #344F1F;
         }
       }
       
       .comment-text {
         font-size: 13px;
-        color: #1c1e21;
+        color: #344F1F;
         margin-bottom: 6px;
       }
       
@@ -272,7 +288,7 @@
           background: none;
           border: none;
           font-size: 12px;
-          color: #65676b;
+          color: #344F1F;
           cursor: pointer;
           padding: 2px 0;
           
@@ -288,7 +304,6 @@
 // Mobile responsive
 @media (max-width: 768px) {
   .post-card {
-    padding: 12px;
     margin-bottom: 12px;
     border-radius: 8px;
   }
@@ -309,7 +324,7 @@
     }
   }
   
-  .post-image {
-    max-height: 300px !important;
+  .post-card > .post-image {
+    max-height: 300px;
   }
 }

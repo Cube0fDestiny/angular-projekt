@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #1877f2;
+  background-color: #F4991A;
   color: white;
   height: 56px;
   position: fixed;
@@ -12,12 +12,12 @@
 }
 
 .navbar-container {
+  white-space: nowrap;
   display: flex;
+  justify-content: space-between; /* spreads left, center, right across full width */
   align-items: center;
-  justify-content: space-between;
   height: 100%;
   padding: 0 16px;
-  max-width: 1400px;
   margin: 0 auto;
   overflow: visible;
 }
@@ -31,20 +31,20 @@
   .logo-icon {
     font-size: 28px;
     margin-right: 4px;
-  }
-  
-  .logo-text {
     font-size: 20px;
+    height: 48px;
+    width: 88px;
   }
 }
 
 .search-container {
-  flex: 0 1 400px;
+  flex: 0 1 350px;
+  text-align: center;
   position: relative;
   
   .search-icon {
     position: absolute;
-    left: 12px;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
     color: #65676b;
@@ -52,26 +52,24 @@
   
   .search-input {
     width: 100%;
-    padding: 8px 16px 8px 40px;
+    padding: 8px 40px 8px 16px;
     border-radius: 20px;
     border: none;
-    background-color: #f0f2f5;
+    color:#344F1F;
+    background-color: #F2EAD3;
     font-size: 15px;
     
     &:focus {
       outline: none;
-      background-color: white;
+      background-color: #F2EAD3;
     }
   }
 }
 
 .nav-items {
-  
   display: flex;
   gap: 8px;
-  flex: 1;
   justify-content: center;
-  max-width: 680px;
   
   .nav-item {
     position: relative;

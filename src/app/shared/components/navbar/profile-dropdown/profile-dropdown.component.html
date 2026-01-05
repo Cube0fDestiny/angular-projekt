@@ -3,10 +3,9 @@
   <div
     class="dropdown-trigger"
     (click)="toggleDropdown()"
-    aria-label="User menu">
-    👤 User Named fsssds
-    <span class="arrow">{{ isOpen ? '▲' : '▼' }}</span>
-</div> 
+    aria-label="User menu"> 
+      <span class="arrow">{{ isOpen ? '▲' : '▼' }}</span>
+  </div> 
   <!-- Dropdown content -->
   <div *ngIf="isOpen" class="dropdown-menu" (click)="$event.stopPropagation()">
     
@@ -14,8 +13,8 @@
       <div class="user-info">
         <img src="https://i.pravatar.cc/40" alt="User" class="user-avatar">
         <div>
-          <span class="user-name">{{user.name}}</span>
-          <small>john example.com</small>
+           <!-- <span class="user-name">{{user.name}}</span> -->
+          <span class="user-name">john example.com</span>
         </div>
       </div>
     </div>
@@ -23,20 +22,24 @@
     <div class="dropdown-divider"></div>
     
     <!-- Your 3 buttons -->
-    <button class="dropdown-item" (click)="onProfileClick()">
-      <span class="icon">👤</span>
-      <span>Profile</span>
-    </button>
-    
-    <button class="dropdown-item" (click)="onSettingsClick()">
-      <span class="icon">⚙️</span>
-      <span>Settings</span>
-    </button>
-    
-    <button class="dropdown-item" (click)="onLogoutClick()">
-      <span class="icon">🚪</span>
-      <span>Logout</span>
-    </button>
+    <div class="dropdown-item">
+      <button class="dropdown-button" (click)="onProfileClick()">
+        <span class="icon">👤</span>
+        <span>Profile</span>
+      </button>
+    </div>
+    <div class="dropdown-item">
+      <button class="dropdown-button" (click)="onSettingsClick()">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </div>
+    <div class="dropdown-item">
+      <button class="dropdown-button" (click)="onLogoutClick()">
+        <span class="icon">🚪</span>
+        <span>Logout</span>
+      </button>
+    </div>
   </div>
 </div>
 

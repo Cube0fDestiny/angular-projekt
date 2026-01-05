@@ -4,11 +4,13 @@
   position: fixed;
   right: 0;
   top: 60px;
-  background: white;
-  border-left: 1px solid #e4e6eb;
+  background: #F9F5F0;
   overflow-y: auto;
   padding: 20px 16px;
   z-index: 100;
+  font-size: large;
+  font-weight: 700;
+  color: #344F1F;
   
   .section {
     margin-bottom: 24px;
@@ -20,15 +22,13 @@
       margin-bottom: 12px;
       
       .section-title {
-        font-size: 17px;
-        font-weight: 600;
-        color: #1c1e21;
+        font-size: x-large;
+        color: #344F1F;
         margin: 0;
       }
       
       .online-count, .count {
         font-size: 13px;
-        color: #65676b;
       }
     }
   }
@@ -45,15 +45,36 @@
       margin-bottom: 4px;
       
       &:hover {
-        background: #f0f2f5;
+        background: #F2EAD3;
       }
       
-      .friend-avatar, .profile-avatar {
+      .profile-avatar {
         position: relative;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        object-fit: cover;
         
+        .online-status {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 10px;
+          height: 10px;
+          background: #31a24c;
+          border: 2px solid white;
+          border-radius: 50%;
+        }
+      }
+
+       .friend-avatar{
+        position: relative;
+
         img {
           width: 40px;
           height: 40px;
+          border: none;
           border-radius: 50%;
           object-fit: cover;
         }
@@ -74,20 +95,17 @@
         flex: 1;
         
         .friend-name, .profile-name {
-          font-size: 15px;
-          font-weight: 600;
-          color: #1c1e21;
+          font-size: large;
+          color: #F4991A;
           margin: 0 0 4px 0;
         }
         
         .friend-status, .profile-meta {
           font-size: 13px;
-          color: #65676b;
         }
       }
       
       .message-btn {
-        background: #e4e6eb;
         border: none;
         width: 36px;
         height: 36px;
@@ -99,14 +117,14 @@
         font-size: 18px;
         
         &:hover {
-          background: #d8dade;
+          background: #F2EAD3;
         }
       }
       
       .add-friend-btn {
         padding: 6px 16px;
-        background: #216fdb;
-        color: white;
+        background: #F4991A;
+        color: #F9F5F0;
         border: none;
         border-radius: 6px;
         font-size: 13px;
@@ -114,7 +132,8 @@
         cursor: pointer;
         
         &:hover {
-          background: #1b5dbd;
+          background: #344F1F;
+          color: #F9F5F0;
         }
       }
     }
@@ -127,7 +146,7 @@
         align-items: center;
         gap: 12px;
         padding: 12px;
-        background: #f0f2f5;
+        background: #F2EAD3;
         border-radius: 8px;
         margin-bottom: 8px;
         
@@ -149,7 +168,6 @@
           
           .mutual-friends {
             font-size: 13px;
-            color: #65676b;
           }
         }
         
@@ -169,20 +187,20 @@
           }
           
           .accept-btn {
-            background: #216fdb;
-            color: white;
+            background: #F4991A;
+            color: #F9F5F0;
             
             &:hover {
-              background: #1b5dbd;
+              background: #344F1F;
             }
           }
           
           .reject-btn {
-            background: #e4e6eb;
-            color: #1c1e21;
+            background: #F2EAD3;
+            color: #344F1F;
             
             &:hover {
-              background: #d8dade;
+              background: #e4dbbf;
             }
           }
         }
@@ -197,7 +215,7 @@
         align-items: center;
         gap: 12px;
         padding: 10px;
-        background: #fff8e1;
+        background: #F2EAD3;
         border-radius: 8px;
         
         .birthday-avatar {
@@ -210,7 +228,6 @@
         .birthday-info {
           .birthday-text {
             font-size: 14px;
-            color: #1c1e21;
           }
         }
       }
@@ -220,7 +237,6 @@
   .sponsored {
     .sponsored-list {
       .sponsored-item {
-        border: 1px solid #e4e6eb;
         border-radius: 8px;
         overflow: hidden;
         
@@ -241,7 +257,6 @@
           
           .sponsored-desc {
             font-size: 13px;
-            color: #65676b;
             margin: 0 0 8px 0;
           }
           
@@ -262,12 +277,10 @@
   .sidebar-footer {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #e4e6eb;
     text-align: center;
     
     .copyright {
       font-size: 12px;
-      color: #65676b;
       margin: 0;
     }
   }

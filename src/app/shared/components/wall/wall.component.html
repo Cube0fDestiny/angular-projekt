@@ -1,5 +1,4 @@
 <div class="wall-container">
-  
   <!-- Create New Post (optional) -->
   <div class="create-post-section" *ngIf="showCreatePost">
    <!-- <app-create-post (postCreated)="addPost($event)"></app-create-post>
@@ -8,7 +7,6 @@
   
   <!-- Posts List -->
   <div class="posts-list">
-    
     <!-- Empty State -->
     <div *ngIf="posts.length === 0" class="empty-wall">
       <div class="empty-icon">📝</div>
@@ -17,7 +15,7 @@
     </div>
     
     <!-- Posts -->
-  <app-post-card
+    <app-post-card
       *ngFor="let post of displayedPosts"
       [post]="post"
       (like)="onLike(post.id)"

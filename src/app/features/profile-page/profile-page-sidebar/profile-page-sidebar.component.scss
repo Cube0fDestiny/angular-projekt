@@ -2,10 +2,11 @@
   display: inline-block; /* ← Allows neighbouring */
   vertical-align: top;   /* ← Aligns properly */
   width: 360px;
-  background: white;
+  background: #F9F5F0;
+  border: none;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+
   
   @media (max-width: 768px) {
     width: 100%;
@@ -13,7 +14,12 @@
   }
   
   .sidebar-section {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 30px;
+    background-color: #F2EAD3;
+    padding: 8px;
+    border: none;
+    border-radius: 5%;
     
     &:last-child {
       margin-bottom: 0;
@@ -25,16 +31,17 @@
       align-items: center;
       margin-bottom: 16px;
       padding-bottom: 8px;
-      border-bottom: 1px solid #e4e6eb;
       
       .section-title {
         display: flex;
         align-items: center;
+        text-align: center;
         gap: 8px;
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1c1e21;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: x-large;
+        color: #344F1F;
+        font-weight: 700;
         
         .section-icon {
           font-size: 20px;

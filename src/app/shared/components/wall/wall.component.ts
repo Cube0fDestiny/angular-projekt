@@ -22,7 +22,6 @@ export class WallComponent implements OnInit {
   showCreatePost=false;
   // Called when @Input() posts changes
   ngOnChanges() {
-    
     this.loadPosts();
   }
   
@@ -43,6 +42,8 @@ export class WallComponent implements OnInit {
       {
         id: 1,
         content: 'Just finished the Angular feed! 🎉 This is amazing!',
+        location: 'WIELKA LECHIA!!!',
+        isEdited: true,
         author: {
           id: 1,
           name: 'John Doe',

@@ -33,7 +33,7 @@
   padding: 60px 20px;
   background: #f8f9fa;
   border-radius: 12px;
-  border: 2px dashed #dee2e6;
+  border: none;
   text-align: center; /* Fallback for text */
 }
 
@@ -61,18 +61,18 @@
 
 .load-more-btn {
   padding: 12px 30px;
-  background: #4267B2;
-  color: white;
+  background: #F4991A;
+  color: #F9F5F0;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   /* No display: inline-block needed with flex parent */
 }
 
 .load-more-btn:hover {
-  background: #365899;
+  background: #344F1F;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(66, 103, 178, 0.3);
 }

@@ -1,29 +1,8 @@
 /* Home Page Styles */
+body {
+  background: #F9F5F0;
+}
 :host {
   display: block;
-  background: #f0f2f5; /* Facebook grey background */
   min-height: 100vh;
-}
-
-.center-wrapper {
-  /* Centering */
-  width: 680px;
-  margin: 20px auto;
-  
-  /* Styling */
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  
-  /* Ensure it's visible */
-  display: block;
-  position: relative;
-  box-sizing: border-box;
-}
-
-/* Make wall fill the container */
-.center-wrapper app-wall {
-  display: block;
-  width: 100%;
 }

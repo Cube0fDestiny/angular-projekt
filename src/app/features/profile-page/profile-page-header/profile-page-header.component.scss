@@ -1,5 +1,5 @@
 .profile-header {
-  background: white;
+  background: #F2EAD3;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   margin-bottom: 20px;
   
@@ -46,14 +46,15 @@
     
     .profile-picture-container {
       position: relative;
+      padding: 12px;
       
       .profile-picture {
+        margin-top: 48px;
+        
         width: 168px;
         height: 168px;
         border-radius: 50%;
-        border: 4px solid white;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        background: white;
         object-fit: cover;
         
         @media (max-width: 768px) {
@@ -83,6 +84,7 @@
     
     .profile-info {
       flex: 1;
+      margin-top: 56px;
       padding: 20px 0 0 40px;
       
       @media (max-width: 768px) {
@@ -93,7 +95,7 @@
         font-size: 32px;
         font-weight: 700;
         margin: 0 0 8px 0;
-        color: #1c1e21;
+        color: #F4991A;
         
         @media (max-width: 768px) {
           font-size: 24px;
@@ -102,7 +104,7 @@
       
       .profile-bio {
         font-size: 16px;
-        color: #65676b;
+        color: #344F1F;
         margin: 0 0 20px 0;
         max-width: 600px;
       }
@@ -123,12 +125,13 @@
           
           strong {
             font-size: 20px;
-            color: #1c1e21;
+            color: #344F1F;
           }
           
           span {
             font-size: 14px;
-            color: #65676b;
+            color: #344F1F;
+            font-weight: 600;
           }
         }
       }
@@ -156,20 +159,22 @@
           justify-content: center;
           
           &.btn-primary {
-            background: #216fdb;
-            color: white;
+            background: #F4991A;
+            color: #F9F5F0;
             
             &:hover {
-              background: #1b5dbd;
+              background: #344F1F;
+              color: #F9F5F0;
             }
           }
           
           &.btn-secondary {
-            background: #e4e6eb;
-            color: #1c1e21;
+            background: #F4991A;
+            color: #F9F5F0;
             
             &:hover {
-              background: #d8dade;
+              background: #344F1F;
+              color: #F9F5F0;
             }
           }
         }
@@ -192,7 +197,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: #e4e6eb;
+        background: #F2EAD3;
         border: none;
         cursor: pointer;
         font-size: 18px;
@@ -201,7 +206,7 @@
         justify-content: center;
         
         &:hover {
-          background: #d8dade;
+          background: #ebe0c1;
         }
       }
     }

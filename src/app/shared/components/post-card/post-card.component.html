@@ -1,5 +1,11 @@
 <div class="post-card" [class.with-image]="post.imageUrl">
   
+   <!-- Post Image -->
+    <img 
+      *ngIf="post.imageUrl" 
+      [src]="post.imageUrl" 
+      [alt]="'Image in post by ' + post.author.name"
+      class="post-image" >
   <!-- Post Header -->
   <div class="post-header">
     <img [src]="post.author.avatar" [alt]="post.author.name" class="author-avatar">
@@ -20,31 +26,20 @@
   
   <!-- Post Content -->
   <div class="post-content">
-    <p class="post-text">{{ post.content }}</p>
-    
-    <!-- Post Image -->
-    <img 
-      *ngIf="post.imageUrl" 
-      [src]="post.imageUrl" 
-      [alt]="'Image in post by ' + post.author.name"
-      class="post-image" >
+    <app-text-display variant="white">{{ post.content }}</app-text-display>
   </div>
   
   <!-- Post Stats -->
   <div class="post-stats" *ngIf="post.likes > 0 || post.comments.length > 0 || post.shares > 0">
-    <div class="stats-left">
-      <span *ngIf="post.likes > 0" class="likes-count">
-        👍 {{ post.likes }}
-      </span>
-      <span *ngIf="post.comments.length > 0" class="comments-count">
-        💬 {{ post.comments.length }}
-      </span>
-    </div>
-    <div class="stats-right">
-      <span *ngIf="post.shares > 0" class="shares-count">
-        🔄 {{ post.shares }} shares
-      </span>
-    </div>
+    <span *ngIf="post.likes > 0" class="likes-count">
+      👍 {{ post.likes }}
+    </span>
+    <span *ngIf="post.comments.length > 0" class="comments-count">
+      💬 {{ post.comments.length }}
+    </span>
+    <span *ngIf="post.shares > 0" class="shares-count">
+      🔄 {{ post.shares }}
+    </span>
   </div>
   
   <!-- Post Actions -->
@@ -54,17 +49,17 @@
       [class.liked]="isLikedByCurrentUser"
       (click)="onLike()">
       <span class="action-icon">{{ isLikedByCurrentUser ? '❤️' : '🤍' }}</span>
-      <span class="action-text">Like</span>
+      <span class="action-text">Orang it</span>
     </button>
     
     <button class="action-btn comment-btn" (click)="toggleComments()">
       <span class="action-icon">💬</span>
-      <span class="action-text">Comment</span>
+      <span class="action-text">Comments</span>
     </button>
     
     <button class="action-btn share-btn" (click)="share.emit(post.id)">
       <span class="action-icon">🔄</span>
-      <span class="action-text">Share</span>
+      <span class="action-text">Squeeze</span>
     </button>
   </div>
   

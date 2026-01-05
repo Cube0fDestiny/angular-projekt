@@ -2,14 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
-import { ProfileHeaderComponent } from '../profile-page-header/profile-page-header.component';
-import { ProfileSidebarComponent } from '../profile-page-sidebar/profile-page-sidebar.component';
+import { ProfilePageHeaderComponent } from '../profile-page-header/profile-page-header.component';
+import { ProfilePageSidebarComponent } from '../profile-page-sidebar/profile-page-sidebar.component';
 import { WallComponent } from '../../../shared/components/wall/wall.component';
 import { NavbarComponent } from '../../../shared/components/navbar/main/navbar.component';
 
 @Component({
   selector: 'app-profile-page',
-  imports: [NgIf, ProfileHeaderComponent, ProfileSidebarComponent, WallComponent,NavbarComponent],
+  standalone: true,
+  imports: [NgIf, ProfilePageHeaderComponent, ProfilePageSidebarComponent, WallComponent,NavbarComponent],
   templateUrl: './profile-page.component.html'
 })
 export class ProfilePageComponent implements OnInit {

@@ -1,1 +1,19 @@
-<p>text-display works!</p>
+<div
+  class="rounded-lg bg-white text-[#344F1F] p-8 font-bold"
+  [ngClass]="{
+    'bg-white': variant === 'white',
+    'bg-[#F2EAD3]': variant === 'beige'
+  }"
+>
+  <h1
+    [ngClass]="{
+      'pb-8': title != '',
+      'text-left': title_align === 'left',
+      'text-right': title_align === 'right',
+      'text-center': title_align === 'center',
+      'text-xl' : variant === 'beige',
+      'text-lg' : variant === 'white'
+    }"
+  >{{ title }}</h1>
+  <ng-content></ng-content>
+</div>

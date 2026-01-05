@@ -6,8 +6,10 @@
   position: fixed;
   left: 0;
   top: 60px; // Below navbar
-  background: white;
-  border-right: 1px solid #e4e6eb;
+  background: #F9F5F0;
+  color: #F4991A;
+  font-weight: 700;
+  font-size: 700;
   overflow-y: auto;
   padding: 20px 16px;
   z-index: 100;
@@ -23,7 +25,7 @@
     transition: background 0.2s;
     
     &:hover {
-      background: #f0f2f5;
+      background: #F2EAD3;
     }
     
     .user-avatar {
@@ -34,8 +36,7 @@
     }
     
     .user-name {
-      font-weight: 600;
-      color: #1c1e21;
+      font-size: x-large;
     }
   }
   
@@ -49,14 +50,13 @@
       margin-bottom: 12px;
       
       .section-title {
-        font-size: 17px;
-        font-weight: 600;
-        color: #1c1e21;
+        font-size: x-large;
+        color: #344F1F;
         margin: 0;
       }
       
       .see-all {
-        color: #216fdb;
+        color: #344F1F;
         background: none;
         border: none;
         font-size: 14px;
@@ -71,6 +71,11 @@
   }
   
   .quick-actions {
+    .section-title {
+      font-size: x-large;
+      color: #344F1F;
+      margin: 0;
+    }
     .actions-list {
       display: flex;
       flex-direction: column;
@@ -89,18 +94,18 @@
         transition: background 0.2s;
         
         &:hover {
-          background: #f0f2f5;
+          background: #F2EAD3;
         }
         
         .action-icon {
           font-size: 20px;
-          width: 24px;
+          width: 48px;
           text-align: center;
         }
         
         .action-label {
-          font-size: 15px;
-          color: #1c1e21;
+          font-size: larger;
+          color: #344F1F;
         }
       }
     }
@@ -118,22 +123,22 @@
       margin-bottom: 4px;
       
       &:hover {
-        background: #f0f2f5;
+        background: #F2EAD3;
       }
       
       &.joined {
-        background: #e7f3ff;
+        background: #F2EAD3;
         
         &:hover {
-          background: #d8e8ff;
+          background: #ebe0c1;
         }
       }
       
       .group-icon, .org-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: #f0f2f5;
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -144,9 +149,8 @@
         flex: 1;
         
         .group-name, .org-name {
-          font-size: 15px;
-          font-weight: 600;
-          color: #1c1e21;
+          max-width: 100px;
+          font-size: large;
           margin: 0 0 4px 0;
         }
         
@@ -154,14 +158,14 @@
           display: flex;
           gap: 8px;
           font-size: 12px;
-          color: #65676b;
+          color: #344F1F;
         }
       }
       
       .join-btn {
         padding: 6px 16px;
-        background: #e4e6eb;
-        color: #1c1e21;
+        background: #F4991A;
+        color: #F9F5F0;
         border: none;
         border-radius: 6px;
         font-size: 13px;
@@ -169,15 +173,16 @@
         cursor: pointer;
         
         &.joined {
-          background: #216fdb;
-          color: white;
+          background: #344F1F;
+          color: #F9F5F0;
         }
         
         &:hover {
-          background: #d8dade;
-          
+          background: #344F1F;
+          color: #F9F5F0;
           &.joined {
-            background: #1b5dbd;
+            color: #344F1F;
+            background: #F9F5F0;
           }
         }
       }
@@ -194,7 +199,7 @@
     
     .footer-link {
       font-size: 12px;
-      color: #65676b;
+      color: #344F1F;
       text-decoration: none;
       
       &:hover {

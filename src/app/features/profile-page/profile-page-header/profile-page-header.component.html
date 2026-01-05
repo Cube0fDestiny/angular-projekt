@@ -18,21 +18,17 @@
     <!-- Profile Info -->
     <div class="profile-info">
       <h1 class="profile-name">{{ user.name }}</h1>
-      <p class="profile-bio" *ngIf="user.bio">{{ user.bio }}</p>
       
       <!-- Stats -->
       <div class="profile-stats">
         <div class="stat">
-          <strong>{{ stats.friends || 0 }}</strong>
-          <span>Friends</span>
+          <span>{{ stats.friends || 0 }} Friends</span>
         </div>
         <div class="stat">
-          <strong>{{ stats.posts || 0 }}</strong>
-          <span>Posts</span>
+          <span>{{ stats.posts || 0 }} Posts</span>
         </div>
         <div class="stat">
-          <strong>{{ stats.photos || 0 }}</strong>
-          <span>Photos</span>
+          <span>{{ stats.photos || 0 }} Photos</span>
         </div>
       </div>
       

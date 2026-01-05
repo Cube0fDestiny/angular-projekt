@@ -2,18 +2,17 @@
   <div class="navbar-container">
     <!-- Logo -->
     <div class="navbar-logo" (click)="setActive('home')">
-      <span class="logo-icon">f</span>
-      <span class="logo-text">facebook</span>
+      <img class="logo-icon" src="assets/logo.png" alt="Orang">
     </div>
 
     <!-- Search Bar -->
     <div class="search-container">
-      <span class="search-icon">🔍</span>
       <input 
-        type="text" 
-        class="search-input" 
-        placeholder="Szukaj na Facebooku"
+        type="text"
+        class="search-input"
+        placeholder="Wyszukaj"
       >
+      <span class="search-icon">?</span>
     </div>
 
     <!-- Main Navigation (tylko wizualnie) -->
@@ -27,18 +26,13 @@
         <span class="nav-icon">{{item.icon}}</span>
         <span *ngIf="item.badge" class="nav-badge">{{item.badge}}</span>
       </div>
-      
-    </div>
-
-    <!-- User Menu -->
-    <div class="user-menu">
-      <div> loser menu</div>
-      <div class="user-info" (click)="setActive('profile')">
-        <img [src]="currentUser.avatar" alt="Avatar" class="user-avatar"> 
-        
-        <span class="user-name">{{currentUser.name}}</span>
+      <!-- User Menu -->
+      <div class="user-menu">
+        <div class="user-info" (click)="setActive('profile')">
+          <img [src]="currentUser.avatar" alt="Avatar" class="user-avatar"> 
+          
+        </div>
         <profile-dropdown> </profile-dropdown>
-      
       </div>
     </div>
   </div>

@@ -1,17 +1,18 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Post, Comment } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
+import { TextDisplayComponent } from '../../../shared/components/text-display/text-display.component';
 @Component({
   selector: 'app-post-card',
   templateUrl: './post-card.component.html',
-  imports: [NgIf,NgFor],
+  imports: [NgIf,NgFor,TextDisplayComponent],
   styleUrls: ['./post-card.component.scss'], 
 })
 export class PostCardComponent {
   @Input() post!: Post;
   @Input() showActions = true;
   @Input() currentUserId?: number;
-  
+
   @Output() like = new EventEmitter<number>();
   @Output() comment = new EventEmitter<{postId: number, text: string}>();
   @Output() share = new EventEmitter<number>();

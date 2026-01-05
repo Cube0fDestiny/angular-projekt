@@ -1,5 +1,18 @@
 <div class="profile-sidebar">
   
+  <!-- Bio Section -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        Bio
+      </h3>
+     <!-- <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
+        See all 
+      </a>-->
+    </div>
+    <app-text-display variant="white"><p class="profile-bio" *ngIf="user.bio">{{ user.bio }}</p></app-text-display>
+  </div>
+
   <!-- Friends Section -->
   <div class="sidebar-section">
     <div class="section-header">
