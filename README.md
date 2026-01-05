@@ -1,4 +1,4 @@
-# Portal społecznościowy (typu Facebook)
+# Portal społecznościowy (typu Orang 🍊)
 
 Zakres funkcjonalny:
 
