@@ -3,18 +3,25 @@ import { HomeComponent } from './features/home/main/home.component';
 import { ProfilePageComponent } from './features/profile-page/main/profile-page.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
-export const routes: Routes = [
-  { path: '', component: HomeComponent },  //tu zamień homecomponent na cokolwiek innego i to bd defaultowa strona
- 
+import { authGuard } from './core/guards/auth.guard'; // Import your guard
 
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
+export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   
-  // PROFILE ROUTE - direct component
-  { path: 'profile/:id', component: ProfilePageComponent },
+  // Guarded Routes
+  { 
+    path: 'home', 
+    component: HomeComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'profile/:id', 
+    component: ProfilePageComponent, 
+    canActivate: [authGuard] 
+  },
   
-  { path: '**', redirectTo: '/home' },
-  { path: '**', redirectTo: '' },  // Wszystko inne też na homepage
+  // Redirects at the bottom
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '**', redirectTo: '/home' }
 ];

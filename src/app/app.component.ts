@@ -13,7 +13,7 @@ export class AppComponent {
   
   ngOnInit() {
     // Load current user when app starts
-    this.userService.initializeWithMockData();
+    // this.userService.initializeWithMockData();
     
     // Or load from localStorage/API:
     // const savedUser = localStorage.getItem('currentUser');

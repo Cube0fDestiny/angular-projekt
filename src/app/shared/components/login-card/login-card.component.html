@@ -3,23 +3,21 @@
     {{ isRegisterPage ? 'Sign up' : 'Login' }}
   </h2>
 
-  <form>
+  <form (ngSubmit)="onHandleAuth()">
     <div class="mb-6 text-left">
-      <label for="email" class="mb-2 block text-sm text-gray-800">Email</label>
-      <input type="email" id="email" placeholder="Value" class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none" />
+      <label class="mb-2 block text-sm text-gray-800">Email</label>
+      <input name="email" [(ngModel)]="email" type="email" placeholder="Value" 
+             class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 outline-none focus:ring-2 focus:ring-orange-400" />
     </div>
 
-    <div [class.mb-6]="isRegisterPage" [class.mb-12]="!isRegisterPage" class="text-left">
-      <label for="password" class="mb-2 block text-sm text-gray-800">Password</label>
-      <input type="password" id="password" placeholder="Value" class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none" />
+    <div class="mb-12 text-left">
+      <label class="mb-2 block text-sm text-gray-800">Password</label>
+      <input name="password" [(ngModel)]="password" type="password" placeholder="Value" 
+             class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 outline-none focus:ring-2 focus:ring-orange-400" />
     </div>
 
-    <div *ngIf="isRegisterPage" class="mb-12 text-left">
-      <label for="confirmPassword" class="mb-2 block text-sm text-gray-800">Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="Value" class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none" />
-    </div>
-
-    <button type="submit" class="hover:bg-[#f06b05] cursor-pointer w-40 rounded-tl-3xl rounded-br-3xl rounded-tr-xl rounded-bl-xl bg-[#F4991A] py-3 font-bold text-white transition duration-200">
+    <button type="submit" 
+            class="hover:bg-[#f06b05] cursor-pointer w-40 rounded-tl-3xl rounded-br-3xl rounded-tr-xl rounded-bl-xl bg-[#F4991A] py-3 font-bold text-white transition duration-200">
       {{ isRegisterPage ? 'Sign up' : 'Login' }}
     </button>
 

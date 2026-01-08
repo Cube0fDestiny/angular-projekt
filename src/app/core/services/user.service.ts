@@ -26,7 +26,8 @@ export class UserService {
       friends: [2, 3, 4],
       bio: 'Angular developer',
       status: 'online', 
-      groups: [1, 2]
+      groups: [1, 2],
+      password: 'password'
     },
     {
       id: 2,
@@ -37,7 +38,8 @@ export class UserService {
       friends: [1, 3, 5],
       bio: 'UI/UX Designer',
       status: 'online', 
-      groups: [2, 3]
+      groups: [2, 3],
+      password: 'password'
     },
     {
       id: 3,
@@ -48,7 +50,8 @@ export class UserService {
       friends: [1, 2, 4],
       bio: 'Project Manager',
       status: 'away', 
-      groups: [1, 3]
+      groups: [1, 3],
+      password: 'password'
     },
     {
       id: 4,
@@ -59,7 +62,8 @@ export class UserService {
       friends: [1, 3, 5],
       bio: 'Backend Developer',
       status: 'offline', 
-      groups: [1]
+      groups: [1],
+      password: 'password'
     },
     {
       id: 5,
@@ -70,13 +74,15 @@ export class UserService {
       friends: [2, 4],
       bio: 'DevOps Engineer',
       status: 'online', 
-      groups: [2]
+      groups: [2],
+      password: 'password'
     }
   ];
 
   // Current user
-  private currentUserSubject = new BehaviorSubject<User | null>(this.users[0]);
+  // private currentUserSubject = new BehaviorSubject<User | null>(this.users[0]);
 
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
   
   // Get all users
@@ -150,7 +156,8 @@ export class UserService {
           role: 'user',
           friends: [2, 3, 4],
           bio: 'Angular developer',
-          status: 'online'
+          status: 'online',
+          password: 'password'
         };
         
         this.setCurrentUser(mockUser);
@@ -203,7 +210,8 @@ export class UserService {
       role: 'user',
       friends: [2, 3, 4],
       bio: 'Angular enthusiast',
-      status: 'online'
+      status: 'online',
+      password: 'password'
     };
     this.setCurrentUser(mockUser);
   }
