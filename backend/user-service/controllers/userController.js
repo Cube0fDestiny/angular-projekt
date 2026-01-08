@@ -1,4 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Dane w pamięci
 let users = [
@@ -6,7 +12,7 @@ let users = [
     id: 1,
     name: "John Doe",
     email: "john@example.com",
-    password: "password",
+    password: "$2a$10$hRxiaBBI237lD0qmBvriQ.iL34xO6XteAQTzHp8O924TwgiwVFPea",
     role: "admin",
     avatar: "https://i.pravatar.cc/150?img=1",
     status: "online",
@@ -16,7 +22,7 @@ let users = [
     id: 2,
     name: "Jane Smith",
     email: "jane@example.com",
-    password: "password",
+    password: "$2a$10$hRxiaBBI237lD0qmBvriQ.iL34xO6XteAQTzHp8O924TwgiwVFPea",
     role: "user",
     avatar: "https://i.pravatar.cc/150?img=2",
     status: "away",
@@ -25,31 +31,33 @@ let users = [
 ];
 
 export const getAllUsers = (req, res) => {
-  const safeUsers = users.map(user => {
+  const safeUsers = users.map((user) => {
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   });
-  
+
   res.json(safeUsers);
 };
 
 export const getUserProfile = (req, res) => {
   const user = users.find((u) => u.id === parseInt(req.params.id));
-  
+
   if (!user) {
     return res.status(404).json({ message: "Użytkownik nie istnieje" });
   }
 
   const { password, ...userWithoutPassword } = user;
-  
-  console.log(`[User-Service] Pobrano bezpieczny profil dla ID: ${req.params.id}`);
+
+  console.log(
+    `[User-Service] Pobrano bezpieczny profil dla ID: ${req.params.id}`
+  );
   res.json(userWithoutPassword);
 };
 
 export const register = async (req, res) => {
   const { name, email, password, avatar } = req.body;
 
-  const existingUser = user.find((u) => u.email === email);
+  const existingUser = users.find((u) => u.email === email);
   if (existingUser)
     return res
       .status(400)
@@ -70,32 +78,51 @@ export const register = async (req, res) => {
 
   users.push(newUser);
 
+  const secret = process.env.JWT_SECRET;
+  const token = jwt.sign({ id: newUser.id, email: newUser.email }, secret, {
+    expiresIn: "1h",
+  });
+
   const { password: _, ...userWithoutPassword } = newUser;
 
-  console.log(`[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.id}`);
-  res.status(201).json(newUser);
+  console.log(
+    `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.id}`
+  );
+  res.status(201).json({
+    user: userWithoutPassword,
+    token: token,
+  });
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
   const user = users.find((u) => u.email === email);
 
-  if (!user) return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+  if (!user) {
+    return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+  }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+  if (!isMatch) {
+    return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+  }
+
+  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "1h",
+  });
 
   const { password: _, ...userWithoutPassword } = user;
-  
+
   console.log(`[User-Service] Zalogowano ID: ${user.id}`);
-  res.json(userWithoutPassword);
+
+  res.json({ user: userWithoutPassword, token: token });
 };
 
 export const updateProfile = (req, res) => {
   const { id } = req.params;
   const { name, bio, location, avatar, status } = req.body;
 
-  const index = users.findIndex(u => u.id === parseInt(id));
+  const index = users.findIndex((u) => u.id === parseInt(id));
 
   if (index === -1) {
     return res.status(404).json({ message: "Użytkownik nie znaleziony" });
@@ -108,11 +135,11 @@ export const updateProfile = (req, res) => {
     bio: bio ?? users[index].bio,
     location: location ?? users[index].location,
     avatar: avatar || users[index].avatar,
-    status: status || users[index].status
+    status: status || users[index].status,
   };
 
   console.log(`[User-Service] Zaktualizowano profil ID: ${id}`);
-  
+
   const { password, ...userWithoutPassword } = users[index];
   res.json(userWithoutPassword);
 };
@@ -120,11 +147,13 @@ export const updateProfile = (req, res) => {
 export const deleteUser = (req, res) => {
   const { id } = req.params;
   const initialLength = users.length;
-  
-  users = users.filter(u => u.id !== parseInt(id));
+
+  users = users.filter((u) => u.id !== parseInt(id));
 
   if (users.length === initialLength) {
-    return res.status(404).json({ message: "Nie znaleziono użytkownika do usunięcia" });
+    return res
+      .status(404)
+      .json({ message: "Nie znaleziono użytkownika do usunięcia" });
   }
 
   console.log(`[User-Service] Usunięto użytkownika ID: ${id}`);
