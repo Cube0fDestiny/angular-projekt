@@ -1,0 +1,46 @@
+<nav
+  class="fixed top-0 left-0 right-0 z-1000 h-14 bg-[#F4991A] text-white shadow-md overflow-visible"
+>
+  <div
+    class="mx-auto flex h-full items-center justify-between px-4 whitespace-nowrap overflow-visible"
+  >
+
+    <!-- LEFT: LOGO -->
+    <div
+      class="flex cursor-pointer items-center font-bold"
+      (click)="goHome()"
+    >
+      <img
+        src="assets/logo.png"
+        alt="Orang"
+        class="h-12 w-22 object-contain"
+      />
+    </div>
+
+    <!-- RIGHT: AUTH ACTIONS -->
+    <div class="flex items-center gap-3">
+
+      <!-- LOGIN -->
+      <button
+        *ngIf="!isLoginPage"
+        (click)="goLogin()"
+        class="flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold transition
+               hover:bg-white/10"
+      >
+        Log in
+      </button>
+
+      <!-- REGISTER -->
+      <button
+        *ngIf="!isRegisterPage"
+        (click)="goRegister()"
+        class="flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold transition
+               hover:bg-white/10"
+      >
+        Sign up
+      </button>
+
+    </div>
+
+  </div>
+</nav>
