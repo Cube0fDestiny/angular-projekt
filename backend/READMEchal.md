@@ -11,3 +11,5 @@ i skopiujcie .gitignore'a z innego folderu. Dodajecie ponadto ręcznie do packag
 ```bash
 npm pkg set type=module
 ```
+
+Ponadto do każdego mikroserwisu trzeba dodać .enva z PORT i JWT_SECRET
