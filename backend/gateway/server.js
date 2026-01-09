@@ -15,10 +15,21 @@ app.use(
 );
 
 // Konfiguracja dla Post Service
-app.use('/api/posts', createProxyMiddleware({
-  target: 'http://localhost:3002/posts',
-  changeOrigin: true,
-}));
+app.use(
+  "/api/posts",
+  createProxyMiddleware({
+    target: "http://localhost:3002/posts",
+    changeOrigin: true,
+  })
+);
+
+app.use(
+  "/api/events",
+  createProxyMiddleware({
+    target: "http://localhost:3003/events",
+    changeOrigin: true,
+  })
+);
 
 const PORT = 3000;
 app.listen(PORT, () => {
