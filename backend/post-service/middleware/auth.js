@@ -1,4 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import jwt from "jsonwebtoken";
+import { posts } from "../controllers/postController.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -21,14 +25,24 @@ export const verifyToken = (req, res, next) => {
 
 export const isOwnerOrAdmin = (req, res, next) => {
   // req.user został ustawiony wcześniej przez verifyToken
-  const authenticatedUserId = req.user.id;
-  const targetUserId = parseInt(req.params.id);
+  const authenticatedUserId = Number(req.user.id);
+  const postIdFromParams = Number(req.params.id);
 
-  if (authenticatedUserId === targetUserId || req.user.role === 'admin') {
-    next(); // To Twój profil lub jesteś adminem - przechodzisz dalej
+  const post = posts.find((p) => p.id === postIdFromParams);
+
+  if (!post) {
+    return res.status(404).json({ message: "Nie znaleziono posta o tym ID" });
+  }
+
+  if (
+    authenticatedUserId === Number(post.userId) ||
+    req.user.role === "admin"
+  ) {
+    next();
   } else {
-    return res.status(403).json({ 
-      message: "Nie masz uprawnień do modyfikacji tego zasobu (Ownership required)" 
+    return res.status(403).json({
+      message:
+        "Nie masz uprawnień do modyfikacji tego zasobu (Ownership required)",
     });
   }
 };

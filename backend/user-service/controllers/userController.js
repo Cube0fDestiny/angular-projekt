@@ -79,7 +79,7 @@ export const register = async (req, res) => {
   users.push(newUser);
 
   const secret = process.env.JWT_SECRET;
-  const token = jwt.sign({ id: newUser.id, email: newUser.email }, secret, {
+  const token = jwt.sign({ id: newUser.id, email: newUser.email, role: "user" }, secret, {
     expiresIn: "1h",
   });
 
@@ -107,7 +107,7 @@ export const login = async (req, res) => {
     return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
   }
 
-  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+  const token = jwt.sign({ id: user.id, email: user.email, role: "user" }, JWT_SECRET, {
     expiresIn: "1h",
   });
 

@@ -1,9 +1,10 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
 import cors from "cors";
 import postRoutes from "./routes/posts.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -19,3 +20,5 @@ app.use("/posts", postRoutes);
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => console.log(`🚀 Post-Service działa na porcie ${PORT}`));
+
+app.use(errorHandler);
