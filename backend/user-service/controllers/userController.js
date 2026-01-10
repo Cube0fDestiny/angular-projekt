@@ -3,159 +3,287 @@ dotenv.config();
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import * as db from "../db/index.js";
+import { hashPassword, verifyPassword } from "../middleware/auth.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Dane w pamięci
-let users = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    password: "$2a$10$hRxiaBBI237lD0qmBvriQ.iL34xO6XteAQTzHp8O924TwgiwVFPea",
-    role: "admin",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    status: "online",
-    bio: "Angular Lover",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    password: "$2a$10$hRxiaBBI237lD0qmBvriQ.iL34xO6XteAQTzHp8O924TwgiwVFPea",
-    role: "user",
-    avatar: "https://i.pravatar.cc/150?img=2",
-    status: "away",
-    bio: "UX Designer",
-  },
-];
+export const getAllUsers = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT user_id, name, surname, email, bio, is_company, created_at
+      FROM Users
+      WHERE deleted = false`
+    );
 
-export const getAllUsers = (req, res) => {
-  const safeUsers = users.map((user) => {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  });
+    const users = result.rows.map((row) => ({
+      id: row.user_id,
+      name: row.name,
+      surname: row.surname,
+      email: row.email,
+      bio: row.bio,
+      is_company: row.is_company,
+      created_at: row.created_at,
+      avatar: `https://i.pravatar.cc/150?u=${row.email}`,
+    }));
 
-  res.json(safeUsers);
+    console.log(
+      `[User-Service] Pobrano ${users.length} użytkowników z bazy danych`
+    );
+    res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas pobierania użytkowników",
+    });
+  }
 };
 
-export const getUserProfile = (req, res) => {
-  const user = users.find((u) => u.id === parseInt(req.params.id));
+export const getUserProfile = async (req, res) => {
+  const { id } = req.params;
 
-  if (!user) {
-    return res.status(404).json({ message: "Użytkownik nie istnieje" });
+  try {
+    const result = await db.query(
+      `SELECT user_id, name, surname, email, bio, is_company, created_at
+      FROM Users
+      WHERE user_id = $1 AND deleted = false`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono użytkownika o id: " + id });
+    }
+
+    const row = result.rows[0];
+
+    const user = {
+      id: row.user_id,
+      name: row.name,
+      surname: row.surname,
+      email: row.email,
+      bio: row.bio,
+      is_company: row.is_company,
+      created_at: row.created_at,
+      avatar: `https://i.pravatar.cc/150?u=${row.email}`,
+    };
+
+    console.log(`[User-Service] Pobrano profil użytkownika ID: ${id}`);
+    res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error:
+        err.message + " Błąd serwera podczas pobierania profilu użytkownika",
+    });
   }
-
-  const { password, ...userWithoutPassword } = user;
-
-  console.log(
-    `[User-Service] Pobrano bezpieczny profil dla ID: ${req.params.id}`
-  );
-  res.json(userWithoutPassword);
 };
 
 export const register = async (req, res) => {
-  const { name, email, password, avatar } = req.body;
+  const { name, surname, email, password, is_company } = req.body;
 
-  const existingUser = users.find((u) => u.email === email);
-  if (existingUser)
-    return res
-      .status(400)
-      .json({ message: "Użytkownik o tym adresie email już istnieje" });
+  try {
+    const checkUser = await db.query(`SELECT * FROM Users WHERE email = $1`, [
+      email,
+    ]);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    if (checkUser.rows.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Użytkownik o podanym adresie email juz istnieje" });
+    }
 
-  const newUser = {
-    id: users.length + 1,
-    name,
-    email,
-    password: hashedPassword,
-    role: "user",
-    avatar: avatar || `https://i.pravatar.cc/150?u=${email}`,
-    status: "online",
-    bio: "",
-  };
+    const { salt, hash } = hashPassword(password);
 
-  users.push(newUser);
+    const result = await db.query(
+      `INSERT INTO Users (name, surname, email, password, salt, is_company) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
+      [name, surname, email, hash, salt, is_company || false]
+    );
 
-  const secret = process.env.JWT_SECRET;
-  const token = jwt.sign({ id: newUser.id, email: newUser.email, role: "user" }, secret, {
-    expiresIn: "1h",
-  });
+    const newUser = result.rows[0];
 
-  const { password: _, ...userWithoutPassword } = newUser;
+    const token = jwt.sign(
+      {
+        id: newUser.user_id,
+        email: email,
+        role: "user",
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "12h",
+      }
+    );
 
-  console.log(
-    `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.id}`
-  );
-  res.status(201).json({
-    user: userWithoutPassword,
-    token: token,
-  });
+    console.log(
+      `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.user_id}`
+    );
+
+    res.status(201).json({
+      user: {
+        id: newUser.user_id,
+        name: name,
+        surname: name,
+        email: email,
+        is_company: is_company,
+        avatar: `https://i.pravatar.cc/150?u=${email}`,
+      },
+      token: token,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error:
+        err.message + " Błąd serwera podczas rejestracji nowego użytkownika",
+    });
+  }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  const user = users.find((u) => u.email === email);
 
-  if (!user) {
-    return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+  try {
+    const result = await db.query(
+      `SELECT user_id, name, surname, email, password, salt, is_company, deleted
+      FROM Users
+      WHERE email = $1`,
+      [email]
+    );
+    
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ message: "Nieprawidłowy email lub hasło" });
+    }
+    if (user.deleted) {
+      return res.status(401).json({ message: "Konto zostało usunięte" });
+    }
+
+    const isValid = verifyPassword(password, user.password, user.salt);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Nieprawidłowy email lub hasło" });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.user_id,
+        email: email,
+        role: "user",
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "12h",
+      }
+    );
+    
+    console.log(
+      `[User-Service] Zalogowano użytkownika ID: ${user.user_id}`
+    );
+    
+    res.status(200).json({
+      user: {
+        id: user.user_id,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        is_company: user.is_company,
+        avatar: `https://i.pravatar.cc/150?u=${user.email}`,
+      },
+      token: token,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas logowania",
+    });
   }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
-  }
-
-  const token = jwt.sign({ id: user.id, email: user.email, role: "user" }, JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  const { password: _, ...userWithoutPassword } = user;
-
-  console.log(`[User-Service] Zalogowano ID: ${user.id}`);
-
-  res.json({ user: userWithoutPassword, token: token });
 };
 
-export const updateProfile = (req, res) => {
+export const updateProfile = async (req, res) => {
   const { id } = req.params;
-  const { name, bio, location, avatar, status } = req.body;
+  const { name, bio, is_company } = req.body;
 
-  const index = users.findIndex((u) => u.id === parseInt(id));
+  try {
+    const currentRes = await db.query(
+      `SELECT name, bio, is_company FROM Users WHERE user_id = $1 AND deleted = false`,
+      [id]
+    );
+    if (currentRes.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono użytkownika do edycji" });
+    }
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Użytkownik nie znaleziony" });
+    const current = currentRes.rows[0];
+
+    const newName = name || current.name;
+    const newBio = bio !== undefined ? bio : current.bio;
+    const newIsCompany = is_company !== undefined ? is_company : current.is_company;
+
+    const updateQuery = `
+      UPDATE Users
+      SET name = $1, bio = $2, is_company = $3
+      WHERE user_id = $4 AND deleted = false
+      RETURNING user_id
+    `;
+
+    const result = await db.query(updateQuery, [
+      newName,
+      newBio,
+      newIsCompany,
+      id,
+    ]);
+
+    console.log(
+      `[User-Service] Zaktualizowano profil użytkownika ID: ${id}`
+    );
+
+    res.status(200).json({
+      message: "Profil został zaktualizowany",
+      user_id: result.rows[0].user_id,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas aktualizacji profilu",
+    });
   }
-
-  // Aktualizujemy tylko te pola, które przyszły w żądaniu (tzw. partial update)
-  users[index] = {
-    ...users[index],
-    name: name || users[index].name,
-    bio: bio ?? users[index].bio,
-    location: location ?? users[index].location,
-    avatar: avatar || users[index].avatar,
-    status: status || users[index].status,
-  };
-
-  console.log(`[User-Service] Zaktualizowano profil ID: ${id}`);
-
-  const { password, ...userWithoutPassword } = users[index];
-  res.json(userWithoutPassword);
 };
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async (req, res) => {
   const { id } = req.params;
-  const initialLength = users.length;
 
-  users = users.filter((u) => u.id !== parseInt(id));
+  try {
+    const result = await db.query(
+      `UPDATE Users
+      SET deleted = true
+      WHERE user_id = $1 AND deleted = false
+      RETURNING user_id`,
+      [id]
+    );
 
-  if (users.length === initialLength) {
-    return res
-      .status(404)
-      .json({ message: "Nie znaleziono użytkownika do usunięcia" });
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono użytkownika do usunęcia" });
+    }
+
+    console.log(
+      `[User-Service] Usunięto profil użytkownika ID: ${id}`
+    );
+
+    res.status(200).json({
+      message: "Profil został usunięty",
+      user_id: result.rows[0].user_id,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas usuwania profilu",
+    });
   }
-
-  console.log(`[User-Service] Usunięto użytkownika ID: ${id}`);
-  res.status(204).send(); // 204 No Content - sukces bez zwracania danych
 };

@@ -4,6 +4,9 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const PBKDF2_ITERATIONS = process.env.PBKDF2_ITERATIONS;
+const PBKDF2_KEYLEN = process.env.PBKDF2_KEYLEN;
+const PBKDF2_DIGEST = process.env.PBKDF2_DIGEST;
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -35,3 +38,14 @@ export const isOwnerOrAdmin = (req, res, next) => {
     });
   }
 };
+
+export const hashPassword = (password) => {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+  return { salt, hash };
+}
+
+export const verifyPassword = (password, salt, hash) => {
+  const inputHash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST).toString('hex');
+  return inputHash === hash;
+}
