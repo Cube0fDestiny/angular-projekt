@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import bcrypt from "bcrypt";
-import jwt, { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import * as db from "../db/index.js";
-import { hashPassword, verifyPassword } from "../middleware/auth";
+import { hashPassword, verifyPassword } from "../middleware/auth.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
