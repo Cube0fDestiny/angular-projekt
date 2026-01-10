@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import jwt from "jsonwebtoken";
-import { posts } from "../controllers/postController.js";
+import * as db from "../db/index.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -23,26 +23,32 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-export const isOwnerOrAdmin = (req, res, next) => {
-  // req.user został ustawiony wcześniej przez verifyToken
-  const authenticatedUserId = Number(req.user.id);
-  const postIdFromParams = Number(req.params.id);
+export const isPostOwner = async (req, res, next) => {
+  const authenticatedUserId = req.user.id;
+  const postId = req.params.id;
 
-  const post = posts.find((p) => p.id === postIdFromParams);
+  try {
+    const result = await db.query(
+      'SELECT creator_id FROM "Posts" WHERE id = $1',
+      [postId]
+    );
 
-  if (!post) {
-    return res.status(404).json({ message: "Nie znaleziono posta o tym ID" });
-  }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Post nie istnieje" });
+    }
 
-  if (
-    authenticatedUserId === Number(post.userId) ||
-    req.user.role === "admin"
-  ) {
-    next();
-  } else {
-    return res.status(403).json({
-      message:
-        "Nie masz uprawnień do modyfikacji tego zasobu (Ownership required)",
-    });
+    const postCreatorId = result.rows[0].creator_id;
+    if (authenticatedUserId === postCreatorId || req.user.role === "admin") {
+      next();
+    } else {
+      return res.status(403).json({
+        message: "Nie jesteś właścicielem tego posta!",
+        debug: { user: authenticatedUserId, owner: postCreatorId },
+      });
+    }
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Błąd serwera podczas sprawdzania uprawnień: " + err.message });
   }
 };

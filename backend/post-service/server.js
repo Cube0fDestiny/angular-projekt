@@ -19,6 +19,6 @@ app.use((req, res, next) => {
 app.use("/posts", postRoutes);
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => console.log(`🚀 Post-Service działa na porcie ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Post-Service running on port ${PORT}`));
 
 app.use(errorHandler);
