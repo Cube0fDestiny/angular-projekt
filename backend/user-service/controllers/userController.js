@@ -12,7 +12,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const result = await db.query(
       `SELECT user_id, name, surname, email, bio, is_company, created_at
-      FROM Users
+      FROM "Users"
       WHERE deleted = false`
     );
 
@@ -45,7 +45,7 @@ export const getUserProfile = async (req, res) => {
   try {
     const result = await db.query(
       `SELECT user_id, name, surname, email, bio, is_company, created_at
-      FROM Users
+      FROM "Users"
       WHERE user_id = $1 AND deleted = false`,
       [id]
     );
@@ -84,7 +84,7 @@ export const register = async (req, res) => {
   const { name, surname, email, password, is_company } = req.body;
 
   try {
-    const checkUser = await db.query(`SELECT * FROM Users WHERE email = $1`, [
+    const checkUser = await db.query(`SELECT * FROM "Users" WHERE email = $1 and deleted = false`, [
       email,
     ]);
 
@@ -97,7 +97,7 @@ export const register = async (req, res) => {
     const { salt, hash } = hashPassword(password);
 
     const result = await db.query(
-      `INSERT INTO Users (name, surname, email, password, salt, is_company) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
+      `INSERT INTO "Users" (name, surname, email, password, salt, is_company) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
       [name, surname, email, hash, salt, is_company || false]
     );
 
@@ -111,7 +111,7 @@ export const register = async (req, res) => {
       },
       JWT_SECRET,
       {
-        expiresIn: "12h",
+        expiresIn: "1h",
       }
     );
 
@@ -145,11 +145,13 @@ export const login = async (req, res) => {
   try {
     const result = await db.query(
       `SELECT user_id, name, surname, email, password, salt, is_company, deleted
-      FROM Users
-      WHERE email = $1`,
+      FROM "Users"
+      WHERE email = $1
+      ORDER BY created_at DESC
+      LIMIT 1`,
       [email]
     );
-    
+
     const user = result.rows[0];
 
     if (!user) {
@@ -159,7 +161,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Konto zostało usunięte" });
     }
 
-    const isValid = verifyPassword(password, user.password, user.salt);
+    const isValid = verifyPassword(password, user.salt, user.password);
 
     if (!isValid) {
       return res.status(401).json({ message: "Nieprawidłowy email lub hasło" });
@@ -173,14 +175,12 @@ export const login = async (req, res) => {
       },
       JWT_SECRET,
       {
-        expiresIn: "12h",
+        expiresIn: "1h",
       }
     );
-    
-    console.log(
-      `[User-Service] Zalogowano użytkownika ID: ${user.user_id}`
-    );
-    
+
+    console.log(`[User-Service] Zalogowano użytkownika ID: ${user.user_id}`);
+
     res.status(200).json({
       user: {
         id: user.user_id,
@@ -192,7 +192,6 @@ export const login = async (req, res) => {
       },
       token: token,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -207,7 +206,7 @@ export const updateProfile = async (req, res) => {
 
   try {
     const currentRes = await db.query(
-      `SELECT name, bio, is_company FROM Users WHERE user_id = $1 AND deleted = false`,
+      `SELECT name, bio, is_company FROM "Users" WHERE user_id = $1 AND deleted = false`,
       [id]
     );
     if (currentRes.rows.length === 0) {
@@ -220,10 +219,11 @@ export const updateProfile = async (req, res) => {
 
     const newName = name || current.name;
     const newBio = bio !== undefined ? bio : current.bio;
-    const newIsCompany = is_company !== undefined ? is_company : current.is_company;
+    const newIsCompany =
+      is_company !== undefined ? is_company : current.is_company;
 
     const updateQuery = `
-      UPDATE Users
+      UPDATE "Users"
       SET name = $1, bio = $2, is_company = $3
       WHERE user_id = $4 AND deleted = false
       RETURNING user_id
@@ -236,15 +236,12 @@ export const updateProfile = async (req, res) => {
       id,
     ]);
 
-    console.log(
-      `[User-Service] Zaktualizowano profil użytkownika ID: ${id}`
-    );
+    console.log(`[User-Service] Zaktualizowano profil użytkownika ID: ${id}`);
 
     res.status(200).json({
       message: "Profil został zaktualizowany",
       user_id: result.rows[0].user_id,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -258,7 +255,7 @@ export const deleteUser = async (req, res) => {
 
   try {
     const result = await db.query(
-      `UPDATE Users
+      `UPDATE "Users"
       SET deleted = true
       WHERE user_id = $1 AND deleted = false
       RETURNING user_id`,
@@ -271,15 +268,12 @@ export const deleteUser = async (req, res) => {
         .json({ message: "Nie znaleziono użytkownika do usunęcia" });
     }
 
-    console.log(
-      `[User-Service] Usunięto profil użytkownika ID: ${id}`
-    );
+    console.log(`[User-Service] Usunięto profil użytkownika ID: ${id}`);
 
     res.status(200).json({
       message: "Profil został usunięty",
       user_id: result.rows[0].user_id,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({

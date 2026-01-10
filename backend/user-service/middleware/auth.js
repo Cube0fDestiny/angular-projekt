@@ -2,10 +2,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const PBKDF2_ITERATIONS = process.env.PBKDF2_ITERATIONS;
-const PBKDF2_KEYLEN = process.env.PBKDF2_KEYLEN;
+const PBKDF2_ITERATIONS = parseInt(process.env.PBKDF2_ITERATIONS);
+const PBKDF2_KEYLEN = parseInt(process.env.PBKDF2_KEYLEN);
 const PBKDF2_DIGEST = process.env.PBKDF2_DIGEST;
 
 export const verifyToken = (req, res, next) => {
@@ -21,20 +22,23 @@ export const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Nieprawidłowy lub wygasły token" });
+    return res.status(401).json({ message: "Nieprawidłowy lub wygasły token: " + error.message });
   }
 };
 
 export const isOwnerOrAdmin = (req, res, next) => {
-  // req.user został ustawiony wcześniej przez verifyToken
-  const authenticatedUserId = req.user.id;
-  const targetUserId = parseInt(req.params.id);
+  const authenticatedUserId = req.user.id; 
+  const targetUserId = req.params.id;
 
-  if (authenticatedUserId === targetUserId || req.user.role === 'admin') {
-    next(); // To Twój profil lub jesteś adminem - przechodzisz dalej
+  console.log(`Auth ID: ${authenticatedUserId} (typ: ${typeof authenticatedUserId})`);
+  console.log(`Target ID: ${targetUserId} (typ: ${typeof targetUserId})`);
+
+  if (authenticatedUserId == targetUserId || req.user.role === 'admin') {
+    next();
   } else {
     return res.status(403).json({ 
-      message: "Nie masz uprawnień do modyfikacji tego zasobu (Ownership required)" 
+      message: "Nie masz uprawnień do modyfikacji tego zasobu (Ownership required)",
+      debug: { auth: authenticatedUserId, target: targetUserId } 
     });
   }
 };
