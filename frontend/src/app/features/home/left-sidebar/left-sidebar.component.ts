@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { UserService } from '../../../core/services/user.service';
 import { NgFor, NgIf } from '@angular/common';
+import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 @Component({
   selector: 'app-left-sidebar',
   templateUrl: './left-sidebar.component.html',
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, OrangButtonComponent],
   styleUrls: ['./left-sidebar.component.scss']
 })
 export class LeftSidebarComponent {

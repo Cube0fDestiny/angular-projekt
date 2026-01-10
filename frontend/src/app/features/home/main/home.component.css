@@ -1,6 +1,6 @@
 /* Home Page Styles */
 body {
-  background: #F9F5F0;
+  background: var(--o-bwhite);
 }
 :host {
   display: block;

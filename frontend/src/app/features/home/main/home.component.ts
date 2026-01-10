@@ -1,20 +1,21 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../../shared/components/navbar/main/navbar.component';
-import { ProfileDropdownComponent } from '../../../shared/components/navbar/profile-dropdown/profile-dropdown.component';
+//import { ProfileDropdownComponent } from '../../../shared/components/navbar/profile-dropdown/profile-dropdown.component';
 import { WallComponent } from '../../../shared/components/wall/wall.component';
 import { LeftSidebarComponent } from '../left-sidebar/left-sidebar.component';
 import { RightSidebarComponent } from '../right-sidebar/right-sidebar.component';
+//import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
  
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, ProfileDropdownComponent, WallComponent, LeftSidebarComponent, RightSidebarComponent], // Import navbar tutaj
+  imports: [CommonModule, NavbarComponent, WallComponent, LeftSidebarComponent, RightSidebarComponent], // Import navbar tutaj
   
   template: ` 
    <app-navbar></app-navbar>
 
-<table style="width: 100%; border-collapse: collapse; border: none;background: #F9F5F0;">
+<table style="width: 100%; border-collapse: collapse; border: none;background: var(--o-bwhite);">
   <tr>
     <!-- Left Sidebar -->
     <td 
@@ -27,7 +28,7 @@ import { RightSidebarComponent } from '../right-sidebar/right-sidebar.component'
     <td 
     [style.width.px]="wallBoxWidth"
     style="vertical-align: top; padding: 20px; border: none;">
-      <app-wall>a</app-wall>
+      <app-wall></app-wall>
     </td>
 
     <!-- Right Sidebar -->

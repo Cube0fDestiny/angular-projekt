@@ -3,15 +3,16 @@ import { CommonModule } from '@angular/common'; // For *ngIf
 import { FormsModule } from '@angular/forms'; // Fixes 'ngModel' error
 import { Router, RouterLink } from '@angular/router'; // Fixes 'routerLink' error
 import { AuthService } from '../../../core/services/auth.service';
-
+import { OrangButtonComponent } from "../orang-button/orang-button.component";
 @Component({
   selector: 'app-login-card',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     FormsModule,
-    RouterLink
-  ],
+    RouterLink,
+    OrangButtonComponent
+],
   templateUrl: './login-card.component.html',
   styleUrl: './login-card.component.css'
 })

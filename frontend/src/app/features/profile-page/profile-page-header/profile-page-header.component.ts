@@ -2,11 +2,12 @@ import { NgIf } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
+import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 
 @Component({
   selector: 'app-profile-header',
   templateUrl: './profile-page-header.component.html',
-  imports:[NgIf],
+  imports: [NgIf, OrangButtonComponent],
   styleUrls: ['./profile-page-header.component.scss']
 })
 export class ProfilePageHeaderComponent {

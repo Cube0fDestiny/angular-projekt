@@ -1,5 +1,5 @@
 .profile-header {
-  background: #F2EAD3;
+  background: var(--o-beige);
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   margin-bottom: 20px;
   
@@ -95,7 +95,7 @@
         font-size: 32px;
         font-weight: 700;
         margin: 0 0 8px 0;
-        color: #F4991A;
+        color: var(--o-orange);
         
         @media (max-width: 768px) {
           font-size: 24px;
@@ -104,7 +104,7 @@
       
       .profile-bio {
         font-size: 16px;
-        color: #344F1F;
+        color: var(--o-green);
         margin: 0 0 20px 0;
         max-width: 600px;
       }
@@ -125,12 +125,12 @@
           
           strong {
             font-size: 20px;
-            color: #344F1F;
+            color: var(--o-green);
           }
           
           span {
             font-size: 14px;
-            color: #344F1F;
+            color: var(--o-green);
             font-weight: 600;
           }
         }
@@ -143,40 +143,6 @@
         
         @media (max-width: 768px) {
           justify-content: center;
-        }
-        
-        button {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 15px;
-          min-width: 100px;
-          justify-content: center;
-          
-          &.btn-primary {
-            background: #F4991A;
-            color: #F9F5F0;
-            
-            &:hover {
-              background: #344F1F;
-              color: #F9F5F0;
-            }
-          }
-          
-          &.btn-secondary {
-            background: #F4991A;
-            color: #F9F5F0;
-            
-            &:hover {
-              background: #344F1F;
-              color: #F9F5F0;
-            }
-          }
         }
       }
     }
@@ -197,7 +163,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: #F2EAD3;
+        background: var(--o-beige);
         border: none;
         cursor: pointer;
         font-size: 18px;
@@ -206,7 +172,7 @@
         justify-content: center;
         
         &:hover {
-          background: #ebe0c1;
+          background: var(--o-dbeige);
         }
       }
     }

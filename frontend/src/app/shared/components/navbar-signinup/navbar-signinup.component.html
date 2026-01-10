@@ -1,5 +1,5 @@
 <nav
-  class="fixed top-0 left-0 right-0 z-1000 h-14 bg-[#F4991A] text-white shadow-md overflow-visible"
+  class="fixed top-0 left-0 right-0 z-1000 h-14 bg-[var(--o-orange)] text-white shadow-md overflow-visible"
 >
   <div
     class="mx-auto flex h-full items-center justify-between px-4 whitespace-nowrap overflow-visible"
@@ -21,24 +21,20 @@
     <div class="flex items-center gap-3">
 
       <!-- LOGIN -->
-      <button
+      <orang-button
         *ngIf="!isLoginPage"
         (click)="goLogin()"
-        class="flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold transition
-               hover:bg-white/10"
       >
         Log in
-      </button>
+      </orang-button>
 
       <!-- REGISTER -->
-      <button
+      <orang-button
         *ngIf="!isRegisterPage"
         (click)="goRegister()"
-        class="flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold transition
-               hover:bg-white/10"
       >
         Sign up
-      </button>
+      </orang-button>
 
     </div>
 

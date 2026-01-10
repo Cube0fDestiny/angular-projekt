@@ -31,7 +31,7 @@
   align-items: center; /* Centers horizontally */
   justify-content: center; /* Centers vertically */
   padding: 60px 20px;
-  background: #f8f9fa;
+  background: var(--o-bwhite);
   border-radius: 12px;
   border: none;
   text-align: center; /* Fallback for text */
@@ -44,13 +44,9 @@
 }
 
 .empty-wall h3 {
-  color: #495057;
   margin-bottom: 8px;
 }
 
-.empty-wall p {
-  color: #6c757d;
-}
 
 /* Load more - use flexbox to center only this */
 .load-more {
@@ -59,34 +55,11 @@
   justify-content: center; /* Centers the button */
 }
 
-.load-more-btn {
-  padding: 12px 30px;
-  background: #F4991A;
-  color: #F9F5F0;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  /* No display: inline-block needed with flex parent */
-}
-
-.load-more-btn:hover {
-  background: #344F1F;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(66, 103, 178, 0.3);
-}
-
-.load-more-btn:active {
-  transform: translateY(0);
-}
-
 /* End of feed - center only this */
 .end-of-feed {
   padding: 20px;
-  color: #6c757d;
+  color: var(--o-green);
   font-size: 14px;
-  border-top: 1px solid #dee2e6;
   margin-top: 20px;
   text-align: center; /* This only affects this element */
 }
