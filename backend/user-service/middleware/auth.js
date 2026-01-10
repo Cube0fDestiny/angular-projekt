@@ -30,9 +30,6 @@ export const isOwnerOrAdmin = (req, res, next) => {
   const authenticatedUserId = req.user.id; 
   const targetUserId = req.params.id;
 
-  console.log(`Auth ID: ${authenticatedUserId} (typ: ${typeof authenticatedUserId})`);
-  console.log(`Target ID: ${targetUserId} (typ: ${typeof targetUserId})`);
-
   if (authenticatedUserId == targetUserId || req.user.role === 'admin') {
     next();
   } else {
