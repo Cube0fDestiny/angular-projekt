@@ -5,11 +5,12 @@ import { ProfileDropdownComponent } from '../../../shared/components/navbar/prof
 import { WallComponent } from '../../../shared/components/wall/wall.component';
 import { LeftSidebarComponent } from '../left-sidebar/left-sidebar.component';
 import { RightSidebarComponent } from '../right-sidebar/right-sidebar.component';
+import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
  
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, ProfileDropdownComponent, WallComponent, LeftSidebarComponent, RightSidebarComponent], // Import navbar tutaj
+  imports: [OrangButtonComponent, CommonModule, NavbarComponent, ProfileDropdownComponent, WallComponent, LeftSidebarComponent, RightSidebarComponent], // Import navbar tutaj
   
   template: ` 
    <app-navbar></app-navbar>
@@ -27,7 +28,8 @@ import { RightSidebarComponent } from '../right-sidebar/right-sidebar.component'
     <td 
     [style.width.px]="wallBoxWidth"
     style="vertical-align: top; padding: 20px; border: none;">
-      <app-wall>a</app-wall>
+      <app-wall></app-wall>
+      <orang-button>Test Button</orang-button>
     </td>
 
     <!-- Right Sidebar -->

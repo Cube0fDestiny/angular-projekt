@@ -1,0 +1,23 @@
+<button
+  type="button"
+  (click)="isActive = !isActive"
+  class="
+    px-2 py-1
+    font-bold text-xl text-[#F2EAD3]
+    transition-all duration-150 ease-out
+    transform
+    hover:-translate-y-0.5 hover:rotate-1 hover:shadow-lg
+    active:translate-y-0
+    cursor-pointer
+    rounded-tl-xl
+    rounded-br-xl
+    rounded-tr-sm
+    rounded-bl-sm
+  "
+  [ngClass]="isActive ? activeClasses : inactiveClasses"
+>
+  <ng-content></ng-content>
+</button>
+
+
+
