@@ -25,9 +25,9 @@
     </app-post-card> 
     <!-- Load More Button -->
     <div *ngIf="showLoadMore && hasMorePosts" class="load-more">
-      <button (click)="loadMore()" class="load-more-btn">
+      <orang-button (click)="loadMore()">
         Load More Posts ({{ posts.length - displayedPosts.length }} remaining)
-      </button>
+      </orang-button>
     </div>
     
     <!-- End of Feed -->

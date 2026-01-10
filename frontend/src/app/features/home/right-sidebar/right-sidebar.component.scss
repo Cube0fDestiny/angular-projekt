@@ -4,13 +4,13 @@
   position: fixed;
   right: 0;
   top: 60px;
-  background: #F9F5F0;
+  background: var(--o-bwhite);
   overflow-y: auto;
   padding: 20px 16px;
   z-index: 100;
   font-size: large;
   font-weight: 700;
-  color: #344F1F;
+  color: var(--o-green);
   
   .section {
     margin-bottom: 24px;
@@ -23,7 +23,7 @@
       
       .section-title {
         font-size: x-large;
-        color: #344F1F;
+        color: var(--o-green);
         margin: 0;
       }
       
@@ -45,7 +45,7 @@
       margin-bottom: 4px;
       
       &:hover {
-        background: #F2EAD3;
+        background: var(--o-beige);
       }
       
       .profile-avatar {
@@ -96,7 +96,7 @@
         
         .friend-name, .profile-name {
           font-size: large;
-          color: #F4991A;
+          color: var(--o-orange);
           margin: 0 0 4px 0;
         }
         
@@ -105,37 +105,6 @@
         }
       }
       
-      .message-btn {
-        border: none;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 18px;
-        
-        &:hover {
-          background: #F2EAD3;
-        }
-      }
-      
-      .add-friend-btn {
-        padding: 6px 16px;
-        background: #F4991A;
-        color: #F9F5F0;
-        border: none;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        
-        &:hover {
-          background: #344F1F;
-          color: #F9F5F0;
-        }
-      }
     }
   }
   
@@ -146,7 +115,7 @@
         align-items: center;
         gap: 12px;
         padding: 12px;
-        background: #F2EAD3;
+        background: var(--o-beige);
         border-radius: 8px;
         margin-bottom: 8px;
         
@@ -176,33 +145,7 @@
           flex-direction: column;
           gap: 6px;
           
-          button {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            min-width: 80px;
-          }
-          
-          .accept-btn {
-            background: #F4991A;
-            color: #F9F5F0;
-            
-            &:hover {
-              background: #344F1F;
-            }
-          }
-          
-          .reject-btn {
-            background: #F2EAD3;
-            color: #344F1F;
-            
-            &:hover {
-              background: #e4dbbf;
-            }
-          }
+        
         }
       }
     }
@@ -215,7 +158,7 @@
         align-items: center;
         gap: 12px;
         padding: 10px;
-        background: #F2EAD3;
+        background: var(--o-beige);
         border-radius: 8px;
         
         .birthday-avatar {

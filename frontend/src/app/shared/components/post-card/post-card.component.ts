@@ -2,10 +2,11 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Post, Comment } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
 import { TextDisplayComponent } from '../../../shared/components/text-display/text-display.component';
+import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
 @Component({
   selector: 'app-post-card',
   templateUrl: './post-card.component.html',
-  imports: [NgIf,NgFor,TextDisplayComponent],
+  imports: [NgIf,NgFor,TextDisplayComponent,OrangButtonComponent],
   styleUrls: ['./post-card.component.scss'], 
 })
 export class PostCardComponent {

@@ -10,13 +10,13 @@
   <div class="section quick-actions">
     <h3 class="section-title">Shortcuts</h3>
     <div class="actions-list">
-      <button 
+      <orang-button 
         *ngFor="let action of quickActions"
-        class="action-btn"
+        size="small"
         (click)="onQuickAction(action.action)">
         <span class="action-icon">{{ action.icon }}</span>
         <span class="action-label">{{ action.label }}</span>
-      </button>
+      </orang-button>
     </div>
   </div>
   
@@ -24,7 +24,7 @@
   <div class="section groups-section">
     <div class="section-header">
       <h3 class="section-title">Your Groups</h3>
-      <button class="see-all">See All</button>
+      <orang-button size="small">See All</orang-button>
     </div>
     
     <div class="groups-list">
@@ -44,12 +44,12 @@
           </div>
         </div>
         
-        <button 
-          class="join-btn"
-          [class.joined]="group.isJoined"
+        <orang-button 
+          [isActive]="!group.isJoined"
+          size="small"
           (click)="joinGroup(group.id); $event.stopPropagation()">
           {{ group.isJoined ? 'Joined' : 'Join' }}
-        </button>
+        </orang-button>
       </div>
     </div>
   </div>

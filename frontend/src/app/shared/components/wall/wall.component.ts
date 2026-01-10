@@ -2,11 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from "@angular/common";
 import { Post } from '../../../shared/models/post.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
+import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
 @Component({
   selector: 'app-wall',
   templateUrl: './wall.component.html',
   styleUrls: ['./wall.component.scss'],
-  imports: [NgIf, PostCardComponent, NgForOf]
+  imports: [NgIf, PostCardComponent, NgForOf, OrangButtonComponent]
 })
 export class WallComponent implements OnInit {
   // Accept ANY number of posts from parent

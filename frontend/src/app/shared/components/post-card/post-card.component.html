@@ -44,23 +44,17 @@
   
   <!-- Post Actions -->
   <div class="post-actions" *ngIf="showActions">
-    <button 
-      class="action-btn like-btn" 
-      [class.liked]="isLikedByCurrentUser"
-      (click)="onLike()">
-      <span class="action-icon">{{ isLikedByCurrentUser ? '❤️' : '🤍' }}</span>
-      <span class="action-text">Orang it</span>
-    </button>
+    <orang-button (click)="onLike()">
+      <span>🍊 Orang it</span>
+    </orang-button>
     
-    <button class="action-btn comment-btn" (click)="toggleComments()">
-      <span class="action-icon">💬</span>
-      <span class="action-text">Comments</span>
-    </button>
+    <orang-button (click)="toggleComments()">
+      <span>💬 Comments</span>
+    </orang-button>
     
-    <button class="action-btn share-btn" (click)="share.emit(post.id)">
-      <span class="action-icon">🔄</span>
-      <span class="action-text">Squeeze</span>
-    </button>
+    <orang-button (click)="share.emit(post.id)">
+      <span>🔄 Squeeze</span>
+    </orang-button>
   </div>
   
   <!-- Comment Input -->
@@ -77,12 +71,9 @@
         (keyup.enter)="addComment()"
         class="comment-input-field">
       
-      <button 
-        class="post-comment-btn"
-        [disabled]="!newComment.trim()"
-        (click)="addComment()">
+      <orang-button size="small" (click)="addComment()">
         Post
-      </button>
+      </orang-button>
     </div>
   </div>
   
@@ -100,12 +91,12 @@
         <p class="comment-text">{{ comment.text }}</p>
         
         <div class="comment-actions">
-          <button class="comment-like-btn" (click)="likeComment(comment.id)">
+          <orang-button size="small" (click)="likeComment(comment.id)">
             Like
-          </button>
-          <button class="comment-reply-btn">
+          </orang-button>
+          <orang-button size="small">
             Reply
-          </button>
+          </orang-button>
         </div>
       </div>
     </div>

@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
+import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
 @Component({
   selector: 'app-navbar-signinup',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,OrangButtonComponent],
   templateUrl: './navbar-signinup.component.html',
 })
 export class NavbarSigninupComponent {

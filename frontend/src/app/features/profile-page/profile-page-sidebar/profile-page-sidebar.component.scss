@@ -2,7 +2,7 @@
   display: inline-block; /* ← Allows neighbouring */
   vertical-align: top;   /* ← Aligns properly */
   width: 360px;
-  background: #F9F5F0;
+  background: var(--o-bwhite);
   border: none;
   border-radius: 8px;
   padding: 20px;
@@ -16,7 +16,7 @@
   .sidebar-section {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 30px;
-    background-color: #F2EAD3;
+    background-color: var(--o-beige);
     padding: 8px;
     border: none;
     border-radius: 5%;
@@ -40,7 +40,7 @@
         margin-left: auto;
         margin-right: auto;
         font-size: x-large;
-        color: #344F1F;
+        color: var(--o-green);
         font-weight: 700;
         
         .section-icon {

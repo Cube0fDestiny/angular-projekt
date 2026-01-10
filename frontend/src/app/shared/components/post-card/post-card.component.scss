@@ -1,5 +1,5 @@
 .post-card {
-  background: #F2EAD3;
+  background: var(--o-beige);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
@@ -65,7 +65,7 @@
       display: flex;
       gap: 8px;
       font-size: small;
-      color: #344F1F;
+      color: var(--o-green);
       
       .post-location {
         display: flex;
@@ -74,22 +74,22 @@
       }
       
       .edited {
-        color: #344F1F;
+        color: var(--o-green);
       }
     }
   }
   
   .more-options {
-    background: none;
+    background: var(--o-green);
     border: none;
     font-size: 20px;
-    color: #65676b;
+    color: var(--o-beige);
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 50%;
     
     &:hover {
-      background: #f0f2f5;
+      background: var(--o-dgreen);
     }
   }
 }
@@ -108,10 +108,10 @@
   margin-left: 64px;
   margin-right: 32px;
   font-size: 14px;
-  color: #F2EAD3;
+  color: var(--o-beige);
   
   .likes-count, .comments-count, .shares-count {
-    background: #344F1F;
+    background: var(--o-green);
     display: flex;
     align-items: center;
     border: none;
@@ -132,40 +132,6 @@
   margin-left: 64px;
   margin-right: 32px;
   margin-bottom: 12px;
-  
-  .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    border-radius: 6px;
-    font-size: large;
-    font-weight: 700;
-    background-color: #F4991A;
-    color:#F2EAD3;
-    
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    &:hover {
-      color: #344F1F;
-    }
-    
-    &.liked {
-      background-color: #344F1F;
-      
-      &:hover {
-        background-color: #F2EAD3;
-        color: #344F1F;
-      }
-    }
-    
-    .action-icon {
-      font-size: 18px;
-    }
-  }
 }
 
 .comment-input {
@@ -188,10 +154,10 @@
     gap: 8px;
     
     .comment-input-field {
-      flex: 1;
+      width: 90%;
       padding: 8px 12px;
-      border: 1px solid #F2EAD3;
-      color:#344F1F;
+      border: 1px solid var(--o-beige);
+      color: var(--o-green);
       border-radius: 20px;
       font-size: 14px;
       background: white;
@@ -199,28 +165,7 @@
       &:focus {
         outline: none;
         background: white;
-        border-color: #F4991A;
-      }
-    }
-    
-    .post-comment-btn {
-      padding: 8px 16px;
-      margin-right: 16px;
-      background: #F4991A;
-      color: #F2EAD3;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      
-      &:hover:not(:disabled) {
-        background: #F4991A;
-        color: #344F1F;
-      }
-      
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+        border-color: var(--o-orange);
       }
     }
   }
@@ -265,18 +210,18 @@
         .comment-author {
           font-weight: 600;
           font-size: 13px;
-          color: #344F1F;
+          color: var(--o-dgreen);
         }
         
         .comment-time {
           font-size: 11px;
-          color: #344F1F;
+          color: var(--o-green);
         }
       }
       
       .comment-text {
         font-size: 13px;
-        color: #344F1F;
+        color: var(--o-green);
         margin-bottom: 6px;
       }
       
@@ -288,7 +233,7 @@
           background: none;
           border: none;
           font-size: 12px;
-          color: #344F1F;
+          color: var(--o-dgreen);
           cursor: pointer;
           padding: 2px 0;
           

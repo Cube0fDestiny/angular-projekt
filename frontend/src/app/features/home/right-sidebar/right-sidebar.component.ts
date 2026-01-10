@@ -1,10 +1,11 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 
 @Component({
   selector: 'app-right-sidebar',
   templateUrl: './right-sidebar.component.html',
-  imports: [NgFor,NgIf],
+  imports: [NgFor, NgIf, OrangButtonComponent],
   styleUrls: ['./right-sidebar.component.scss']
 })
 export class RightSidebarComponent implements OnInit {

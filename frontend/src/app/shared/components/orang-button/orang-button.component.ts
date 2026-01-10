@@ -5,22 +5,39 @@ import { NgClass } from '@angular/common';
   selector: 'orang-button',
   imports: [NgClass],
   templateUrl: './orang-button.component.html',
-  styleUrl: './orang-button.component.css'
+  styleUrls: ['./orang-button.component.css']
 })
 export class OrangButtonComponent {
-activeClasses = `
-  bg-[#F4991A]
-  ring-8 ring-[#F4991A]
-  hover:bg-[#d98415]   /* slightly darker */
-  hover:ring-[#d98415] /* slightly darker */
-`;
+  @Input() isActive = true;
+  @Input() type: 'button' | 'submit' | 'reset' = 'button';
+  @Input() size: 'default' | 'small' = 'default';
 
-inactiveClasses = `
-  bg-[#344F1F]
-  ring-8 ring-[#344F1F]
-  hover:bg-[#2a3a14]   /* slightly darker */
-  hover:ring-[#2a3a14] /* slightly darker */
-`;
+  activeClasses = `
+    bg-[var(--o-orange)]
+    ring-8 ring-[var(--o-orange)]
+    hover:bg-[var(--o-dorange)]
+    hover:ring-[var(--o-dorange)]
+  `;
 
-  @Input() isActive = false;
+  inactiveClasses = `
+    bg-[var(--o-green)]
+    ring-8 ring-[var(--o-green)]
+    hover:bg-[var(--o-dgreen)]
+    hover:ring-[var(--o-dgreen)]
+  `;
+
+  get sizeClasses() {
+    switch (this.size) {
+      case 'small':
+        return 'px-0 py-0 text-sm ring-1';
+      default:
+        return 'px-2 py-1 text-xl ring-8';
+    }
+  }
+
+  toggleActive(event: Event) {
+    this.isActive = !this.isActive;
+  }
+
 }
+

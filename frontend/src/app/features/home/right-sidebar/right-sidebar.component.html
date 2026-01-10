@@ -23,11 +23,10 @@
           <span class="friend-status">{{ friend.lastActive }}</span>
         </div>
         
-        <button 
-          class="message-btn"
+        <orang-button size="small"
           (click)="sendMessage(friend.id); $event.stopPropagation()">
-          💬
-        </button>
+          💬 Chat
+        </orang-button>
       </div>
     </div>
   </div>
@@ -49,16 +48,14 @@
         </div>
         
         <div class="request-actions">
-          <button 
-            class="accept-btn"
+          <orang-button size="small"
             (click)="acceptRequest(request.id)">
             Confirm
-          </button>
-          <button 
-            class="reject-btn"
+          </orang-button>
+          <orang-button size="small" [isActive]="false"
             (click)="rejectRequest(request.id)">
             Delete
-          </button>
+          </orang-button>
         </div>
       </div>
     </div>
@@ -85,7 +82,7 @@
           </span>
         </div>
         
-        <button class="add-friend-btn">Add Friend</button>
+        <orang-button size="small">Add Friend</orang-button>
       </div>
     </div>
   </div>

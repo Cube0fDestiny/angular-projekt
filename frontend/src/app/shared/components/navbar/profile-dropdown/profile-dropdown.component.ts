@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, Input, OnInit, inject } from '@angular/core';
 import { CommonModule, NgIf } from "@angular/common";
 import { Router } from '@angular/router';
-
+import { OrangButtonComponent } from '../../../../shared/components/orang-button/orang-button.component';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service'; // Added this
 
@@ -10,7 +10,7 @@ import { AuthService } from '../../../../core/services/auth.service'; // Added t
   templateUrl: './profile-dropdown.component.html',
   styleUrls: ['./profile-dropdown.component.scss'],
   standalone: true, // Assuming standalone based on previous context
-  imports: [NgIf, CommonModule]
+  imports: [NgIf, CommonModule, OrangButtonComponent]
 })
 export class ProfileDropdownComponent implements OnInit {
   @Output() profileClick = new EventEmitter<void>();

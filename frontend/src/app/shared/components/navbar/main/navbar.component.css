@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #F4991A;
+  background-color: var(--o-orange);
   color: white;
   height: 56px;
   position: fixed;
@@ -55,13 +55,13 @@
     padding: 8px 40px 8px 16px;
     border-radius: 20px;
     border: none;
-    color:#344F1F;
-    background-color: #F2EAD3;
+    color:var(--o-green);
+    background-color: var(--o-beige);
     font-size: 15px;
     
     &:focus {
       outline: none;
-      background-color: #F2EAD3;
+      background-color: var(--o-beige);
     }
   }
 }

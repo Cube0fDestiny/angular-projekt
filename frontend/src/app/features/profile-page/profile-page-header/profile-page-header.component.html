@@ -63,15 +63,15 @@
         
         <!-- STRANGER'S PROFILE -->
         <ng-container *ngIf="!isFriend && !isOwnProfile">
-          <button class="btn-primary" (click)="onAddFriend()">
+          <orang-button (click)="onAddFriend()">
             👥 Add Friend
-          </button>
-          <button class="btn-secondary" (click)="onMessage()">
+          </orang-button>
+          <orang-button (click)="onMessage()">
             💬 Message
-          </button>
-          <button class="btn-secondary" (click)="onMore()">
+          </orang-button>
+          <orang-button (click)="onMore()">
             ⋮ More
-          </button>
+          </orang-button>
         </ng-container>
         
       </div>

@@ -8,14 +8,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #F4991A;
-  color: #F2EAD3;  
+  background-color: var(--o-orange);
+  color: var(--o-beige);
   cursor: pointer;
   font-size: 14px;
   transition: color 0.2s;
   
   &:hover {
-    color: #344F1F;
+    color: var(--o-green);
   }
   
   .arrow {
@@ -84,8 +84,8 @@
 
   //right: 10%;
   min-width: 240px;
-  background: #F2EAD3;
-  border: 2px solid #344F1F;
+  background: var(--o-beige);
+  border: 2px solid var(--o-green);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -113,7 +113,7 @@
     gap: 12px;
 
     .user-name {
-      color: #F4991A;
+      color: var(--o-orange);
       font-weight: 600;
       font-size: larger;
     }
@@ -161,23 +161,6 @@
   font-size: 14px;
   color: #333;
   transition: background 0.2s;
-  
-  .dropdown-button {
-    padding: 8px;
-    cursor: pointer;
-    display: flex;
-    height: 80%;
-    width: 50%;
-    color:#F2EAD3;
-    border: none;
-    border-radius: 10%;
-    background-color: #F4991A;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: #344F1F;
-    }
-  }
 
   .icon {
     font-size: 16px;
