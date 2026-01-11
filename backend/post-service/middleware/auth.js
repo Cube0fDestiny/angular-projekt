@@ -49,6 +49,44 @@ export const isPostOwner = async (req, res, next) => {
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Błąd serwera podczas sprawdzania uprawnień: " + err.message });
+      .json({
+        error: "Błąd serwera podczas sprawdzania uprawnień: " + err.message,
+      });
+  }
+};
+
+export const isCommentOwner = async (req, res, next) => {
+  const authenticatedUserId = req.user.id;
+  const { commentId } = req.params;
+
+  if (!commentId) {
+    return res.status(400).json({ message: "ID komentarza jest wymagane" });
+  }
+
+  try {
+    const result = await db.query(
+      'SELECT creator_id FROM "Post_Comments" WHERE id = $1',
+      [commentId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Komentarz nie istnieje" });
+    }
+
+    const commentCreatorId = result.rows[0].creator_id;
+    if (authenticatedUserId === commentCreatorId || req.user.role === "admin") {
+      next();
+    } else {
+      return res.status(403).json({
+        message: "Nie jesteś własącicielem tego komentarza!",
+        debug: { user: authenticatedUserId, owner: commentCreatorId },
+      });
+    }
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        error: "Błąd serwera podczas sprawdzania uprawnień: " + err.message,
+      });
   }
 };
