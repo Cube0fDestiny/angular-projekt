@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.component';
-import { UserService } from '../../../../core/services/user.service';
+import { UserService } from '../../../../core/user/user.service';
 import { Route, Router } from '@angular/router';
 @Component({
   selector: 'app-navbar',
@@ -14,14 +14,25 @@ export class NavbarComponent implements OnInit {
   
   currentUser: any;
     
-    constructor(private userService: UserService, private router: Router) {}
+  constructor(private userService: UserService, private router: Router) {}
+  
+  ngOnInit() {
+    // Subscribe to global user changes
+    this.userService.currentUser$.subscribe(user => {
+      this.currentUser = user;  // Updates automatically!
+    });
+  }
+
+  goToProfile(userId: number): void {
+    // Just pass the ID - that's it!
+    console.log("going to profile");
+    this.router.navigate(['/profile', userId]);
     
-    ngOnInit() {
-      // Subscribe to global user changes
-      this.userService.currentUser$.subscribe(user => {
-        this.currentUser = user;  // Updates automatically!
-      });
-    }
+    // OR if you want to pass the whole user object:
+    // this.router.navigate(['/profile', userId], {
+    //   state: { userId: userId }  // Optional, you can get it from route params
+    // });
+  }
   
  // user = {
    // name:  this.currentUser,//'Jan Kowalski',
@@ -51,16 +62,7 @@ export class NavbarComponent implements OnInit {
     }
   }
    
-  goToProfile(userId: number): void {
-    // Just pass the ID - that's it!
-    console.log("going to profile");
-    this.router.navigate(['/profile', userId]);
-    
-    // OR if you want to pass the whole user object:
-    // this.router.navigate(['/profile', userId], {
-    //   state: { userId: userId }  // Optional, you can get it from route params
-    // });
-  }
+
     
   
 }

@@ -1,14 +1,10 @@
-export class User {
-  id!: number;
-  name!: string;
-  email!: string;
-  avatar!: string;
-  role!: 'user' | 'admin' | 'moderator';
-  friends?: number[];  // Array of friend IDs
-  groups?: number[];   // Array of group IDs
-  bio?: string;
-  location?: string;
-  status?: 'online' | 'away' | 'offline';
-  lastSeen?: Date;
-  password: string = 'password';
+export interface User {
+  id: string;
+  name: string;
+  surname: string;
+  email: string;
+  bio?: string | null;
+  is_company: boolean;
+  created_at?: string;
+  avatar: string;
 }

@@ -3,7 +3,7 @@ import { HomeComponent } from './features/home/main/home.component';
 import { ProfilePageComponent } from './features/profile-page/main/profile-page.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
-import { authGuard } from './core/guards/auth.guard'; // Import your guard
+import { authGuard } from './core/auth/auth.guard'; // Import your guard
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },

@@ -9,15 +9,15 @@
     <!-- Profile Picture -->
     <div class="profile-picture-container">
       <img 
-        [src]="user.avatar" 
-        [alt]="user.name" 
+        [src]="user?.avatar" 
+        [alt]="user?.name" 
         class="profile-picture">
       <button class="edit-picture-btn" *ngIf="isOwnProfile">✏️</button>
     </div>
     
     <!-- Profile Info -->
     <div class="profile-info">
-      <h1 class="profile-name">{{ user.name }}</h1>
+      <h1 class="profile-name">{{ user?.name }}</h1>
       
       <!-- Stats -->
       <div class="profile-stats">
