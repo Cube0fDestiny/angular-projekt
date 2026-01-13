@@ -1,4 +1,5 @@
 import * as db from "../db/index.js";
+import WebSocket from "ws";
 
 export const getUserChats = async (req, res) => {
   const userId = req.params.id;
@@ -92,20 +93,45 @@ export const getChatMessages = async (req, res) => {
 };
 
 export const createMessage = async (req, res) => {
-    const { chatId } = req.params;
-    const { text } = req.body;
-    const creatorId = req.user.id;
+  const { chatId } = req.params;
+  const { text } = req.body;
+  const creatorId = req.user.id;
 
-    try {
-        const result = await db.query(
-            `INSERT INTO "Chat_Messages" (chat_id, creator_id, text) VALUES ($1, $2, $3) RETURNING *`,
-            [chatId, creatorId, text]
+  try {
+    const result = await db.query(
+      `INSERT INTO "Chat_Messages" (chat_id, creator_id, text) VALUES ($1, $2, $3) RETURNING *`,
+      [chatId, creatorId, text]
+    );
+    const newMessage = result.rows[0];
+    const clients = req.app.get("clients");
+
+    const participantsResult = await db.query(
+      `SELECT user_id FROM "Chat_Participants" WHERE chat_id = $1 and user_id != $2`,
+      [chatId, creatorId]
+    );
+
+    recipientIds = participantsResult.rows.map((participant) => {
+      return participant.user_id;
+    });
+
+    recipientIds.forEach((recipientId) => {
+      const recipientSocket = clients.get(recipientId);
+      if (recipientSocket && recipientSocket.readyState === WebSocket.OPEN) {
+        console.log(
+          `[Chat-Service] Wysyłam wiadomość o id: ${newMessage.id} do użytkownika o id: ${recipientId}`
         );
-        
-        console.log(`[Chat-Service] Stworzono wiadomość o id: ${result.rows[0].id}`);
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message + " Błąd serwera podczas tworzenia wiadomości" });
-    }
-}
+        recipientSocket.send(JSON.stringify(newMessage));
+      }
+    });
+
+    console.log(
+      `[Chat-Service] Stworzono wiadomość o id: ${result.rows[0].id}`
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas tworzenia wiadomości",
+    });
+  }
+};
