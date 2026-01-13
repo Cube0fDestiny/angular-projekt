@@ -1,11 +1,27 @@
 import express from "express";
-import { getEvents, createEvent } from "../controllers/eventController.js";
-import { verifyToken, isCreatorOrAdmin } from "../middleware/auth.js";
+import {
+  getAllEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  toggleFollowEvent,
+  getEventFollowers,
+  getUserEvents,
+} from "../controllers/eventController.js";
+import { verifyToken, isEventOwner } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/", getEvents);
+/* --- Trasy dla Wydarzeń --- */
+router.get("/", getAllEvents);
+router.get("/user-events", verifyToken, getUserEvents);
+router.get("/:id", getEventById);
 router.post("/", verifyToken, createEvent);
-// router.put('/:id', verifyToken, isCreatorOrAdmin, eventCtrl.updateEvent);
+router.put("/:id", verifyToken, isEventOwner, updateEvent);
+router.delete("/:id", verifyToken, isEventOwner, deleteEvent);
 
+/* --- Trasy dla Uczestników/Obserwujących --- */
+router.get("/:id/followers", getEventFollowers);
+router.post("/:id/follow", verifyToken, toggleFollowEvent);
 export default router;
