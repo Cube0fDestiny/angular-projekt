@@ -13,7 +13,7 @@ export const verifyToken = (req, res, next) => {
         req.user = jwt.verify(token, JWT_SECRET);
         next();
     } catch (error) {
-        return res.status(401).json({ message: "Nieprawidłowy lub wygasły token" });
+        return res.status(401).json({ message: error + " Nieprawidłowy lub wygasły token" });
     }
 };
 
