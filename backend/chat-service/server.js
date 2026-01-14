@@ -8,10 +8,10 @@ import { WebSocketServer } from "ws";
 import url from "url";
 import jwt from "jsonwebtoken";
 
-import chatRoutes from "./routes/chats.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
 
@@ -26,9 +26,22 @@ app.use((req, res, next) => {
 app.use("/chats", chatRoutes);
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer: true }); 
 
 const clients = new Map();
+
+server.on('upgrade', (request, socket, head) => {
+    // Sprawdzamy, czy żądanie jest na naszą dedykowaną ścieżkę WebSocket
+    if (url.parse(request.url).pathname === '/ws') { 
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            // Jeśli tak, "przekazujemy" połączenie do serwera WebSocket
+            wss.emit('connection', ws, request);
+        });
+    } else {
+        // Jeśli nie, niszczymy socket, aby Express nie musiał go obsługiwać
+        socket.destroy();
+    }
+});
 
 wss.on("connection", (ws, req) => {
   const token = url.parse(req.url, true).query.token;
@@ -66,6 +79,6 @@ app.set("wss", wss);
 app.set("clients", clients);
 
 const PORT = process.env.PORT || 3006;
-app.listen(PORT, () => console.log(`🚀 Chat-Service running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Chat-Service running on port ${PORT}`));
 
 app.use(errorHandler);
