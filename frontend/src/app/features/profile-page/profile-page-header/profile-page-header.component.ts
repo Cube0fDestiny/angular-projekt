@@ -1,8 +1,9 @@
 import { NgIf } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { UserService } from '../../../core/services/user.service';
+import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
+import { User } from '../../../shared/models/user.model';
 
 @Component({
   selector: 'app-profile-header',
@@ -10,53 +11,23 @@ import { OrangButtonComponent } from "../../../shared/components/orang-button/or
   imports: [NgIf, OrangButtonComponent],
   styleUrls: ['./profile-page-header.component.scss']
 })
-export class ProfilePageHeaderComponent {
-  @Input() user: any = null;
+export class ProfilePageHeaderComponent implements OnInit {
+  @Input() user: User | null = null;
   @Input() isOwnProfile = false;
   @Input() isFriend = false;
-  userId: number = 0;
+
+  /** Keep as string because backend uses UUIDs */
+  userId: string | null = null;
+
   @Input() stats = {
     friends: 0,
     posts: 0,
     photos: 0
   };
 
-  constructor(
-    private route: ActivatedRoute,
-    public userService: UserService
-  ) {}
+  /** Default cover image */
+  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
 
-  ngOnInit(): void {
-    // Get userId from URL
-    this.userId = Number(this.route.snapshot.paramMap.get('id'));
-    
-    // Load user data based on ID
-    this.loadUser(this.userId);
-  }
-  
-  loadUser(userId: number): void {
-    // Fetch user data - in real app from API
-    // For now, check if it's current user or a friend
-    
-    const currentUser = this.userService.currentUser;
-    
-    if (userId === currentUser?.id) {
-      // It's the current user's own profile
-      this.user = currentUser;
-    } else {
-      // It's someone else - create mock data based on ID
-      this.user = {
-        id: userId,
-        name: `User ${userId}`,
-        avatar: `https://i.pravatar.cc/150?img=${userId}`,
-        bio: `This is user ${userId}'s profile`,
-        isFriend: currentUser?.friends?.includes(userId) || false
-      };
-    }
-    
-    console.log('Profile for user:', this.user);
-  }
-  
   @Output() editProfile = new EventEmitter<void>();
   @Output() addStory = new EventEmitter<void>();
   @Output() viewAs = new EventEmitter<void>();
@@ -64,35 +35,49 @@ export class ProfilePageHeaderComponent {
   @Output() addFriend = new EventEmitter<void>();
   @Output() unfriend = new EventEmitter<void>();
   @Output() more = new EventEmitter<void>();
-  
-  // Default cover image
-  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
-  
-  onEditProfile(): void {
-    this.editProfile.emit();
+
+  currentUser: User | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    public userService: UserService
+  ) {}
+
+  ngOnInit(): void {
+    // Subscribe to current user
+    this.userService.currentUser$.subscribe(u => this.currentUser = u);
+
+    // Get userId from route (if any)
+    this.userId = this.route.snapshot.paramMap.get('id');
+
+    // Load profile data
+    this.loadUser(this.userId);
   }
-  
-  onAddStory(): void {
-    this.addStory.emit();
+
+  loadUser(userId: string | null): void {
+    if (!userId || userId === this.currentUser?.id) {
+      // Show current user's profile
+      this.user = this.currentUser;
+      this.isOwnProfile = true;
+      this.isFriend = false;
+    } else {
+      // Fetch another user's profile
+      this.userService.getUserById(userId).subscribe(u => {
+        this.user = u;
+        this.isOwnProfile = false;
+        this.isFriend = false; // Friends system not implemented yet
+      });
+    }
+
+    console.log('Profile for user:', this.user);
   }
-  
-  onViewAs(): void {
-    this.viewAs.emit();
-  }
-  
-  onMessage(): void {
-    this.message.emit();
-  }
-  
-  onAddFriend(): void {
-    this.addFriend.emit();
-  }
-  
-  onUnfriend(): void {
-    this.unfriend.emit();
-  }
-  
-  onMore(): void {
-    this.more.emit();
-  }
+
+  // Event emitters
+  onEditProfile(): void { this.editProfile.emit(); }
+  onAddStory(): void { this.addStory.emit(); }
+  onViewAs(): void { this.viewAs.emit(); }
+  onMessage(): void { this.message.emit(); }
+  onAddFriend(): void { this.addFriend.emit(); }
+  onUnfriend(): void { this.unfriend.emit(); }
+  onMore(): void { this.more.emit(); }
 }

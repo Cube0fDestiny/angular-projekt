@@ -2,8 +2,8 @@ import { Component, EventEmitter, Output, Input, OnInit, inject } from '@angular
 import { CommonModule, NgIf } from "@angular/common";
 import { Router } from '@angular/router';
 import { OrangButtonComponent } from '../../../../shared/components/orang-button/orang-button.component';
-import { UserService } from '../../../../core/services/user.service';
-import { AuthService } from '../../../../core/services/auth.service'; // Added this
+import { UserService } from '../../../../core/user/user.service';
+import { AuthService } from '../../../../core/auth/auth.service'; // Added this
 
 @Component({
   selector: 'profile-dropdown',

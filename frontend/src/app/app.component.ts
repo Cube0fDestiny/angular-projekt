@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { UserService } from './core/services/user.service';
+import { UserService } from './core/user/user.service';
+import { AuthService } from './core/auth/auth.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -10,13 +11,9 @@ import { UserService } from './core/services/user.service';
 export class AppComponent {
   title = 'orangular';
   constructor(private userService: UserService) {}
-  
-  ngOnInit() {
-    // Load current user when app starts
-    // this.userService.initializeWithMockData();
-    
-    // Or load from localStorage/API:
-    // const savedUser = localStorage.getItem('currentUser');
-    // if (savedUser) this.userService.setCurrentUser(JSON.parse(savedUser));
+
+  ngOnInit(): void {
+    this.userService.initializeFromStorage();
   }
+
 }

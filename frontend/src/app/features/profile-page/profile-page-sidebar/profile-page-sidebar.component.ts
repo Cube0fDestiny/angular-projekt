@@ -1,80 +1,77 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
 import { TextDisplayComponent } from '../../../shared/components/text-display/text-display.component';
-import { ActivatedRoute } from '@angular/router';
-import { UserService } from '../../../core/services/user.service';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { User } from '../../../shared/models/user.model';
+import { UserService } from '../../../core/user/user.service';
 
 @Component({
   selector: 'app-profile-sidebar',
   templateUrl: './profile-page-sidebar.component.html',
-  imports: [NgIf,NgFor,TextDisplayComponent],
+  imports: [NgIf, NgFor, TextDisplayComponent],
   styleUrls: ['./profile-page-sidebar.component.scss']
 })
-export class ProfilePageSidebarComponent {
-  @Input() user: any = null;
-  @Input() userId: number = 0;
-  // Input data
-  @Input() friends: any[] = [];
+export class ProfilePageSidebarComponent implements OnInit {
+
+  /** Main profile user */
+  @Input() user!: User;
+
+  /** Placeholder for groups and photos (mock) */
   @Input() groups: any[] = [];
   @Input() photos: any[] = [];
-  
-  // Events
-  @Output() friendClick = new EventEmitter<number>();
+
+  /** Events for interactions */
+  @Output() userClick = new EventEmitter<string>();
   @Output() groupClick = new EventEmitter<number>();
   @Output() photoClick = new EventEmitter<any>();
-  
-  // Navigate to friend's profile
-  goToFriendProfile(friendId: number): void {
-    this.friendClick.emit(friendId);
-    this.router.navigate(['/profile', friendId]);
-  }
-  
-  // Navigate to group
-  goToGroup(groupId: number): void {
-    this.groupClick.emit(groupId);
-    // this.router.navigate(['/group', groupId]);
-  }
-  
-  // Open photo viewer
-  openPhoto(photo: any): void {
-    this.photoClick.emit(photo);
-  }
+
+  /** All users used to display as "friends" temporarily */
+  friends: User[] = [];
+
+  /** Current logged-in user */
+  currentUser!: User | null;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    public userService: UserService
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    // Get userId from URL
-    this.userId = Number(this.route.snapshot.paramMap.get('id'));
-    
-    // Load user data based on ID
-    this.loadUser(this.userId);
-  }
-  
-  loadUser(userId: number): void {
-    // Fetch user data - in real app from API
-    // For now, check if it's current user or a friend
-    
-    const currentUser = this.userService.currentUser;
-    
-    if (userId === currentUser?.id) {
-      // It's the current user's own profile
-      this.user = currentUser;
+    const userId = this.route.snapshot.paramMap.get('id');
+
+    // Subscribe to current user
+    this.userService.currentUser$.subscribe(user => this.currentUser = user);
+
+    // Load main profile (either from route or current user)
+    if (userId) {
+      this.userService.getUserById(userId).subscribe(u => this.user = u);
     } else {
-      // It's someone else - create mock data based on ID
-      this.user = {
-        id: userId,
-        name: `User ${userId}`,
-        avatar: `https://i.pravatar.cc/150?img=${userId}`,
-        bio: `This is user ${userId}'s profile`,
-        isFriend: currentUser?.friends?.includes(userId) || false
-      };
+      this.user = this.currentUser!;
     }
-    
-    console.log('Profile for user:', this.user);
+
+    // Load all users as "friends" for temporary display
+    this.userService.getAllUsers().subscribe(users => {
+      // Exclude current user from friends list if you want
+      this.friends = users.filter(u => u.id !== this.currentUser?.id);
+    });
+  }
+
+  /** Navigate to another user's profile */
+  goToFriendProfile(userId: string): void {
+    this.userClick.emit(userId);
+    this.router.navigate(['/users', userId]);
+  }
+
+  /** Navigate to group (mock) */
+  goToGroup(groupId: number): void {
+    this.groupClick.emit(groupId);
+    // this.router.navigate(['/group', groupId]); // still mock
+  }
+
+  /** Open photo (mock) */
+  openPhoto(photo: any): void {
+    this.photoClick.emit(photo);
   }
 }
+
