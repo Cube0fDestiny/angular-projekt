@@ -1,1 +1,0 @@
-modele to po prostu przygotowane klasy/typy do użycia gdzie indziej. Zignorować

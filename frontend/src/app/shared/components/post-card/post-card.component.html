@@ -1,35 +1,37 @@
-<div class="post-card" [class.with-image]="post.imageUrl">
+<div class="post-card" >
   
-   <!-- Post Image -->
+   <!-- Post Image <div class="post-card" [class.with-image]="post.imageUrl">
     <img 
       *ngIf="post.imageUrl" 
       [src]="post.imageUrl" 
       [alt]="'Image in post by ' + post.author.name"
-      class="post-image" >
+      class="post-image" >-->
+    <img src="assets/images/orange-grove.png" alt="Orang">
   <!-- Post Header -->
   <div class="post-header">
-    <img [src]="post.author.avatar" [alt]="post.author.name" class="author-avatar">
+    <div *ngIf="isLoading">Loading...</div>
+    <img *ngIf="user && !isLoading" [src]="user.avatar" [alt]="user.name" class="author-avatar">
     
-    <div class="author-info">
-      <div class="author-name">{{ post.author.name }}</div>
+    <div *ngIf="user && !isLoading" class="author-info">
+      <div class="author-name">{{ user.name }}</div>
       <div class="post-meta">
         <span class="post-time">{{ timeAgo }}</span>
-        <span *ngIf="post.location" class="post-location">📍 {{ post.location }}</span>
-        <span *ngIf="post.isEdited" class="edited">(edited)</span>
+        <span *ngIf="post.location_id" class="post-location">📍 {{ post.location_id }}</span>
+        <!-- <span *ngIf="post.isEdited" class="edited">(edited)</span>-->
       </div>
     </div>
     
-    <button class="more-options" *ngIf="currentUserId === post.author.id">
+    <button class="more-options" *ngIf="currentUserId === post.creator_id">
       ⋮
     </button>
   </div>
   
   <!-- Post Content -->
   <div class="post-content">
-    <app-text-display variant="white">{{ post.content }}</app-text-display>
+    <app-text-display variant="white">{{ post.Text }}</app-text-display>
   </div>
   
-  <!-- Post Stats -->
+  <!-- Post Stats
   <div class="post-stats" *ngIf="post.likes > 0 || post.comments.length > 0 || post.shares > 0">
     <span *ngIf="post.likes > 0" class="likes-count">
       👍 {{ post.likes }}
@@ -40,11 +42,15 @@
     <span *ngIf="post.shares > 0" class="shares-count">
       🔄 {{ post.shares }}
     </span>
-  </div>
+  </div>-->
   
   <!-- Post Actions -->
   <div class="post-actions" *ngIf="showActions">
-    <orang-button (click)="onLike()">
+    <!-- <orang-button (click)="onLike()">
+      <span>🍊 Orang it</span>
+    </orang-button> -->
+
+    <orang-button>
       <span>🍊 Orang it</span>
     </orang-button>
     
@@ -59,10 +65,10 @@
   
   <!-- Comment Input -->
   <div class="comment-input" *ngIf="showActions">
-    <img 
-      [src]="post.author.avatar" 
-      [alt]="post.author.name" 
-      class="commenter-avatar">
+    <!--<img 
+      [src]="currentUser.avatar" 
+      [alt]="currentUser.name" 
+      class="commenter-avatar">-->
     
     <div class="input-container">
       <input 
@@ -78,8 +84,8 @@
   </div>
   
   <!-- Comments Section -->
-  <div class="comments-section" *ngIf="showComments && post.comments.length > 0">
-    <div class="comment" *ngFor="let comment of post.comments">
+  <div class="comments-section" *ngIf="showComments && comments.length > 0">
+    <div class="comment" *ngFor="let comment of comments">
       <img [src]="comment.author.avatar" [alt]="comment.author.name" class="comment-avatar">
       
       <div class="comment-content">
@@ -91,9 +97,6 @@
         <p class="comment-text">{{ comment.text }}</p>
         
         <div class="comment-actions">
-          <orang-button size="small" (click)="likeComment(comment.id)">
-            Like
-          </orang-button>
           <orang-button size="small">
             Reply
           </orang-button>
