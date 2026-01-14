@@ -4,12 +4,12 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import http from "http";
-import { WebSocketServer } from "ws";
-import url from "url";
+import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 
 import chatRoutes from "./routes/chatRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import * as db from "./db/index.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -26,57 +26,57 @@ app.use((req, res, next) => {
 app.use("/chats", chatRoutes);
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({ noServer: true }); 
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+})
 
-const clients = new Map();
-
-server.on('upgrade', (request, socket, head) => {
-    // Sprawdzamy, czy żądanie jest na naszą dedykowaną ścieżkę WebSocket
-    if (url.parse(request.url).pathname === '/ws') { 
-        wss.handleUpgrade(request, socket, head, (ws) => {
-            // Jeśli tak, "przekazujemy" połączenie do serwera WebSocket
-            wss.emit('connection', ws, request);
-        });
-    } else {
-        // Jeśli nie, niszczymy socket, aby Express nie musiał go obsługiwać
-        socket.destroy();
-    }
-});
-
-wss.on("connection", (ws, req) => {
-  const token = url.parse(req.url, true).query.token;
-  let userId;
-
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
   if (!token) {
-    console.log("[Chat-Service] Brak tokena w zapytaniu");
-    ws.close();
-    return;
+    return next(new Error("Authentication error: Token not provided."));
   }
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    userId = decoded.id;
+    socket.user = decoded;
+    next();
   } catch (error) {
-    console.log("[Chat-Service] Nieprawidłowy token");
-    ws.close();
-    return;
+    next(new Error("Authentication error: Invalid token."));
   }
+})
 
-  console.log("[Chat-Service] Nowy klient połączony", userId);
-  clients.set(userId, ws);
+io.on("connection", (socket) => {
+  console.log(`[Socket.IO] Użytkownik połączony ${socket.user.name}. Socket ID: ${socket.id}`);
 
-  ws.on("message", (message) => {
-    console.log(`[Chat-Service] Otrzymano wiadomość od klienta: ${message}`);
+  socket.join(socket.user.id);
+
+  socket.on('joinChatRoom', async (chatId) => {
+    try {
+      const result = await db.query(
+        `SELECT 1 FROM "Chat_Participants" WHERE chat_id = $1 AND user_id = $2`,
+        [chatId, socket.user.id]
+      );
+
+      if (result.rowCount > 0) {
+        socket.join(chatId);
+        console.log(`[Socket.IO] Użytkownik ${socket.user.id} dołączony do czatu o id: ${chatId}`);
+      } else {
+        console.warn(`[Socket.IO] Użytkownik ${socket.user.id} nie jest członkiem czatu o id: ${chatId}`);
+      }
+    } catch (err) {
+      console.error(err + " Błąd serwera podczas weryfikacji uczestnika czatu.");
+      socket.emit('error', '[Socket.IO] Błąd serwera podczas weryfikacji uczestnika czatu.');
+    }
   });
 
-  ws.on("close", () => {
-    console.log("[Chat-Service] Klient rozłączony", userId);
-    clients.delete(userId);
+  socket.on('disconnect', () => {
+    console.log('[Socket.IO] Użytkownik ${socket.user.id} rozłączony');
   });
 });
 
-app.set("wss", wss);
-app.set("clients", clients);
+app.set("io", io);
 
 const PORT = process.env.PORT || 3006;
 server.listen(PORT, () => console.log(`🚀 Chat-Service running on port ${PORT}`));

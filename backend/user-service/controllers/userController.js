@@ -111,7 +111,7 @@ export const register = async (req, res) => {
       },
       JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "12h",
       }
     );
 
@@ -175,7 +175,7 @@ export const login = async (req, res) => {
       },
       JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "12h",
       }
     );
 

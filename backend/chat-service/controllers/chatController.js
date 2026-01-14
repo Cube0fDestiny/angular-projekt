@@ -1,8 +1,7 @@
 import * as db from "../db/index.js";
-import WebSocket from "ws";
 
 export const getUserChats = async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.user.id;
 
   try {
     const result = await db.query(
@@ -34,7 +33,7 @@ export const createChat = async (req, res) => {
       .json({ error: "Podano nieprawidłowe dane użytkowników" });
   }
 
-  const allParticipantsIds = [creatorId, ...participantIds];
+  const allParticipantIds = [creatorId, ...participantIds];
   const client = await db.pool.connect();
 
   try {
@@ -50,7 +49,7 @@ export const createChat = async (req, res) => {
         VALUES ${allParticipantIds
           .map((_, i) => `($1, $${i + 2})`)
           .join(", ")}`;
-    const participantValues = [newChat.id, ...allParticipantsIds];
+    const participantValues = [newChat.id, ...allParticipantIds];
     await client.query(participantQuery, participantValues);
 
     await client.query("COMMIT");
@@ -68,7 +67,7 @@ export const createChat = async (req, res) => {
 };
 
 export const getChatMessages = async (req, res) => {
-  const chatId = req.params.id;
+  const chatId = req.params.chatId;
 
   try {
     const result = await db.query(
@@ -94,6 +93,7 @@ export const getChatMessages = async (req, res) => {
 
 export const createMessage = async (req, res) => {
   const { chatId } = req.params;
+  console.log(chatId)
   const { text } = req.body;
   const creatorId = req.user.id;
 
@@ -103,31 +103,14 @@ export const createMessage = async (req, res) => {
       [chatId, creatorId, text]
     );
     const newMessage = result.rows[0];
-    const clients = req.app.get("clients");
+    const io = req.app.get("io");
 
-    const participantsResult = await db.query(
-      `SELECT user_id FROM "Chat_Participants" WHERE chat_id = $1 and user_id != $2`,
-      [chatId, creatorId]
-    );
-
-    recipientIds = participantsResult.rows.map((participant) => {
-      return participant.user_id;
-    });
-
-    recipientIds.forEach((recipientId) => {
-      const recipientSocket = clients.get(recipientId);
-      if (recipientSocket && recipientSocket.readyState === WebSocket.OPEN) {
-        console.log(
-          `[Chat-Service] Wysyłam wiadomość o id: ${newMessage.id} do użytkownika o id: ${recipientId}`
-        );
-        recipientSocket.send(JSON.stringify(newMessage));
-      }
-    });
+    io.to(chatId).emit("newMessage", newMessage);
 
     console.log(
       `[Chat-Service] Stworzono wiadomość o id: ${result.rows[0].id}`
     );
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(newMessage);
   } catch (err) {
     console.error(err);
     res.status(500).json({
