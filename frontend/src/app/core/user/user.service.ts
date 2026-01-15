@@ -25,11 +25,16 @@ export class UserService {
     return this.currentUserSubject.value;
   }
 
+  // In UserService
   setSession(user: User, token: string): void {
+    //console.log('Storing token in localStorage:', token);
+    //console.log('Storing user in localStorage:', user);
+    
     localStorage.setItem('token', token);
     localStorage.setItem('currentUser', JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
+
 
   clearSession(): void {
     localStorage.removeItem('token');

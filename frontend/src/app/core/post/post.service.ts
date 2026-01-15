@@ -58,6 +58,8 @@ export class PostService {
     in_reply_to?: string;
     image_ids?: string[];
   }): Observable<any> {
+    console.log(data);
+    console.log(postId);
     return this.http.post<any>(`${this.apiUrl}/${postId}/comments`, data);
   }
 

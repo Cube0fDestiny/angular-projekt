@@ -20,6 +20,8 @@ import { OrangButtonComponent } from "../orang-button/orang-button.component";
 export class LoginCardComponent {
   email = '';
   password = '';
+  newName = '';
+  newSurname = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -31,8 +33,8 @@ export class LoginCardComponent {
     if (this.isRegisterPage) {
       // For now, provide default name/surname/is_company
       this.authService.register({
-        name: this.email.split('@')[0], // simple default name
-        surname: '',                     // default empty
+        name: this.newName,
+        surname: this.newSurname,
         email: this.email,
         password: this.password,
         is_company: false

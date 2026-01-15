@@ -18,6 +18,12 @@
   }
 }
 
+.reply-button {
+  color: var(--o-orange);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .post-card > .post-image {
   display: block;
   width: 100%;
