@@ -53,7 +53,9 @@ export const createPost = async (req, res) => {
 
   try {
     const result = await db.query(
-      `INSERT INTO "Posts" (creator_id, "Text", location_id, location_type) VALUES ($1, $2, $3, $4) RETURNING *`,
+      `INSERT INTO "Posts" (creator_id, "Text", location_id, location_type) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING id, created_at, "Text", location_id, location_type, creator_id`,
       [creator_id, content, location_id || null, location_type || null]
     );
 
