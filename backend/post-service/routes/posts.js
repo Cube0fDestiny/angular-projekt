@@ -5,6 +5,7 @@ import {
   updatePost,
   deletePost,
   getPostById,
+  getPostsByUserId,
 } from "../controllers/postController.js";
 
 import { toggleReaction } from "../controllers/reactionController.js";
@@ -26,6 +27,7 @@ const router = express.Router();
 
 // Posts enpoints
 router.get("/", getAllPosts);
+router.get("/user",verifyToken ,getPostsByUserId);
 router.get("/:id", getPostById);
 router.post("/", verifyToken, createPost);
 router.put("/:id", verifyToken, isPostOwner, updatePost);
