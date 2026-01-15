@@ -8,7 +8,7 @@ import { Post } from '../../shared/models/post.model';
   providedIn: 'root'
 })
 export class PostService {
-  private readonly apiUrl = 'http://localhost:3002/posts';
+  private readonly apiUrl = 'http://localhost:3000/posts';
 
   constructor(private http: HttpClient) {}
 

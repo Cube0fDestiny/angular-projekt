@@ -6,7 +6,7 @@ import { User } from '../../shared/models/user.model';
   providedIn: 'root'
 })
 export class UserService {
-  private readonly apiUrl = 'http://localhost:3001/users';
+  private readonly apiUrl = 'http://localhost:3000/users';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
