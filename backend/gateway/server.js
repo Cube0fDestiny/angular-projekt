@@ -4,8 +4,20 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import http from "http";
+import pino from "pino";
+import pinoHttp from "pino-http";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { gatewayVerifyToken } from "./middleware/auth.js";
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  transport:
+    process.env.NODE_ENV !== "production"
+      ? {
+          target: "pino-pretty",
+        }
+      : undefined,
+});
 
 const service = [
   {
@@ -42,14 +54,8 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors());
-// app.use(express.json());
 app.use(gatewayVerifyToken);
-
-// Loggujemy otrzymane requesty i sprawdzamy token
-app.use((req, res, next) => {
-  console.log(`[Gateway] Otrzymano: ${req.method} ${req.url}`);
-  next();
-});
+app.use(pinoHttp({ logger }));
 
 // Konfiguracja Proxy dla serwisów
 service.forEach(({ route, target }) => {
@@ -60,11 +66,16 @@ service.forEach(({ route, target }) => {
       // Usuwa prefiks - /example/123 -> /123
       [`^${route}`]: "",
     },
-    // onProxyReq: (proxyReq, req, res) => {
-    //   if (req.headers["x-user-data"]) {
-    //     proxyReq.setHeader("x-user-data", req.headers["x-user-data"]);
-    //   }
-    // },
+    onError: (err, req, res) => {
+      req.log.error({ err, service: route }, "Błąd proxy");
+      res.writeHead(503, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          message: "Usługa jest tymczasowo niedostępna.",
+          service: route,
+        })
+      );
+    },
   };
   app.use(route, createProxyMiddleware(proxyOptions));
 });
@@ -76,22 +87,27 @@ const chatServiceProxy = createProxyMiddleware({
   pathRewrite: {
     "^/chats": "",
   },
-  // onProxyReq: (proxyReq, req, res) => {
-  //   if (req.headers["x-user-data"]) {
-  //     proxyReq.setHeader("x-user-data", req.headers["x-user-data"]);
-  //   }
-  // },
+  onError: (err, req, res) => {
+    req.log.error({ err, service: "/chats" }, "Błąd proxy");
+    res.writeHead(503, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        message: "Usługa jest tymczasowo niedostępna.",
+        service: "/chats",
+      })
+    );
+  },
 });
 
 app.use("/chats", chatServiceProxy);
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Gateway running on port ${PORT}`));
+server.listen(PORT, () => logger.info(`🚀 Gateway running on port ${PORT}`));
 
 server.on("upgrade", (req, socket, head) => {
-  console.log(`[Gateway] Próba uaktualnienia do WebSocket serwisu ${req.url}`);
+  logger.info({ url: req.url }, `Próba uaktualnienia połączenia do WebSocket`);
   if (req.url.startsWith("/chats")) {
-    chatServiceProxy.ws(req, socket, head);
+    chatServiceProxy.upgrade(req, socket, head);
   } else {
     socket.destroy();
   }
