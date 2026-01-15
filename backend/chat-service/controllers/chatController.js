@@ -2,6 +2,7 @@ import * as db from "../db/index.js";
 
 export const getUserChats = async (req, res) => {
   const userId = req.user.id;
+  const log = req.log;
 
   try {
     const result = await db.query(
@@ -13,10 +14,13 @@ export const getUserChats = async (req, res) => {
       [userId]
     );
 
-    console.log(`[Chat-Service] Pobrano czaty użytkownika o id: ${userId}`);
+    log.info(
+      { userId, chatCount: result.rowCount },
+      "Pobrano czaty użytkownika."
+    );
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error({ err, userId }, "Błąd serwera podczas pobierania czatów.");
     res
       .status(500)
       .json({ error: err.message + " Błąd serwera podczas pobierania czatów" });
@@ -26,8 +30,13 @@ export const getUserChats = async (req, res) => {
 export const createChat = async (req, res) => {
   const { name, participantIds } = req.body;
   const creatorId = req.user.id;
+  const log = req.log;
 
   if (!participantIds || !Array.isArray(participantIds)) {
+    log.warn(
+      { creatorId, body: req.body },
+      "Nieudana próba stworzenia czatu z nieprawidłowymi danymi."
+    );
     return res
       .status(400)
       .json({ error: "Podano nieprawidłowe dane użytkowników" });
@@ -53,11 +62,15 @@ export const createChat = async (req, res) => {
     await client.query(participantQuery, participantValues);
 
     await client.query("COMMIT");
-    console.log(`[Chat-Service] Utworzono nowy czat o id: ${newChat.id}`);
+    log.info(
+      { chatId: newChat.id, creatorId, participants: allParticipantIds },
+      "Utworzono nowy czat."
+    );
+    res.status(201).json(newChat);
     res.status(201).json(newChat);
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err);
+    log.error({ err, creatorId }, "Błąd transakcji podczas tworzenia czatu.");
     res
       .status(500)
       .json({ error: err.message + " Błąd serwera podczas tworzenia czatu" });
@@ -78,10 +91,16 @@ export const getChatMessages = async (req, res) => {
       [chatId]
     );
 
-    console.log(`[Chat-Service] Pobrano wiadomości czatu o id: ${chatId}`);
+    log.info(
+      { chatId, messageCount: result.rowCount },
+      "Pobrano wiadomości z czatu."
+    );
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error(
+      { err, chatId },
+      "Błąd serwera podczas pobierania wiadomości czatu."
+    );
     res.status(500).json({
       error:
         err.message +
@@ -93,7 +112,7 @@ export const getChatMessages = async (req, res) => {
 
 export const createMessage = async (req, res) => {
   const { chatId } = req.params;
-  console.log(chatId)
+  const log = req.log;
   const { text } = req.body;
   const creatorId = req.user.id;
 
@@ -107,12 +126,16 @@ export const createMessage = async (req, res) => {
 
     io.to(chatId).emit("newMessage", newMessage);
 
-    console.log(
-      `[Chat-Service] Stworzono wiadomość o id: ${result.rows[0].id}`
+    log.info(
+      { messageId: newMessage.id, chatId, creatorId },
+      "Stworzono i rozgłoszono nową wiadomość."
     );
     res.status(201).json(newMessage);
   } catch (err) {
-    console.error(err);
+    log.error(
+      { err, chatId, creatorId },
+      "Błąd serwera podczas tworzenia wiadomości."
+    );
     res.status(500).json({
       error: err.message + " Błąd serwera podczas tworzenia wiadomości",
     });

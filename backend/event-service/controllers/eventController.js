@@ -199,7 +199,7 @@ export const deleteEvent = async (req, res) => {
     }
 
     log.info({ eventId: id }, "Usunięto wydarzenie.");
-    res.status(204).json({ message: "Event został usunięty" });
+    res.status(200).json({ message: "Event został usunięty" });
   } catch (err) {
     log.error({ err, eventId: id }, "Błąd serwera podczas usuwania wydarzenia.");
     res.status(500).json({

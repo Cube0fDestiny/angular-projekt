@@ -25,7 +25,7 @@ app.use(express.json());
 app.use("/events", eventRoutes);
 
 app.listen(PORT, () => {
-  console.log(`[Event-Service] Serwer działa na porcie ${PORT}`);
+  logger.info(`[Event-Service] Serwer działa na porcie ${PORT}`);
 });
 
 app.use(errorHandler);

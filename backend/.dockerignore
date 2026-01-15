@@ -1,0 +1,15 @@
+# Zależności i pliki tymczasowe Node.js
+node_modules
+npm-debug.log
+
+# Pliki środowiskowe i konfiguracyjne
+.env
+.env.*
+!/.env.example # Czasem chcemy dołączyć plik przykładowy
+
+# Logi
+*.log
+
+# Foldery systemowe
+.git
+.vscode
