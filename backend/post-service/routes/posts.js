@@ -8,7 +8,10 @@ import {
   getPostsByUserId,
 } from "../controllers/postController.js";
 
-import { toggleReaction } from "../controllers/reactionController.js";
+import {
+  toggleReaction,
+  getMyReactionForPost,
+} from "../controllers/reactionController.js";
 
 import {
   createComment,
@@ -27,7 +30,7 @@ const router = express.Router();
 
 // Posts enpoints
 router.get("/", getAllPosts);
-router.get("/user",verifyToken ,getPostsByUserId);
+router.get("/user", verifyToken, getPostsByUserId);
 router.get("/:id", getPostById);
 router.post("/", verifyToken, createPost);
 router.put("/:id", verifyToken, isPostOwner, updatePost);
@@ -35,6 +38,7 @@ router.delete("/:id", verifyToken, isPostOwner, deletePost);
 
 // Reaction endpoint
 router.post("/:id/reactions", verifyToken, toggleReaction);
+router.get("/:id/reactions", verifyToken, getMyReactionForPost);
 
 // Comments endpoints
 router.get("/:postId/comments", getCommentsForPosts);
