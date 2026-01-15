@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -22,31 +21,31 @@ const logger = pino({
 const service = [
   {
     route: "/users",
-    target: "http://localhost:3001/users",
+    target: "http://user-service:3001/users",
   },
   {
     route: "/posts",
-    target: "http://localhost:3002/posts",
+    target: "http://post-service:3002/posts",
   },
   {
     route: "/events",
-    target: "http://localhost:3003/events",
+    target: "http://event-service:3003/events",
   },
   {
     route: "/images",
-    target: "http://localhost:3004/images",
+    target: "http://image-service:3004/images",
   },
   {
     route: "/groups",
-    target: "http://localhost:3005/groups",
+    target: "http://group-service:3005/groups",
   },
   // {
   //   route:"/chats",
-  //   target:"http://localhost:3006"
+  //   target:"http://chat-service:3006"
   // },
   {
     route: "/notifications",
-    target: "http://localhost:3007/notifications",
+    target: "http://notification-service:3007/notifications",
   },
 ];
 
@@ -81,7 +80,7 @@ service.forEach(({ route, target }) => {
 });
 
 const chatServiceProxy = createProxyMiddleware({
-  target: "http://localhost:3006/chats",
+  target: "http://chat-service:3006/chats",
   changeOrigin: true,
   ws: true,
   pathRewrite: {

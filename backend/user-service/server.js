@@ -1,20 +1,25 @@
-import express from 'express';
-import cors from 'cors';
-import userRoutes from './routes/users.js'; // <-- .js !!!
+import express from "express";
+import cors from "cors";
+import { pinoHttp } from "pino-http";
+import userRoutes from "./routes/users.js"; // <-- .js !!!
+import pino from "pino";
+import { errorHandler } from "./middleware/errorHandler.js";
+
+const logger = pino({
+  transport:
+    process.env.NODE_ENV !== "production"
+      ? { target: "pino-pretty" }
+      : undefined,
+});
 
 const app = express();
+app.use(pinoHttp({ logger }));
 app.use(cors());
 app.use(express.json());
 
-app.use('/users', userRoutes);
+app.use("/users", userRoutes);
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: "Wystąpił wewnętrzny błąd serwera",
-    error: process.env.NODE_ENV === 'development' ? err.message : {}
-  });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`User service running on port ${PORT}`));
+app.listen(PORT, () => logger.info(`User service running on port ${PORT}`));

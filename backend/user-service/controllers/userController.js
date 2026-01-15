@@ -27,12 +27,12 @@ export const getAllUsers = async (req, res) => {
       avatar: `https://i.pravatar.cc/150?u=${row.email}`,
     }));
 
-    console.log(
+    req.log.info(
       `[User-Service] Pobrano ${users.length} użytkowników z bazy danych`
     );
     res.status(200).json(users);
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania użytkowników",
     });
@@ -69,10 +69,10 @@ export const getUserProfile = async (req, res) => {
       avatar: `https://i.pravatar.cc/150?u=${row.email}`,
     };
 
-    console.log(`[User-Service] Pobrano profil użytkownika ID: ${id}`);
+    req.log.info(`[User-Service] Pobrano profil użytkownika ID: ${id}`);
     res.status(200).json(user);
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas pobierania profilu użytkownika",
@@ -115,7 +115,7 @@ export const register = async (req, res) => {
       }
     );
 
-    console.log(
+    req.log.info(
       `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.user_id}`
     );
 
@@ -131,7 +131,7 @@ export const register = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas rejestracji nowego użytkownika",
@@ -179,7 +179,7 @@ export const login = async (req, res) => {
       }
     );
 
-    console.log(`[User-Service] Zalogowano użytkownika ID: ${user.user_id}`);
+    req.log.info(`[User-Service] Zalogowano użytkownika ID: ${user.user_id}`);
 
     res.status(200).json({
       user: {
@@ -193,7 +193,7 @@ export const login = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas logowania",
     });
@@ -236,14 +236,14 @@ export const updateProfile = async (req, res) => {
       id,
     ]);
 
-    console.log(`[User-Service] Zaktualizowano profil użytkownika ID: ${id}`);
+    req.log.info(`[User-Service] Zaktualizowano profil użytkownika ID: ${id}`);
 
     res.status(200).json({
       message: "Profil został zaktualizowany",
       user_id: result.rows[0].user_id,
     });
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas aktualizacji profilu",
     });
@@ -268,14 +268,14 @@ export const deleteUser = async (req, res) => {
         .json({ message: "Nie znaleziono użytkownika do usunęcia" });
     }
 
-    console.log(`[User-Service] Usunięto profil użytkownika ID: ${id}`);
+    req.log.info(`[User-Service] Usunięto profil użytkownika ID: ${id}`);
 
     res.status(200).json({
       message: "Profil został usunięty",
       user_id: result.rows[0].user_id,
     });
   } catch (err) {
-    console.error(err);
+    req.log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas usuwania profilu",
     });
