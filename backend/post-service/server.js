@@ -13,6 +13,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   console.log(`[Post-Service] Otrzymano: ${req.method} ${req.url}`);
+  console.log('[Post-Service] Nagłówki:', req.headers); // Dodaj ten log
   next();
 });
 

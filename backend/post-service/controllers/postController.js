@@ -63,7 +63,7 @@ export const getPostById = async (req, res) => {
         .json({ message: "Nie znaleziono posta o id: " + id });
     }
 
-    const post = postResult.rows[0];
+    const postWithReactions = postResult.rows[0];
 
     const reactionsResult = await db.query(
       `SELECT reaction_type, COUNT(*) as count
@@ -80,13 +80,13 @@ export const getPostById = async (req, res) => {
       return { type: row.reaction_type, count: count };
     });
 
-    post.reactions = {
+    postWithReactions.reactions = {
       totalCount: totalCount,
       counts: reactionCounts,
     };
 
     console.log(`[Post-Service] Pobrano post o id: ${id}`);
-    res.status(200).json(result.rows[0]);
+    res.status(200).json(postWithReactions);
   } catch (err) {
     console.error(err);
     res.status(500).json({
