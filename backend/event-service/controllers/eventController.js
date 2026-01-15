@@ -1,6 +1,7 @@
 import * as db from "../db/index.js";
 
 export const getAllEvents = async (req, res) => {
+  const log = req.log;
   try {
     const result = await db.query(
       `SELECT id, name, bio, event_date, creator_id FROM "Events"
@@ -8,12 +9,12 @@ export const getAllEvents = async (req, res) => {
       ORDER BY event_date DESC`
     );
 
-    console.log(
+    log.info(
       `[Event-Service] Pobrano ${result.rows.length} eventów z bazy danych`
     );
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error({ err }, "Błąd serwera podczas pobierania wydarzeń.");
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania eventów",
     });
@@ -22,6 +23,7 @@ export const getAllEvents = async (req, res) => {
 
 export const getEventById = async (req, res) => {
   const { id } = req.params;
+  const log = req.log;
 
   try {
     const result = await db.query(
@@ -31,15 +33,22 @@ export const getEventById = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      log.warn(
+        { eventId: id },
+        "Nieudana próba pobrania nieistniejącego wydarzenia."
+      );
       return res
         .status(404)
         .json({ message: "Nie znaleziono eventu o id: " + id });
     }
 
-    console.log(`[Event-Service] Pobrano event o id: ${id}`);
+    log.info({ eventId: id }, "Pobrano wydarzenie.");
     res.status(200).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    log.error(
+      { err, eventId: id },
+      "Błąd serwera podczas pobierania wydarzenia."
+    );
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas pobierania eventu o id: " + id,
@@ -49,6 +58,7 @@ export const getEventById = async (req, res) => {
 
 export const getUserEvents = async (req, res) => {
   const user_id = req.user.id;
+  const log = req.log;
 
   try {
     const result = await db.query(
@@ -79,12 +89,16 @@ export const getUserEvents = async (req, res) => {
       [user_id]
     );
 
-    console.log(
-      `[Event-Service] Pobrano ${result.rows.length} eventów z bazy danych`
+    log.info(
+      { userId, eventCount: result.rowCount },
+      "Pobrano wydarzenia dla użytkownika."
     );
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error(
+      { err, userId },
+      "Błąd serwera podczas pobierania wydarzeń użytkownika."
+    );
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania eventów",
     });
@@ -92,6 +106,7 @@ export const getUserEvents = async (req, res) => {
 };
 
 export const createEvent = async (req, res) => {
+  const log = req.log;
   const { name, bio, event_date, header_picture_id, profile_picture_id } =
     req.body;
   const creator_id = req.user.id;
@@ -103,10 +118,16 @@ export const createEvent = async (req, res) => {
       [name, bio, event_date, creator_id, header_picture_id, profile_picture_id]
     );
 
-    console.log(`[Event-Service] Stworzono event o id: ${result.rows[0].id}`);
+    log.info(
+      { eventId: newEvent.id, creatorId: creator_id },
+      "Stworzono nowe wydarzenie."
+    );
     res.status(201).json({ message: "Event stworzony!", data: result.rows[0] });
   } catch (err) {
-    console.log(err);
+    log.error(
+      { err, creatorId: creator_id, body: req.body },
+      "Błąd serwera podczas tworzenia wydarzenia."
+    );
     res.status(500).json({
       error: err.message + " Błąd serwera podczas tworzenia eventu o id",
     });
@@ -114,6 +135,7 @@ export const createEvent = async (req, res) => {
 };
 
 export const updateEvent = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
   const { name, bio, event_date } = req.body;
 
@@ -124,6 +146,7 @@ export const updateEvent = async (req, res) => {
     );
 
     if (currentEventResult.rows.length === 0) {
+      log.warn({ eventId: id }, "Nieudana próba aktualizacji nieistniejącego wydarzenia.");
       return res
         .status(404)
         .json({ message: "Nie znaleziono eventu do edycji o id: " + id });
@@ -145,10 +168,10 @@ export const updateEvent = async (req, res) => {
       [updatedData.name, updatedData.bio, updatedData.event_date, id]
     );
 
-    console.log(`[Event-Service] Zaktualizowano event o id: ${id}`);
+    log.info({ eventId: id }, "Zaktualizowano wydarzenie.");
     res.status(200).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    log.error({ err, eventId: id }, "Błąd serwera podczas aktualizacji wydarzenia.");
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas aktualizacji eventu o id: " + id,
@@ -157,6 +180,7 @@ export const updateEvent = async (req, res) => {
 };
 
 export const deleteEvent = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
 
   try {
@@ -174,10 +198,10 @@ export const deleteEvent = async (req, res) => {
         .json({ message: "Nie znaleziono eventu o id: " + id });
     }
 
-    console.log(`[Event-Service] Usunięto event o id: ${id}`);
-    res.status(204).json({ message: "Event został usunięty" });
+    log.info({ eventId: id }, "Usunięto wydarzenie.");
+    res.status(200).json({ message: "Event został usunięty" });
   } catch (err) {
-    console.error(err);
+    log.error({ err, eventId: id }, "Błąd serwera podczas usuwania wydarzenia.");
     res.status(500).json({
       error: err.message + " Błąd serwera podczas usuwania eventu o id: " + id,
     });
@@ -185,6 +209,7 @@ export const deleteEvent = async (req, res) => {
 };
 
 export const toggleFollowEvent = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
   const user_id = req.user.id;
 
@@ -199,9 +224,7 @@ export const toggleFollowEvent = async (req, res) => {
         `DELETE FROM "Event_Follows" WHERE event_id = $1 AND user_id = $2`,
         [id, user_id]
       );
-      console.log(
-        `[Event-Service] Usunięto follow o id: ${existing.rows[0].id}`
-      );
+      log.info({ eventId: id }, "Usunięto follow o id: " + id);
       return res.status(200).json({ message: "Follow został usunięty" });
     }
 
@@ -210,10 +233,10 @@ export const toggleFollowEvent = async (req, res) => {
       [id, user_id]
     );
 
-    console.log(`[Event-Service] Dodano follow o id: ${id}`);
+    log.info({ eventId: id }, "Dodano follow o id: " + id);
     res.status(201).json({ message: "Follow został dodany" });
   } catch (err) {
-    console.error(err);
+    log.error({ err, eventId: id }, "Błąd serwera podczas dodawania followa.");
     res.status(500).json({
       error: err.message + " Błąd serwera podczas zmiany statusu obserwacji",
     });
@@ -221,6 +244,7 @@ export const toggleFollowEvent = async (req, res) => {
 };
 
 export const getEventFollowers = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
 
   try {
@@ -248,10 +272,10 @@ export const getEventFollowers = async (req, res) => {
       [id]
     );
 
-    console.log(`[Event-Service] Pobrano followerów eventu o id: ${id}`);
+    log.info({ eventId: id }, "Pobrano followerów.");
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error({ err, eventId: id }, "Błąd serwera podczas pobierania followerów.");
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania followerów",
     });

@@ -46,3 +46,34 @@ export const toggleReaction = async (req, res) => {
     });
   }
 };
+
+export const getMyReactionForPost = async (req, res) => {
+  const { id } = req.params;
+  const user_id = req.user.id;
+
+    if (!id) {
+      return res.status(400).json({ error: "Post ID jest wymagany" });
+    }
+
+    try {
+      const result = await db.query(
+        `SELECT reaction_type
+        FROM "Post_Reactions"
+        WHERE post_id = $1 AND user_id = $2`,
+        [id, user_id]
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(200).json({ reaction: null });
+      } 
+
+      const reactionType = result.rows[0].reaction_type;
+      console.log(`[Post-Service] Pobrano reakcje o id: ${id}`);
+      return res.status(200).json({ reaction: reactionType });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: err.message + " Błąd serwera podczas pobierania reakcji",
+      });
+    }
+};

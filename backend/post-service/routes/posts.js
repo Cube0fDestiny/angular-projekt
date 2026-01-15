@@ -5,9 +5,13 @@ import {
   updatePost,
   deletePost,
   getPostById,
+  getPostsByUserId,
 } from "../controllers/postController.js";
 
-import { toggleReaction } from "../controllers/reactionController.js";
+import {
+  toggleReaction,
+  getMyReactionForPost,
+} from "../controllers/reactionController.js";
 
 import {
   createComment,
@@ -17,30 +21,35 @@ import {
 } from "../controllers/commentController.js";
 
 import {
-  verifyToken,
+  attachUserFromHeaders,
+  requireAuth,
   isPostOwner,
   isCommentOwner,
 } from "../middleware/auth.js";
 
 const router = express.Router();
 
+router.use(attachUserFromHeaders);
+
 // Posts enpoints
 router.get("/", getAllPosts);
+router.get("/user", requireAuth, getPostsByUserId);
 router.get("/:id", getPostById);
-router.post("/", verifyToken, createPost);
-router.put("/:id", verifyToken, isPostOwner, updatePost);
-router.delete("/:id", verifyToken, isPostOwner, deletePost);
+router.post("/", requireAuth, createPost);
+router.put("/:id", requireAuth, isPostOwner, updatePost);
+router.delete("/:id", requireAuth, isPostOwner, deletePost);
 
 // Reaction endpoint
-router.post("/:id/reactions", verifyToken, toggleReaction);
+router.post("/:id/reactions", requireAuth, toggleReaction);
+router.get("/:id/reactions", requireAuth, getMyReactionForPost);
 
 // Comments endpoints
 router.get("/:postId/comments", getCommentsForPosts);
-router.post("/:postId/comments", verifyToken, createComment);
-router.put("/comments/:commentId", verifyToken, isCommentOwner, updateComment);
+router.post("/:postId/comments", requireAuth, createComment);
+router.put("/comments/:commentId", requireAuth, isCommentOwner, updateComment);
 router.delete(
   "/comments/:commentId",
-  verifyToken,
+  requireAuth,
   isCommentOwner,
   deleteComment
 );
