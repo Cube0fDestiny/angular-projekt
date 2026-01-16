@@ -17,6 +17,7 @@ import { User } from '../../../shared/models/user.model';
 })
 export class PostCardComponent {
   @Input() post!: Post;
+  @Output() postDeleted = new EventEmitter<string>(); // Emit post ID when deleted
 
 
   user: User | null = null;
@@ -36,7 +37,6 @@ export class PostCardComponent {
   /* Keep outputs so parent components don't break */
   @Output() like = new EventEmitter<string>();
   @Output() share = new EventEmitter<string>();
-  @Output() delete = new EventEmitter<string>();
 
   newComment = '';
   showComments = false;
@@ -151,7 +151,7 @@ export class PostCardComponent {
       next: (response) => {
         console.log('Post deleted:', response.message);
         // Emit the delete event so parent can remove it from list
-        this.delete.emit(this.post.id);
+        this.postDeleted.emit(this.post.id); // Notify parent
       },
       error: (error) => {
         console.error('Failed to delete post:', error);
