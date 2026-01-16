@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import * as db from "../db/index.js";
 import { hashPassword, verifyPassword } from "../middleware/auth.js";
@@ -202,11 +201,11 @@ export const login = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   const { id } = req.params;
-  const { name, bio, is_company } = req.body;
+  const { name, surname, email, bio, is_company } = req.body;
 
   try {
     const currentRes = await db.query(
-      `SELECT name, bio, is_company FROM "Users" WHERE user_id = $1 AND deleted = false`,
+      `SELECT name, surname, email, bio, is_company FROM "Users" WHERE user_id = $1 AND deleted = false`,
       [id]
     );
     if (currentRes.rows.length === 0) {
@@ -221,11 +220,14 @@ export const updateProfile = async (req, res) => {
     const newBio = bio !== undefined ? bio : current.bio;
     const newIsCompany =
       is_company !== undefined ? is_company : current.is_company;
+    const newSurname = surname || current.surname;
+    const newEmail = email || current.email;
 
     const updateQuery = `
       UPDATE "Users"
-      SET name = $1, bio = $2, is_company = $3
-      WHERE user_id = $4 AND deleted = false
+      SET name = $1, bio = $2, is_company = $3,
+      email = $4, surname = $5
+      WHERE user_id = $6 AND deleted = false
       RETURNING user_id
     `;
 
@@ -233,7 +235,9 @@ export const updateProfile = async (req, res) => {
       newName,
       newBio,
       newIsCompany,
-      id,
+      newEmail,
+      newSurname,
+      id
     ]);
 
     req.log.info(`[User-Service] Zaktualizowano profil użytkownika ID: ${id}`);
