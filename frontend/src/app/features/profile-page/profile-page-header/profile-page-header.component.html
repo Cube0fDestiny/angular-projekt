@@ -1,7 +1,7 @@
 <div class="profile-header">
   <!-- Cover Photo -->
-  <div class="cover-photo" [style.background-image]="'url(' + coverImage + ')'">
-    <button class="edit-cover-btn" *ngIf="isOwnProfile">✏️ Edit Cover</button>
+  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="'url(' + coverImage + ')'">
+    <orang-button class="absolute bottom-5 right-5 px-3 py-2" size="small" [istoggleable]="false" *ngIf="isOwnProfile">✏️ Edit Cover</orang-button>
   </div>
   
   <!-- Header Content -->
@@ -17,7 +17,7 @@
     
     <!-- Profile Info -->
     <div class="profile-info">
-      <h1 class="profile-name">{{ user?.name }}</h1>
+      <h1 class="profile-name">{{ user?.name }} {{ user?.surname }}</h1>
       
       <!-- Stats -->
       <div class="profile-stats">
@@ -35,30 +35,27 @@
       <!-- 3 BUTTONS (Dynamic based on relationship) -->
       <div class="profile-actions">
         
-        <!-- SELF PROFILE -->
+        <!-- SELF PROFILE 
         <ng-container *ngIf="isOwnProfile">
-          <button class="btn-primary" (click)="onEditProfile()">
+          <orang-button (click)="onEditProfile()">
             ✏️ Edit Profile
-          </button>
-          <button class="btn-secondary" (click)="onAddStory()">
+          </orang-button>
+          <orang-button (click)="onAddStory()">
             📖 Add to Story
-          </button>
-          <button class="btn-secondary" (click)="onViewAs()">
-            👁️ View As
-          </button>
-        </ng-container>
+          </orang-button>
+        </ng-container> -->
         
         <!-- FRIEND'S PROFILE -->
         <ng-container *ngIf="isFriend && !isOwnProfile">
-          <button class="btn-primary" (click)="onMessage()">
+          <orang-button (click)="onMessage()">
             💬 Message
-          </button>
-          <button class="btn-secondary" (click)="onUnfriend()">
+          </orang-button>
+          <orang-button (click)="onUnfriend()">
             👥 Friends
-          </button>
-          <button class="btn-secondary" (click)="onMore()">
+          </orang-button>
+          <!-- <orang-button class="btn-secondary" (click)="onMore()">
             ⋮ More
-          </button>
+          </orang-button>-->
         </ng-container>
         
         <!-- STRANGER'S PROFILE -->

@@ -173,20 +173,47 @@ export class PostCardComponent {
 
   addReply(comment: any): void {
     if (!this.replyText?.trim()) return;
-    console.log(comment);
+    
     this.postService.addComment(this.post.id, {
       text: this.replyText,
       in_reply_to: comment.id,
     }).subscribe({
       next: (reply) => {
-        console.log(comment);
-        console.log(reply);
-        this.comments.unshift(reply);
-        this.comments[0].user = this.userService.currentUser;
+        // Create enriched reply with all needed data
+        const enrichedReply = {
+          ...reply,
+          user: this.userService.currentUser,
+          parentUser: comment.user, // Use parent comment's user data directly
+          isReply: true,
+          parentUserId: comment.creator_id,
+          showReplyForm: false,
+          showEditForm: false
+        };
+        
+        // Calculate display date for the new reply
+        const now = new Date();
+        const replyDate = new Date(reply.created_at);
+        const diffMs = now.getTime() - replyDate.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        
+        if (diffMins < 1) enrichedReply.displayDate = 'Just now';
+        else if (diffMins < 60) enrichedReply.displayDate = `${diffMins}m ago`;
+        else if (diffHours < 24) enrichedReply.displayDate = `${diffHours}h ago`;
+        else if (diffDays < 7) enrichedReply.displayDate = `${diffDays}d ago`;
+        else enrichedReply.displayDate = replyDate.toLocaleDateString();
+        
+        // Add to beginning of comments array
+        this.comments.unshift(enrichedReply);
+        
         this.resetAllSubmitButtons();
         // Reset the form
         comment.showReplyForm = false;
         this.replyText = '';
+      },
+      error: (error) => {
+        console.error('Failed to add reply:', error);
       }
     });
   }
@@ -207,7 +234,6 @@ export class PostCardComponent {
   // Edit a comment
   editComment(comment: any): void {
     if (!comment.editText?.trim() || comment.editText === comment.text) {
-      // If text is empty or unchanged, just close the form
       comment.showEditForm = false;
       return;
     }
@@ -219,12 +245,13 @@ export class PostCardComponent {
         comment.editText = '';
         comment.showEditForm = false;
         
-        // Optional: Show success message
+        // Update the display date to reflect "Just now" or similar
+        comment.displayDate = 'Just now';
+        
         console.log('Comment updated successfully');
       },
       error: (error) => {
         console.error('Failed to update comment:', error);
-        // Optional: Show error message to user
       }
     });
   }
@@ -287,12 +314,31 @@ export class PostCardComponent {
 
         // Now fetch users
         this.fetchUsersForComments();
+        this.getTimeForComments();
         this.loadingComments = false;
       },
       error: () => {
         this.loadingComments = false;
       }
     });
+  }
+
+  private getTimeForComments(): void {
+    this.comments.forEach((comment, index) => {
+      const now = new Date();
+      const commentDate = new Date(comment.created_at);
+      const diffMs = now.getTime() - commentDate.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) comment.displayDate = 'Just now';
+      else if (diffMins < 60) comment.displayDate = `${diffMins}m ago`;
+      else if (diffHours < 24) comment.displayDate = `${diffHours}h ago`;
+      else if (diffDays < 7) comment.displayDate = `${diffDays}d ago`;
+      else comment.displayDate = commentDate.toLocaleDateString();
+    });
+
   }
 
   private fetchUsersForComments(): void {
@@ -316,18 +362,43 @@ export class PostCardComponent {
   }
 
   addComment(): void {
-    //console.log(this.newComment);
     if (!this.newComment.trim()) return;
     
     this.postService.addComment(this.post.id, {
       text: this.newComment,
-  }).subscribe({
+    }).subscribe({
       next: (comment) => {
-        this.comments.unshift(comment);
-        this.comments[0].user = this.userService.currentUser;
-        this.comments[0].showReplyForm = false,
+        // Create enriched comment
+        const enrichedComment = {
+          ...comment,
+          user: this.userService.currentUser,
+          parentUser: null,
+          isReply: false,
+          showReplyForm: false,
+          showEditForm: false
+        };
+        
+        // Calculate display date
+        const now = new Date();
+        const commentDate = new Date(comment.created_at);
+        const diffMs = now.getTime() - commentDate.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        
+        if (diffMins < 1) enrichedComment.displayDate = 'Just now';
+        else if (diffMins < 60) enrichedComment.displayDate = `${diffMins}m ago`;
+        else if (diffHours < 24) enrichedComment.displayDate = `${diffHours}h ago`;
+        else if (diffDays < 7) enrichedComment.displayDate = `${diffDays}d ago`;
+        else enrichedComment.displayDate = commentDate.toLocaleDateString();
+        
+        // Add to beginning of comments array
+        this.comments.unshift(enrichedComment);
         this.newComment = '';
-        this.resetAllSubmitButtons()
+        this.resetAllSubmitButtons();
+      },
+      error: (error) => {
+        console.error('Failed to add comment:', error);
       }
     });
   }

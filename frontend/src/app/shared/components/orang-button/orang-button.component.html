@@ -1,6 +1,6 @@
 <button
   [type]="type"
-  class="m-3 font-bold text-[#F2EAD3] transition-all duration-150 ease-out transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 cursor-pointer
+  class="m-3 cursor-pointer font-bold text-[#F2EAD3] transition-all duration-150 ease-out transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 cursor-pointer
          rounded-tl-xl rounded-br-xl rounded-tr-sm rounded-bl-sm"
   [ngClass]="[isActive ? activeClasses : inactiveClasses, sizeClasses]"
   (click)="toggleActive($event)"

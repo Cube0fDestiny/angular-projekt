@@ -86,7 +86,7 @@
       <div class="comment-content">
         <div class="comment-header">
           <span class="comment-author">{{ comment.user?.name }}</span>
-          <span class="comment-time">{{ timeAgo }}</span>
+          <span class="comment-time">{{ comment?.displayDate }}</span>
         </div>
         
         <div *ngIf="!!!comment.in_reply_to" class="comment-text">
@@ -101,7 +101,7 @@
           {{ comment?.text }}
         </div>
         
-        <div class="comment-input">
+        <div *ngIf="comment.user?.id != currentUser?.id" class="comment-input">
           <orang-button 
             size="small" 
             [istoggleable]=false

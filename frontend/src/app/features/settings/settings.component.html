@@ -1,0 +1,196 @@
+<app-navbar></app-navbar>
+
+<div
+  class="min-h-screen pt-14 flex flex-col bg-cover bg-center [image-rendering:auto]"
+  style="background-image: url('assets/images/orange-grove.png')"
+>
+  <main class="grow flex justify-center items-center p-4 backdrop-blur-[2px]">
+    <app-text-display variant="beige" title="Settings" class="max-w-2xl w-full rounded-xl">
+      
+      <!-- Name Section -->
+      <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          <span class="text-lg font-heavy text-[var(--o-orange)] w-20">Name: </span>
+          
+          <!-- Edit/Cancel Button -->
+          <orang-button 
+            (click)="toggleEditingName()"
+          >
+            {{ isEditingName ? 'Cancel' : 'Edit' }}
+          </orang-button>
+          
+          <!-- Content Area -->
+          <div class="flex-1">
+            <!-- Edit Mode -->
+            <form 
+              *ngIf="isEditingName" 
+              (ngSubmit)="updateName()" 
+              class="flex items-center gap-3"
+            >
+              <app-text-display variant="white" class="text-lg flex-1">
+                <input
+                  type="text"
+                  [(ngModel)]="editedName"
+                  name="editedName"
+                  placeholder="Enter your name"
+                  class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none focus:border-b focus:border-gray-300"
+                  autofocus
+                >
+              </app-text-display>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Save
+              </orang-button>
+            </form>
+            
+            <!-- Display Mode -->
+            <div *ngIf="!isEditingName && currentUser?.name" class="flex items-center">
+              <app-text-display variant="white" class="text-left text-lg w-full">
+                  {{ currentUser?.name }}
+              </app-text-display>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Surname Section -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-lg font-heavy text-[var(--o-orange)] w-20">Surname: </span>
+          
+          <!-- Edit/Cancel Button -->
+          <orang-button 
+            (click)="toggleEditingSurname()"
+          >
+            {{ isEditingSurname ? 'Cancel' : 'Edit' }}
+          </orang-button>
+          
+          <!-- Content Area -->
+          <div class="flex-1">
+            <!-- Edit Mode -->
+            <form 
+              *ngIf="isEditingSurname" 
+              (ngSubmit)="updateSurname()" 
+              class="flex items-center gap-3"
+            >
+              <app-text-display variant="white" class="text-lg flex-1">
+                <input
+                  type="text"
+                  [(ngModel)]="editedSurname"
+                  name="editedSurname"
+                  placeholder="Enter your surname"
+                  class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none focus:border-b focus:border-gray-300"
+                >
+              </app-text-display>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Save
+              </orang-button>
+            </form>
+            
+            <!-- Display Mode -->
+            <div *ngIf="!isEditingSurname && currentUser?.surname" class="flex items-center">
+              <app-text-display variant="white" class="text-left text-lg w-full">{{ currentUser?.surname || 'Not set' }}</app-text-display>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email Section -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-lg font-heavy text-[var(--o-orange)] w-20">Email: </span>
+          
+          <!-- Edit/Cancel Button -->
+          <orang-button 
+            (click)="toggleEditingEmail()"
+          >
+            {{ isEditingEmail ? 'Cancel' : 'Edit' }}
+          </orang-button>
+          
+          <!-- Content Area -->
+          <div class="flex-1">
+            <!-- Edit Mode -->
+            <form 
+              *ngIf="isEditingEmail" 
+              (ngSubmit)="updateEmail()" 
+              class="flex items-center gap-3"
+            >
+              <app-text-display variant="white" class="text-lg flex-1">
+                <input
+                  type="email"
+                  [(ngModel)]="editedEmail"
+                  name="editedEmail"
+                  placeholder="Enter your email"
+                  class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none focus:border-b focus:border-gray-300"
+                >
+              </app-text-display>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Save
+              </orang-button>
+            </form>
+            
+            <!-- Display Mode -->
+            <div *ngIf="!isEditingEmail && currentUser?.email" class="flex items-center">
+              <app-text-display variant="white" class="text-left text-lg w-full">{{ currentUser?.email }}</app-text-display>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Password Section 
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-lg font-heavy text-[var(--o-orange)] w-20">Password: </span>
+          
+
+          <orang-button 
+            (click)="toggleEditingPassword()"
+          >
+            {{ isEditingPassword ? 'Cancel' : 'Edit' }}
+          </orang-button>
+
+          <div class="flex-1">
+
+            <form 
+              *ngIf="isEditingPassword" 
+              (ngSubmit)="updatePassword()" 
+              class="flex items-center gap-3"
+            >
+              <app-text-display variant="white" class="text-lg flex-1">
+                <input
+                  type="password"
+                  [(ngModel)]="editedPassword"
+                  name="editedPassword"
+                  placeholder="Enter new password"
+                  class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none focus:border-b focus:border-gray-300"
+                >
+              </app-text-display>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Save
+              </orang-button>
+            </form>
+            
+
+            <div *ngIf="!isEditingPassword" class="flex items-center">
+              <app-text-display variant="white" class="text-left text-lg w-full">••••••••</app-text-display>
+            </div>
+          </div>
+        </div>
+      </div>-->
+
+    </app-text-display>
+  </main>
+
+  <app-footer></app-footer>
+</div>

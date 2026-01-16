@@ -35,6 +35,18 @@ export class UserService {
     this.currentUserSubject.next(user);
   }
 
+  updateProfile(userId: string, data: {
+    name?: string;
+    surname?: string;
+    email?: string;
+    password?: string;
+    bio?: string;
+    is_company?: boolean;
+  }): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${userId}`, data);
+  }
+
+
 
   clearSession(): void {
     localStorage.removeItem('token');
