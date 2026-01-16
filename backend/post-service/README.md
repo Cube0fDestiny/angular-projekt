@@ -2,7 +2,7 @@
 
 Serwis obsługujący zarządzanie postami, komentarzami i reakcjami.
 
-**Base URL:** `http://localhost:3000/api/posts`
+**Base URL:** `http://localhost:3002/posts`
 
 ---
 ## 🔐 Autentykacja

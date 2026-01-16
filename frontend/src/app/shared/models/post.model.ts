@@ -1,74 +1,44 @@
 // src/app/shared/models/post.model.ts
 
-// First, you might need the User model:
-export interface User {
-  id: number;
-  name: string;
-  avatar: string;
-  email?: string;
-  role?: 'user' | 'admin' | 'moderator';
-  status?: 'online' | 'away' | 'offline';
-  bio?: string;
-  friends?: number[]; // Array of friend IDs
-}
-
 // Comment model
 export interface Comment {
-  id: number;
+  id: string;
+  created_at: Date;
+  in_reply_to: string;
   text: string;
-  author: User;
-  createdAt: Date;
-  likes: number;
-  replies?: Comment[]; // Nested comments for replies
+  image_ids: [string];
+  creator_id: string;
+  post_id: string;
 }
 
 // Reaction type
 export interface Reaction {
-  userId: number;
-  type: 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
+  type: string;
 }
 
 // MAIN POST MODEL
 export interface Post {
-  id: number;
-  content: string;
-  author: User;
-  createdAt: Date;
-  updatedAt?: Date;
-  
-  // Engagement stats
-  likes: number;
-  reactions?: Reaction[]; // Detailed reactions
-  comments: Comment[];
-  shares: number;
-  
-  // Media
-  imageUrl?: string;
-  videoUrl?: string;
-  
-  // Metadata
-  location?: string;
-  tags?: string[];
-  isEdited?: boolean;
-  isPinned?: boolean;
-  
-  // Privacy
-  //visibility: 'public' | 'friends' | 'private';
-  
-  // User interaction
-  userReaction?: Reaction['type']; // Current user's reaction
-  isLiked?: boolean; // For quick check
-  isShared?: boolean;
+  id: string;
+  creator_id: string;
+  Text: string;
+  location_id: string;
+  location_type: string;
+  created_at: Date;
+  deleted: false;
 }
 
 // Types for creating/updating posts
 export type CreatePostDto = {
   content: string;
-  image?: File;
-  video?: File;
-  location?: string;
-  tags?: string[];
- // visibility?: Post['visibility'];
+  location_id: string;
+  location_type: string;
 };
 
+export type CreateCommentDto = {
+  text: string;
+  in_reply_to?: string;
+  image_ids: [string];
+}
+
 export type UpdatePostDto = Partial<CreatePostDto>;
+export type UpdateCommentDto = Partial<CreateCommentDto>;

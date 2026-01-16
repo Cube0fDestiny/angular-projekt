@@ -26,18 +26,9 @@ export class NavbarComponent implements OnInit {
   goToProfile(userId: number): void {
     // Just pass the ID - that's it!
     console.log("going to profile");
-    this.router.navigate(['/profile', userId]);
-    
-    // OR if you want to pass the whole user object:
-    // this.router.navigate(['/profile', userId], {
-    //   state: { userId: userId }  // Optional, you can get it from route params
-    // });
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
   }
-  
- // user = {
-   // name:  this.currentUser,//'Jan Kowalski',
-   // avatar: 'https://i.pravatar.cc/40'
-  //};
+
   
   navItems = [
     { id: 'home', label: 'Strona główna', icon: '🏠' },
@@ -54,7 +45,7 @@ export class NavbarComponent implements OnInit {
     console.log(`Kliknięto: ${itemId}`);
     if(this.activeItem=='profile')
     {
-      this.goToProfile(0);
+      this.goToProfile(this.currentUser.id);
     }
     else
     {

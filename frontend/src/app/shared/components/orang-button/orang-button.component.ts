@@ -11,6 +11,7 @@ export class OrangButtonComponent {
   @Input() isActive = true;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() size: 'default' | 'small' = 'default';
+  @Input() istoggleable = true;
 
   activeClasses = `
     bg-[var(--o-orange)]
@@ -36,7 +37,9 @@ export class OrangButtonComponent {
   }
 
   toggleActive(event: Event) {
-    this.isActive = !this.isActive;
+    if (this.istoggleable) {
+      this.isActive = !this.isActive;
+    }
   }
 
 }

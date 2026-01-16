@@ -6,7 +6,7 @@ import { User } from '../../shared/models/user.model';
   providedIn: 'root'
 })
 export class UserService {
-  private readonly apiUrl = 'http://localhost:3001/users';
+  private readonly apiUrl = 'http://localhost:3000/users';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
@@ -25,11 +25,16 @@ export class UserService {
     return this.currentUserSubject.value;
   }
 
+  // In UserService
   setSession(user: User, token: string): void {
+    //console.log('Storing token in localStorage:', token);
+    //console.log('Storing user in localStorage:', user);
+    
     localStorage.setItem('token', token);
     localStorage.setItem('currentUser', JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
+
 
   clearSession(): void {
     localStorage.removeItem('token');

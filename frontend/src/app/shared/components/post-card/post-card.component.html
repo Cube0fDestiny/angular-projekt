@@ -1,35 +1,37 @@
-<div class="post-card" [class.with-image]="post.imageUrl">
+<div class="post-card" >
   
-   <!-- Post Image -->
+   <!-- Post Image <div class="post-card" [class.with-image]="post.imageUrl">
     <img 
       *ngIf="post.imageUrl" 
       [src]="post.imageUrl" 
       [alt]="'Image in post by ' + post.author.name"
-      class="post-image" >
+      class="post-image" >-->
+    <img src="assets/images/orange-grove.png" alt="Orang">
   <!-- Post Header -->
   <div class="post-header">
-    <img [src]="post.author.avatar" [alt]="post.author.name" class="author-avatar">
+    <div *ngIf="isLoading">Loading...</div>
+    <img *ngIf="user && !isLoading" [src]="user.avatar" [alt]="user.name" class="author-avatar">
     
-    <div class="author-info">
-      <div class="author-name">{{ post.author.name }}</div>
+    <div *ngIf="user && !isLoading" class="author-info">
+      <div class="author-name">{{ user.name }}</div>
       <div class="post-meta">
         <span class="post-time">{{ timeAgo }}</span>
-        <span *ngIf="post.location" class="post-location">📍 {{ post.location }}</span>
-        <span *ngIf="post.isEdited" class="edited">(edited)</span>
+        <span *ngIf="post.location_id" class="post-location">📍 {{ post.location_id }}</span>
+        <!-- <span *ngIf="post.isEdited" class="edited">(edited)</span>-->
       </div>
     </div>
     
-    <button class="more-options" *ngIf="currentUserId === post.author.id">
+    <button class="more-options" *ngIf="currentUserId === post.creator_id">
       ⋮
     </button>
   </div>
   
   <!-- Post Content -->
   <div class="post-content">
-    <app-text-display variant="white">{{ post.content }}</app-text-display>
+    <app-text-display variant="white">{{ post.Text }}</app-text-display>
   </div>
   
-  <!-- Post Stats -->
+  <!-- Post Stats
   <div class="post-stats" *ngIf="post.likes > 0 || post.comments.length > 0 || post.shares > 0">
     <span *ngIf="post.likes > 0" class="likes-count">
       👍 {{ post.likes }}
@@ -40,11 +42,15 @@
     <span *ngIf="post.shares > 0" class="shares-count">
       🔄 {{ post.shares }}
     </span>
-  </div>
+  </div>-->
   
   <!-- Post Actions -->
   <div class="post-actions" *ngIf="showActions">
-    <orang-button (click)="onLike()">
+    <!-- <orang-button (click)="onLike()">
+      <span>🍊 Orang it</span>
+    </orang-button> -->
+
+    <orang-button>
       <span>🍊 Orang it</span>
     </orang-button>
     
@@ -58,47 +64,167 @@
   </div>
   
   <!-- Comment Input -->
-  <div class="comment-input" *ngIf="showActions">
-    <img 
-      [src]="post.author.avatar" 
-      [alt]="post.author.name" 
-      class="commenter-avatar">
-    
-    <div class="input-container">
+  <div class="comment-input" *ngIf="showComments">
+    <form (ngSubmit)="addComment()" class="input-container">
       <input 
-        type="text"  
+        type="text"
+        name="newComment"
         placeholder="Write a comment..."
-        (keyup.enter)="addComment()"
+        [(ngModel)]="newComment"
         class="comment-input-field">
       
-      <orang-button size="small" (click)="addComment()">
+      <orang-button size="small" type="submit" [istoggleable]=false>
         Post
       </orang-button>
-    </div>
+    </form>
   </div>
-  
   <!-- Comments Section -->
-  <div class="comments-section" *ngIf="showComments && post.comments.length > 0">
-    <div class="comment" *ngFor="let comment of post.comments">
-      <img [src]="comment.author.avatar" [alt]="comment.author.name" class="comment-avatar">
+  <div class="comments-section" *ngIf="showComments && comments.length > 0">
+    <div class="comment" *ngFor="let comment of comments">
+      <img [src]="comment.user?.avatar||'assets/logo.png'" [alt]="comment.user?.name||'User'" class="comment-avatar">
       
       <div class="comment-content">
         <div class="comment-header">
-          <span class="comment-author">{{ comment.author.name }}</span>
+          <span class="comment-author">{{ comment.user?.name }}</span>
           <span class="comment-time">{{ timeAgo }}</span>
         </div>
         
-        <p class="comment-text">{{ comment.text }}</p>
-        
-        <div class="comment-actions">
-          <orang-button size="small" (click)="likeComment(comment.id)">
-            Like
-          </orang-button>
-          <orang-button size="small">
-            Reply
-          </orang-button>
+        <div *ngIf="!!!comment.in_reply_to" class="comment-text">
+          {{ comment.text }}
         </div>
+        
+        <!-- Reply comment -->
+        <div *ngIf="!!comment.in_reply_to" class="comment-text">
+          <button (click)="goToProfile(comment.parentUser.id)" class="reply-button">
+            Repling to {{ comment.parentUser?.name }}
+          </button>
+          {{ comment?.text }}
+        </div>
+        
+        <div class="comment-input">
+          <orang-button 
+            size="small" 
+            [istoggleable]=false
+            (click)="toggleReplyForm(comment)"
+          >
+            {{ comment.showReplyForm ? 'Cancel' : 'Reply' }}
+          </orang-button>
+          
+          <form 
+            *ngIf="comment.showReplyForm"
+            (ngSubmit)="addReply(comment)"
+            class="input-container"
+          >
+            <input 
+              [(ngModel)]="replyText"
+              name="replyText"
+              placeholder="Write a reply..."
+              class="comment-input-field"
+            />
+            
+            <orang-button 
+              size="small" 
+              type="submit"
+              untoggleable="true"
+              disabled="!comment.replyText?.trim()"
+            >
+              Post
+            </orang-button>
+          </form>
+        </div>
+
+        <div class="comment-input" *ngIf="comment.user?.id == currentUser?.id">
+          <orang-button 
+            size="small" 
+            [istoggleable]="false"
+            (click)="deleteComment(comment)"
+          >
+            Delete
+          </orang-button>
+
+          <orang-button 
+            size="small" 
+            [istoggleable]="false"
+            (click)="toggleEditForm(comment)"
+          >
+            Edit
+          </orang-button>
+          
+          <form 
+            *ngIf="comment.showEditForm"
+            (ngSubmit)="editComment(comment)"
+            class="input-container"
+          >
+            <input 
+              [(ngModel)]="comment.editText"
+              name="editText"
+              placeholder="Edit Comment"
+              class="comment-input-field"
+            />
+            
+            <orang-button 
+              size="small" 
+              type="submit"
+              [istoggleable]="true"
+            >
+              Confirm
+            </orang-button>
+          </form>
+        </div>
+
       </div>
     </div>
+  </div>
+
+  <div class="post-actions" *ngIf="user?.id == currentUser?.id">
+    <orang-button 
+      size="small" 
+      [istoggleable]="false"
+      (click)="deletePost()"
+    >
+      Delete Post
+    </orang-button>
+
+    <orang-button 
+      size="small" 
+      [istoggleable]="false"
+      (click)="toggleEditPostForm()"
+    >
+      {{ showEditPostForm ? 'Cancel Edit' : 'Edit Post' }}
+    </orang-button>
+    
+    <!-- Edit Post Form -->
+    <form 
+      *ngIf="showEditPostForm"
+      (ngSubmit)="editPost()"
+      class="edit-post-form"
+    >
+      <textarea 
+        [(ngModel)]="editPostText"
+        name="editPostText"
+        placeholder="Edit your post..."
+        class="post-edit-field"
+        rows="3"
+      ></textarea>
+      
+      <div class="form-actions">
+        <orang-button 
+          size="small" 
+          type="submit"
+          [istoggleable]="true"
+        >
+          Save Changes
+        </orang-button>
+        
+        <orang-button 
+          size="small" 
+          type="button"
+          [istoggleable]="false"
+          (click)="cancelEditPost()"
+        >
+          Cancel
+        </orang-button>
+      </div>
+    </form>
   </div>
 </div>

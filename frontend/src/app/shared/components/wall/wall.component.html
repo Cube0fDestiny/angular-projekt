@@ -17,11 +17,7 @@
     <!-- Posts -->
     <app-post-card
       *ngFor="let post of displayedPosts"
-      [post]="post"
-      (like)="onLike(post.id)"
-      (comment)="onComment(post.id, $event.text)"
-      (share)="onShare(post.id)"
-      (delete)="removePost(post.id)">
+      [post]="post">
     </app-post-card> 
     <!-- Load More Button -->
     <div *ngIf="showLoadMore && hasMorePosts" class="load-more">
