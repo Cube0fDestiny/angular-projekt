@@ -1,24 +1,26 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import jwt from "jsonwebtoken";
-import * as db from "../db/index.js";
+export const attachUserFromHeaders = async (req, res, next) => {
+  const userDataHeader = req.headers["x-user-data"];
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(403).json({ message: "Brak autoryzacji" });
+  if (!userDataHeader) {
+    return next();
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    const userData = JSON.parse(userDataHeader);
+    req.user = userData;
     next();
   } catch (error) {
+    console.log(error + " Nieprawidłowy lub wygasły token");
     return res.status(401).json({ message: "Nieprawidłowy lub wygasły token" });
   }
+};
+
+export const requireAuth = async (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Brak autoryzacji" });
+  }
+  next();
 };

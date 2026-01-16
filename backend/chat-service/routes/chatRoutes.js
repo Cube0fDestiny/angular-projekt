@@ -5,22 +5,33 @@ import {
   getChatMessages,
   createMessage,
 } from "../controllers/chatController.js";
-import { verifyToken, isChatParticipant } from "../middleware/auth.js";
+import {
+  attachUserFromHeaders,
+  requireAuth,
+  isChatParticipant,
+} from "../middleware/auth.js";
 
 const router = express.Router();
 
+router.use(attachUserFromHeaders);
+
 // Pobierz wszystkie czaty zalogowanego użytkownika
-router.get("/", verifyToken, getUserChats);
+router.get("/", requireAuth, getUserChats);
 
 // Stwórz nowy czat (prywatny lub grupowy)
-router.post("/", verifyToken, createChat);
+router.post("/", requireAuth, createChat);
 
 // Pobierz wszystkie wiadomości z konkretnego czatu
 // Middleware `isChatParticipant` chroni ten endpoint
-router.get("/:chatId/messages", verifyToken, isChatParticipant, getChatMessages);
+router.get(
+  "/:chatId/messages",
+  requireAuth,
+  isChatParticipant,
+  getChatMessages
+);
 
 // Wyślij nową wiadomość do konkretnego czatu
 // Middleware `isChatParticipant` chroni ten endpoint
-router.post("/:chatId/messages", verifyToken, isChatParticipant, createMessage);
+router.post("/:chatId/messages", requireAuth, isChatParticipant, createMessage);
 
 export default router;

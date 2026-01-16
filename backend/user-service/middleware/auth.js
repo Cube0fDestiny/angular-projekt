@@ -9,21 +9,28 @@ const PBKDF2_ITERATIONS = parseInt(process.env.PBKDF2_ITERATIONS);
 const PBKDF2_KEYLEN = parseInt(process.env.PBKDF2_KEYLEN);
 const PBKDF2_DIGEST = process.env.PBKDF2_DIGEST;
 
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+export const attachUserFromHeaders = async (req, res, next) => {
+  const userDataHeader = req.headers["x-user-data"];
 
-  if (!token) {
-    return res.status(403).json({ message: "Brak autoryzacji" });
+  if (!userDataHeader) {
+    return next();
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    const userData = JSON.parse(userDataHeader);
+    req.user = userData;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Nieprawidłowy lub wygasły token: " + error.message });
+    console.log(error + " Nieprawidłowy lub wygasły token");
+    return res.status(401).json({ message: "Nieprawidłowy lub wygasły token" });
   }
+};
+
+export const requireAuth = async (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Brak autoryzacji" });
+  }
+  next();
 };
 
 export const isOwnerOrAdmin = (req, res, next) => {

@@ -1,10 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-
-import jwt from "jsonwebtoken";
 import * as db from "../db/index.js";
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export const attachUserFromHeaders = async (req, res, next) => {
   const userDataHeader = req.headers["x-user-data"];
