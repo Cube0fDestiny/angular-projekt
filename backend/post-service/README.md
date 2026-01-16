@@ -209,6 +209,20 @@ Ten endpoint obsługuje dodawanie, usuwanie i aktualizację reakcji.
 -   **200:** `{ "message": "Reakcja została usunięta" }` (gdy użytkownik klika tę samą reakcję ponownie)
 -   **200:** `{ "message": "Reakcja została zaktualizowana" }` (gdy użytkownik zmienia typ reakcji)
 
+### 11. Pobranie mojej reakcji na poście
+
+`GET /:id/reactions`
+
+**Wymagana autoryzacja**
+
+**Odpowiedź (200 OK):**
+
+```
+{
+  "reaction": "string" lub null
+}
+```
+
 ---
 ## ⚠️ Obsługa Błędów
 | Kod | Komunikat | Opis |
@@ -218,6 +232,23 @@ Ten endpoint obsługuje dodawanie, usuwanie i aktualizację reakcji.
 | 403 | Forbidden | Brak tokena lub próba modyfikacji zasobu bez uprawnień (np. edycja cudzego posta). |
 | 404 | Not Found | Nie znaleziono posta lub komentarza o podanym ID. |
 | 500 | Server Error | Wewnętrzny błąd serwera, najczęściej związany z bazą danych. |
+---
+
+## 📋 Proponowane Endpointy
+
+Endpointy planowane do implementacji:
+
+### P1. Pobranie postów z filtrem
+`GET /?location_type=string&limit=10&offset=0`
+- *Endpoint publiczny*
+- **Parametry:** location_type (opcjonalnie), limit, offset dla paginacji
+- Filtrowanie postów po typie lokalizacji z obsługą paginacji
+
+### P2. Liczba komentarzy na poście
+`GET /:id/comments/count`
+- *Endpoint publiczny*
+- **Odpowiedź:** `{ "count": number }`
+- Szybkie pobranie liczby komentarzy bez pełnych danych
 ---
 
 **Uwagi:**

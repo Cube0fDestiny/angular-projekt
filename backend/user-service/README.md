@@ -9,7 +9,7 @@ Serwis obsługujący zarządzanie użytkownikami, rejestrację oraz autentykacj�
 ## 🔐 Autentykacja
 Wymagane dla endpointów chronionych:
 - Nagłówek: `Authorization: Bearer <token_jwt>`
-- Token wygasa po: **1h**
+- Token wygasa po: **12h**
 
 ---
 
@@ -132,6 +132,39 @@ Wymagane dla endpointów chronionych:
   "message": "Profil został usunięty",
   "user_id": "uuid"
 }
+
+---
+
+## 📋 Proponowane Endpointy
+
+Endpointy planowane do implementacji:
+
+### P1. Wyszukiwanie użytkowników
+`GET /search?query=string&limit=10`
+- *Endpoint publiczny*
+- **Parametry:** query (string), limit (liczba wyników)
+- Wyszukiwanie po imieniu, nazwisku lub email
+
+### P2. Użytkownicy rekomendowani
+`GET /recommended`
+- *Endpoint publiczny*
+- Zwracanie sugestii użytkowników do obsłużenia (np. pracownicy branży)
+
+### P3. Weryfikacja email
+`POST /verify-email`
+- **Body:** `{ "email": "string", "code": "string" }`
+- Endpoint do potwierdzenia adresu email z użyciem kodu weryfikacyjnego
+
+### P4. Resetowanie hasła
+`POST /reset-password`
+- **Body:** `{ "email": "string", "token": "string", "new_password": "string" }`
+- Endpoint do resetowania hasła poprzez wysłany mail
+
+### P5. Zmiana avatara
+`POST /:id/avatar`
+- *Wymagana autoryzacja (Właściciel lub Admin)*
+- **Body:** multipart/form-data z plikiem obrazu
+- Endpoint do wgranego niestandardowego avatara zamiast autogenerowanego
 
 ---
 
