@@ -1,0 +1,35 @@
+<div class="user-dropdown-container">
+  <!-- Trigger button (user avatar/name) -->
+  <div
+    class="nav-item"
+    (click)="toggleDropdown()"
+    aria-label="User menu"> 
+      <span class="nav-icon">🔔</span>
+      <span *ngIf="friendRequests.length>0" class="nav-badge">{{ friendRequests.length }} </span>
+  </div> 
+  <!-- Dropdown content -->
+  <div *ngIf="isOpen" class="dropdown-menu" (click)="$event.stopPropagation()">
+    <div *ngIf="friendRequests.length>0">
+      <div class="dropdown-header" *ngFor="let friendRequest of friendRequests">
+        <div class="user-info">
+          <img [src]="friendRequest[1]!.avatar" alt="User" class="user-avatar">
+          <div>
+            <span class="user-name">{{friendRequest[1]!.name}}</span>
+          </div>
+          <orang-button size="small" [istoggleable]=false (click)="acceptFriendRequest(friendRequest[0])">
+            Accept
+          </orang-button>
+          <orang-button size="small" [istoggleable]=false (click)="rejectFriendRequest(friendRequest[0])">
+            Reject
+          </orang-button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="friendRequests.length===0" class="text-[var(--o-green)] font-bold text-lg p-8">
+      No New Friend Requests
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop to close when clicking outside -->
+<div *ngIf="isOpen" class="dropdown-backdrop" (click)="closeDropdown()"></div>

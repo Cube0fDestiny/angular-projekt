@@ -26,6 +26,9 @@
         <span class="nav-icon">{{item.icon}}</span>
         <span *ngIf="item.badge" class="nav-badge">{{item.badge}}</span>
       </div>
+      <div class="user-menu">
+        <notifications-dropdown> </notifications-dropdown>
+      </div>
       <!-- User Menu -->
       <div class="user-menu">
         <div class="user-info" (click)="setActive('profile')">

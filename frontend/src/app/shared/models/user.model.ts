@@ -8,3 +8,17 @@ export interface User {
   created_at?: string;
   avatar: string;
 }
+
+export interface IncomingFriendRequest {
+  from_user_id: string;
+  created_at: Date;
+}
+
+export interface OutgoingFriendRequest {
+  to_user_id: string;
+  created_at: Date;
+}
+
+export interface FriendListItem {
+  friend_id: string;
+}

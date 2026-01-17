@@ -1,8 +1,47 @@
 <div class="wall-container">
   <!-- Create New Post (optional) -->
-  <div class="create-post-section" *ngIf="showCreatePost">
+  <div class="create-post-section" *ngIf="location_type!='wall'">
    <!-- <app-create-post (postCreated)="addPost($event)"></app-create-post>
-  -->
+  --><app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
+      
+      <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          
+          <!-- Edit/Cancel Button -->
+          <orang-button 
+            (click)="toggleCreatingPost()"
+          >
+            {{ isCreatingPost ? 'Cancel' : 'Create New Post' }}
+          </orang-button>
+          
+          <!-- Content Area -->
+          <div class="flex-1">
+            <!-- Edit Mode -->
+            <form 
+              *ngIf="isCreatingPost" 
+              (ngSubmit)="createPost()" 
+              class="flex items-center gap-3"
+            >
+              <app-text-display variant="white" class="text-lg flex-1">
+                <textarea
+                  [(ngModel)]="newPost"
+                  name="newPost"
+                  placeholder="Write something Orang!"
+                  rows="1"
+                  class="w-full bg-transparent border border-none rounded-lg p-3 focus:outline-none focus:ring-none focus:border-transparent resize-y"
+                ></textarea>
+              </app-text-display>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Confirm
+              </orang-button>
+            </form>
+          </div>
+        </div>
+      </div>
+      </app-text-display>
   </div>
   
   <!-- Posts List -->
@@ -17,7 +56,8 @@
     <!-- Posts -->
     <app-post-card
       *ngFor="let post of displayedPosts"
-      [post]="post">
+      [post]="post"
+      (postDeleted)="onPostDeleted($event)">
     </app-post-card> 
     <!-- Load More Button -->
     <div *ngIf="showLoadMore && hasMorePosts" class="load-more">

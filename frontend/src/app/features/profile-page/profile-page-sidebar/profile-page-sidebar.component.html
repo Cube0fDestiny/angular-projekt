@@ -3,14 +3,41 @@
   <!-- Bio Section -->
   <div class="sidebar-section">
     <div class="section-header">
-      <h3 class="section-title">
-        Bio
-      </h3>
-     <!-- <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
-        See all 
-      </a>-->
+      <h3 class="section-title">Bio</h3>
+      <orang-button 
+        size="small" 
+        *ngIf="(user?.id==currentUser?.id) && !isEditingBio" 
+        (click)="toggleEditingBio()"
+      >
+        Edit
+      </orang-button>
     </div>
-    <app-text-display variant="white"><p class="profile-bio" *ngIf="user?.bio">{{ user?.bio }}</p></app-text-display>
+    
+    <!-- Edit Form -->
+    <app-text-display variant="white" *ngIf="isEditingBio">
+      <form (ngSubmit)="updateBio()" class="flex flex-col gap-3">
+        <input
+          type="text"
+          [(ngModel)]="editedBio"
+          name="editedBio"
+          placeholder="Write something about yourself!"
+          class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none"
+        >
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <orang-button type="submit" size="small" [istoggleable]="false">
+            confirm
+          </orang-button>
+          <orang-button type="button" (click)="toggleEditingBio()" size="small" [istoggleable]="false">
+            cancel
+          </orang-button>
+        </div>
+      </form>
+    </app-text-display>
+    
+    <!-- Display Bio -->
+    <app-text-display variant="white" *ngIf="user?.bio && !isEditingBio">
+      <p>{{ user?.bio }}</p>
+    </app-text-display>
   </div>
 
   <!-- Friends Section -->
@@ -20,9 +47,9 @@
         <span class="section-icon">👥</span>
         Friends
       </h3>
-  <!--    <a [routerLink]="['/profile', userId, 'friends']" class="see-all">
+      <orang-button (click)="goToFriendsList()" size="small">
         See all
-      </a>-->
+      </orang-button>
     </div>
     
     <div class="friends-grid">

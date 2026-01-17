@@ -49,6 +49,7 @@ export class ProfileDropdownComponent implements OnInit {
   
   onSettingsClick() {
     this.settingsClick.emit();
+    this.router.navigate(['/settings']);
     this.closeDropdown();
   }
   

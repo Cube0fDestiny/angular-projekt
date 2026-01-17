@@ -10,14 +10,12 @@
   <!-- Post Header -->
   <div class="post-header">
     <div *ngIf="isLoading">Loading...</div>
-    <img *ngIf="user && !isLoading" [src]="user.avatar" [alt]="user.name" class="author-avatar">
+    <img *ngIf="user && !isLoading" (click)="goToProfile(user.id)" [src]="user.avatar" [alt]="user.name" class="author-avatar">
     
     <div *ngIf="user && !isLoading" class="author-info">
-      <div class="author-name">{{ user.name }}</div>
+      <div class="author-name" (click)="goToProfile(user.id)">{{ user.name }}</div>
       <div class="post-meta">
         <span class="post-time">{{ timeAgo }}</span>
-        <span *ngIf="post.location_id" class="post-location">📍 {{ post.location_id }}</span>
-        <!-- <span *ngIf="post.isEdited" class="edited">(edited)</span>-->
       </div>
     </div>
     
@@ -86,7 +84,7 @@
       <div class="comment-content">
         <div class="comment-header">
           <span class="comment-author">{{ comment.user?.name }}</span>
-          <span class="comment-time">{{ timeAgo }}</span>
+          <span class="comment-time">{{ comment?.displayDate }}</span>
         </div>
         
         <div *ngIf="!!!comment.in_reply_to" class="comment-text">
@@ -101,7 +99,7 @@
           {{ comment?.text }}
         </div>
         
-        <div class="comment-input">
+        <div *ngIf="comment.user?.id != currentUser?.id" class="comment-input">
           <orang-button 
             size="small" 
             [istoggleable]=false
@@ -176,55 +174,61 @@
     </div>
   </div>
 
-  <div class="post-actions" *ngIf="user?.id == currentUser?.id">
-    <orang-button 
-      size="small" 
-      [istoggleable]="false"
-      (click)="deletePost()"
-    >
-      Delete Post
-    </orang-button>
+  <div 
+  class="post-actions flex flex-col gap-3 px-4 pb-4 ml-16 mr-8 mb-3"
+  *ngIf="user?.id == currentUser?.id"
+>
+  <!-- Top row: Action buttons on left, save button on right (when editing) -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <!-- Left: Stacked buttons -->
+    <div class="flex flex-col sm:flex-row gap-2">
+      <orang-button 
+        size="small" 
+        [istoggleable]="false"
+        (click)="deletePost()"
+        class="w-full sm:w-32"
+      >
+        Delete Post
+      </orang-button>
 
-    <orang-button 
-      size="small" 
-      [istoggleable]="false"
-      (click)="toggleEditPostForm()"
-    >
-      {{ showEditPostForm ? 'Cancel Edit' : 'Edit Post' }}
-    </orang-button>
+      <orang-button 
+        size="small" 
+        [istoggleable]="false"
+        (click)="toggleEditPostForm()"
+        class="w-full sm:w-32"
+      >
+        {{ showEditPostForm ? 'Cancel Edit' : 'Edit Post' }}
+      </orang-button>
+    </div>
     
-    <!-- Edit Post Form -->
-    <form 
+    <!-- Right: Save button (only shown when editing) -->
+    <orang-button 
       *ngIf="showEditPostForm"
-      (ngSubmit)="editPost()"
-      class="edit-post-form"
+      size="small" 
+      type="submit"
+      [istoggleable]="true"
+      (click)="editPost()"
+      class="w-full sm:w-auto min-w-[120px]"
     >
-      <textarea 
+      Save Changes
+    </orang-button>
+  </div>
+  
+  <!-- Edit Post Form - Full width below buttons -->
+  <form 
+    *ngIf="showEditPostForm"
+    (ngSubmit)="editPost()"
+    class="edit-post-form w-full"
+  >
+    <app-text-display variant="white" class="text-lg w-full">
+      <textarea
         [(ngModel)]="editPostText"
         name="editPostText"
-        placeholder="Edit your post..."
-        class="post-edit-field"
+        placeholder="Write something Orang!"
         rows="3"
+        class="w-full bg-transparent border border-none rounded-lg p-3 focus:outline-none focus:ring-none focus:border-transparent resize-y min-h-[100px]"
       ></textarea>
-      
-      <div class="form-actions">
-        <orang-button 
-          size="small" 
-          type="submit"
-          [istoggleable]="true"
-        >
-          Save Changes
-        </orang-button>
-        
-        <orang-button 
-          size="small" 
-          type="button"
-          [istoggleable]="false"
-          (click)="cancelEditPost()"
-        >
-          Cancel
-        </orang-button>
-      </div>
-    </form>
-  </div>
+    </app-text-display>
+  </form>
+</div>
 </div>
