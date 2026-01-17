@@ -318,7 +318,8 @@ export const removeFriend = async (req, res) => {
 };
 
 export const listFriends = async (req, res) => {
-  const userId = req.user.id;
+  const currentUserId = req.user.id;
+  const targetUserId = req.query.id || currentUserId;
   const log = req.log;
 
   try {
@@ -330,14 +331,16 @@ export const listFriends = async (req, res) => {
          END as friend_id
        FROM "Friendships"
        WHERE ($1 IN (requester, requestee)) AND active = true`,
-      [userId]
+      [targetUserId]
     );
 
     const friends = results.rows;
-    log.info(`User ${userId} fetched ${friends.length} friends.`);
+    log.info(
+      `User ${currentUserId} fetched ${friends.length} friends for target user ${targetUserId}.`
+    );
     return res.status(200).json(friends);
   } catch (err) {
-    log.error({ err }, "Server error while fetching friends.");
+    log.error({ err }, `Server error while fetching friends for user ${targetUserId}.`);
     return res
       .status(500)
       .json({ error: "A server error occurred while fetching friends." });
