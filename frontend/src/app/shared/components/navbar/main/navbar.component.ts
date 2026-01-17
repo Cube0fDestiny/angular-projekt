@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.component';
 import { UserService } from '../../../../core/user/user.service';
 import { Route, Router } from '@angular/router';
+import { NotificationsDropdownComponent } from '../notifications-dropdown/notifications-dropdown.component';
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule,ProfileDropdownComponent],
+  imports: [CommonModule, ProfileDropdownComponent, NotificationsDropdownComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
@@ -33,8 +35,8 @@ export class NavbarComponent implements OnInit {
   navItems = [
     { id: 'home', label: 'Strona główna', icon: '🏠' },
     { id: 'friends', label: 'Znajomi', icon: '👥', badge: 5 },
-    { id: 'messages', label: 'Wiadomości', icon: '💬', badge: 12 },
-    { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 }
+    { id: 'messages', label: 'Wiadomości', icon: '💬', badge: 12 }
+    //, { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 }
     //, { id: 'profile', label: 'Profil', icon: '👤' }
   ];
   isDropdownOpen = false;

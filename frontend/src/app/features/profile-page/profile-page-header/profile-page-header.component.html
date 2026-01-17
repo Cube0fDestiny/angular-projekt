@@ -45,30 +45,27 @@
           </orang-button>
         </ng-container> -->
         
-        <!-- FRIEND'S PROFILE -->
-        <ng-container *ngIf="isFriend && !isOwnProfile">
-          <orang-button (click)="onMessage()">
-            💬 Message
-          </orang-button>
-          <orang-button (click)="onUnfriend()">
-            👥 Friends
-          </orang-button>
-          <!-- <orang-button class="btn-secondary" (click)="onMore()">
-            ⋮ More
-          </orang-button>-->
-        </ng-container>
         
-        <!-- STRANGER'S PROFILE -->
-        <ng-container *ngIf="!isFriend && !isOwnProfile">
-          <orang-button (click)="onAddFriend()">
+        <!-- STRANGER'S/FRIEND'S PROFILE -->
+        <ng-container *ngIf="!isOwnProfile">
+          <orang-button *ngIf="!hasFriendRequest&&!didSentFriendRequest&&!isFriend" (click)="onAddFriend(user!.id)" [istoggleable]="false">
             👥 Add Friend
           </orang-button>
+          <orang-button *ngIf="!hasFriendRequest&&isFriend" (click)="removeFriend(user!.id)" [istoggleable]="false">
+            👥 Remove Friend
+          </orang-button>
+          <orang-button *ngIf="!hasFriendRequest&&didSentFriendRequest&&!isFriend" [istoggleable]="false">
+            👥 Pending Responce
+          </orang-button>
+          <orang-button *ngIf="hasFriendRequest&&!isFriend" (click)="acceptFriendRequest(user!.id)" [istoggleable]="false">
+            👥 Accept Invite
+          </orang-button>
           <orang-button (click)="onMessage()">
             💬 Message
           </orang-button>
-          <orang-button (click)="onMore()">
+          <!--<orang-button (click)="onMore()">
             ⋮ More
-          </orang-button>
+          </orang-button>-->
         </ng-container>
         
       </div>

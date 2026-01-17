@@ -5,6 +5,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { authGuard } from './core/auth/auth.guard'; // Import your guard
 import { SettingsComponent } from './features/settings/settings.component';
+import { FriendListComponent } from './features/friend-list/friend-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -15,6 +16,11 @@ export const routes: Routes = [
     path: 'home', 
     component: HomeComponent, 
     canActivate: [authGuard] 
+  },
+  {
+    path: 'friends/:id',
+    component: FriendListComponent,
+    canActivate: [authGuard]
   },
   { 
     path: 'settings', 

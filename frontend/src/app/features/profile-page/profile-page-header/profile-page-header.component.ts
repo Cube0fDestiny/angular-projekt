@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
-import { User } from '../../../shared/models/user.model';
+import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
 
 @Component({
   selector: 'app-profile-header',
@@ -18,6 +18,8 @@ export class ProfilePageHeaderComponent implements OnInit {
 
   /** Keep as string because backend uses UUIDs */
   userId: string | null = null;
+  didSentFriendRequest = false;
+  hasFriendRequest = false;
 
   @Input() stats = {
     friends: 0,
@@ -65,11 +67,25 @@ export class ProfilePageHeaderComponent implements OnInit {
       this.userService.getUserById(userId).subscribe(u => {
         this.user = u;
         this.isOwnProfile = false;
-        this.isFriend = false; // Friends system not implemented yet
+        this.loadFriendRequestsOutgoing();
+        this.loadFriendRequestsIncoming();
+        this.loadFriendStatus();
       });
     }
-
     console.log('Profile for user:', this.user);
+  }
+
+  removeFriend(userId: string): void {
+    this.userService.removeFriend(userId).subscribe({
+      next: (response) => {
+        console.log('Friend removed:', response.message);
+        this.isFriend = false;
+        this.didSentFriendRequest = false;
+      },
+      error: (error) => {
+        console.error('Error removing friend:', error);
+      }
+    });
   }
 
   // Event emitters
@@ -77,7 +93,77 @@ export class ProfilePageHeaderComponent implements OnInit {
   onAddStory(): void { this.addStory.emit(); }
   onViewAs(): void { this.viewAs.emit(); }
   onMessage(): void { this.message.emit(); }
-  onAddFriend(): void { this.addFriend.emit(); }
+
+  onAddFriend(userId: string): void {
+    console.log('sent friend request to: ', userId);
+    this.addFriend.emit();
+    this.userService.sendFriendRequest(userId).subscribe(u => {
+      console.log('send friend request: ', u);
+      this.didSentFriendRequest = true;
+    });
+  }
+
+  loadFriendRequestsOutgoing(): void {
+    this.userService.getFriendRequestsOutgoing().subscribe({
+      next: (friendRequests) => {
+        friendRequests.forEach(request => {
+          if(request.to_user_id==this.userId){
+            this.didSentFriendRequest = true;
+          }
+        });
+        console.log('Loaded outcoming friend requests');
+      },
+      error: (error) => {
+        console.error('Error loading outcoming friend requests:', error);
+      }
+    });
+  }
+
+  loadFriendRequestsIncoming(): void {
+    this.userService.getFriendRequestsIncoming().subscribe({
+      next: (friendRequests) => {
+        friendRequests.forEach(request => {
+          if(request.from_user_id==this.userId){
+            this.hasFriendRequest = true;
+          }
+        });
+        console.log('Loaded friend incoming requests');
+      },
+      error: (error) => {
+        console.error('Error loading incoming friend requests:', error);
+      }
+    });
+  }
+
+  acceptFriendRequest(friend_id: string): void {
+    this.userService.acceptFriendRequest(friend_id).subscribe({
+      next: (response) => {
+        console.log('Friend request accepted:', response.message);
+        this.isFriend = true;
+        this.hasFriendRequest = false;
+      },
+      error: (error) => {
+        console.error('Error accepting friend request:', error);
+      }
+    });
+  }
+
+  loadFriendStatus():void {
+    this.userService.getAllFriends().subscribe({
+    next: (friendItems) => {
+      console.log('loaded friends list')
+      friendItems.forEach(friendItem => {
+        if (friendItem.friend_id==this.userId){
+          this.isFriend = true;
+        }
+      });
+    },
+    error: (error) => {
+      console.error('Error loading friend list:', error);
+    }
+  });
+  }
+
   onUnfriend(): void { this.unfriend.emit(); }
   onMore(): void { this.more.emit(); }
 }
