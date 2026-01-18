@@ -1,3 +1,4 @@
+import { publishEvent } from "../utils/rabbitmq-client.js";
 import * as db from "../db/index.js";
 
 // Comment endpoints
@@ -13,10 +14,10 @@ export const getCommentsForPosts = async (req, res) => {
       [postId]
     );
 
-    console.log(`[Post-Service] Pobrano komentarze do posta o id: ${postId}`);
+    req.log.info(`[Post-Service] Pobrano komentarze do posta o id: ${postId}`);
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    req.error(err);
     res.status(500).json({
       error:
         err.message +
@@ -31,19 +32,25 @@ export const createComment = async (req, res) => {
   const { text, in_reply_to, image_ids } = req.body;
   const creator_id = req.user.id;
 
-  console.log(`asdasdasdasdasd[Post-Service] Tworzenie komentarza do posta o id: ${postId}`);
+  req.log.info(`[Post-Service] Tworzenie komentarza do posta o id: ${postId}`);
   try {
     const result = await db.query(
       `INSERT INTO "Post_Comments" (text, in_reply_to, image_ids, creator_id, post_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [text, in_reply_to || null, image_ids || [], creator_id, postId]
     );
+    const newComment = result.rows[0];
+    publishEvent("comment.created", {
+      commentId: newComment.id,
+      postId: newComment.post_id,
+      creatorId: newComment.creator_id,
+    });
 
-    console.log(
-      `[Post-Service] Utworzono komentarz o id: ${result.rows[0].id}`
+    req.log.info(
+      `[Post-Service] Utworzono komentarz o id: ${newComment.id}`
     );
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(newComment);
   } catch (err) {
-    console.error(err);
+    req.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas tworzenia komentarza",
     });
@@ -69,10 +76,10 @@ export const updateComment = async (req, res) => {
         .json({ message: "Nie znaleziono komentarza o id: " + commentId });
     }
 
-    console.log(`[Post-Service] Zaktualizowano komentarz o id: ${commentId}`);
+    req.log.info(`[Post-Service] Zaktualizowano komentarz o id: ${commentId}`);
     res.status(200).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    req.error(err);
     res.status(500).json({
       error:
         err.message +
@@ -103,10 +110,10 @@ export const deleteComment = async (req, res) => {
         });
     }
 
-    console.log(`[Post-Service] Usunięto komentarz o id: ${commentId}`);
+    req.log.info(`[Post-Service] Usunięto komentarz o id: ${commentId}`);
     res.status(200).json({ message: "Komentarz został usunięty" });
   } catch (err) {
-    console.error(err);
+    req.error(err);
     res.status(500).json({
       error:
         err.message +

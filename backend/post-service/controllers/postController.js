@@ -1,6 +1,8 @@
+import { publishEvent } from "../utils/rabbitmq-client.js";
 import * as db from "../db/index.js";
 
 export const getAllPosts = async (req, res) => {
+  const log = req.log;
   try {
     const result = await db.query(
       `SELECT
@@ -31,15 +33,15 @@ export const getAllPosts = async (req, res) => {
           WHERE
               p.deleted = false
           ORDER BY
-              p.created_at DESC;`
-    );    
-    
-    console.log(
-      `[Post-Service] Pobrano ${result.rows.length} postów z bazy danych`
+              p.created_at DESC;`,
+    );
+
+    log.info(
+      `[Post-Service] Pobrano ${result.rows.length} postów z bazy danych`,
     );
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania postów",
     });
@@ -47,6 +49,7 @@ export const getAllPosts = async (req, res) => {
 };
 
 export const getPostById = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
 
   try {
@@ -54,7 +57,7 @@ export const getPostById = async (req, res) => {
       `SELECT id, creator_id, "Text", location_id, location_type, created_at
       FROM "Posts"
       WHERE id = $1 AND deleted = false`,
-      [id]
+      [id],
     );
 
     if (postResult.rows.length === 0) {
@@ -70,7 +73,7 @@ export const getPostById = async (req, res) => {
       FROM "Post_Reactions"
       WHERE post_id = $1
       GROUP BY reaction_type`,
-      [id]
+      [id],
     );
 
     let totalCount = 0;
@@ -85,10 +88,10 @@ export const getPostById = async (req, res) => {
       counts: reactionCounts,
     };
 
-    console.log(`[Post-Service] Pobrano post o id: ${id}`);
+    log.info(`[Post-Service] Pobrano post o id: ${id}`);
     res.status(200).json(postWithReactions);
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas pobierania posta o id: " + id,
     });
@@ -96,8 +99,8 @@ export const getPostById = async (req, res) => {
 };
 
 export const getPostsByUserId = async (req, res) => {
+  const log = req.log;
   const userId = req.user.id;
-  console.log(userId);
 
   try {
     const result = await db.query(
@@ -132,13 +135,13 @@ export const getPostsByUserId = async (req, res) => {
       ORDER BY
           p.created_at DESC;
       `,
-      [userId]
+      [userId],
     );
 
-    console.log(`[Post-Service] Pobrano posty użytkownika o id: ${userId}`);
+    log.info(`[Post-Service] Pobrano posty użytkownika o id: ${userId}`);
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas pobierania postów użytkownika",
@@ -147,21 +150,28 @@ export const getPostsByUserId = async (req, res) => {
 };
 
 export const createPost = async (req, res) => {
+  const log = req.log;
   const { content, location_id, location_type } = req.body;
-  const creator_id = req.user.id;
+  const creatorId = req.user.id;
 
   try {
     const result = await db.query(
       `INSERT INTO "Posts" (creator_id, "Text", location_id, location_type) 
       VALUES ($1, $2, $3, $4) 
       RETURNING id, created_at, "Text", location_id, location_type, creator_id`,
-      [creator_id, content, location_id || null, location_type || null]
+      [creatorId, content, location_id || null, location_type || null],
     );
+    const newPost = result.rows[0];
 
-    console.log(`[Post-Service] Stworzono post o id: ${result.rows[0].id}`);
+    publishEvent("post.created", {
+      postId: newPost.id,
+      creatorId: newPost.creatorId,
+    });
+
+    log.info(`[Post-Service] Stworzono post o id: ${newPost.id}`);
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas tworzenia posta",
     });
@@ -169,6 +179,7 @@ export const createPost = async (req, res) => {
 };
 
 export const updatePost = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
   const { content } = req.body;
 
@@ -178,13 +189,13 @@ export const updatePost = async (req, res) => {
       SET "Text" = $1
       WHERE id = $2 AND deleted = false
       RETURNING id, created_at, "Text", location_id, location_type, creator_id`,
-      [content, id]
+      [content, id],
     );
 
-    console.log(`[Post-Service] Zaktualizowano post o id: ${id}`);
+    log.info(`[Post-Service] Zaktualizowano post o id: ${id}`);
     res.status(200).json(resulty.rows[0]);
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas aktualizacji posta o id: " + id,
@@ -193,12 +204,13 @@ export const updatePost = async (req, res) => {
 };
 
 export const deletePost = async (req, res) => {
+  const log = req.log;
   const { id } = req.params;
 
   try {
     const isDeleted = await db.query(
       `SELECT deleted FROM "Posts" WHERE id = $1`,
-      [id]
+      [id],
     );
 
     if (isDeleted.rows.length !== 0 && isDeleted.rows[0].deleted) {
@@ -209,13 +221,13 @@ export const deletePost = async (req, res) => {
       `UPDATE "Posts"
       SET deleted = true
       WHERE id = $1 AND deleted = false`,
-      [id]
+      [id],
     );
 
-    console.log(`[Post-Service] Usunięto post o id: ${id}`);
+    log.info(`[Post-Service] Usunięto post o id: ${id}`);
     res.status(200).json({ message: "Post został usunięty" });
   } catch (err) {
-    console.error(err);
+    log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas usuwania posta o id: " + id,
     });

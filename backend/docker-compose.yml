@@ -1,4 +1,18 @@
 services:
+  rabbitmq:
+    image: rabbitmq:4.2.2-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+    restart:
+      unless-stopped
+
   gateway:
     container_name: gateway
     build:
@@ -39,7 +53,10 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
   event-service:
     container_name: event-service
@@ -123,4 +140,5 @@ services:
   #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
   #   restart: unless-stopped
 
-  # TODO: RabbitMQ
+volumes:
+  rabbitmq_data: {}

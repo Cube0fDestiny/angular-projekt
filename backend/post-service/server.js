@@ -2,24 +2,39 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import pino from "pino";
+import pinoHttp from "pino-http";
 import cors from "cors";
 import postRoutes from "./routes/posts.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { connectRabbitMQ } from "./utils/rabbitmq-client.js";
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.use((req, res, next) => {
-  console.log(`[Post-Service] Otrzymano: ${req.method} ${req.url}`);
-  console.log('[Post-Service] Nagłówki:', req.headers); // Dodaj ten log
-  next();
+export const logger = pino({
+  name: "PostService",
+  transport:
+    process.env.NODE_ENV !== "production"
+      ? { target: "pino-pretty" }
+      : undefined,
 });
 
-app.use("/posts", postRoutes);
+const startServer = async () => {
+  await connectRabbitMQ();
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => console.log(`🚀 Post-Service running on port ${PORT}`));
+  const app = express();
 
-app.use(errorHandler);
+  app.use(pinoHttp({ logger }));
+  app.use(cors());
+  app.use(express.json());
+  app.use("/posts", postRoutes);
+  app.use(errorHandler);
+
+  const PORT = process.env.PORT || 3002;
+  app.listen(PORT, () =>
+    logger.info(`🚀 Post-Service running on port ${PORT}`),
+  );
+};
+
+startServer().catch((err) => {
+  logger.fatal({ error: err }, "Post-Service failed to start");
+  process.exit(1);
+});
