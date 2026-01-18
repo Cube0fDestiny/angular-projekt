@@ -1,4 +1,5 @@
 import * as db from "../db/index.js";
+import { publishEvent } from "../utils/rabbitmq-client.js";
 
 export const getUserChats = async (req, res) => {
   const userId = req.user.id;
@@ -66,6 +67,13 @@ export const createChat = async (req, res) => {
       { chatId: newChat.id, creatorId, participants: allParticipantIds },
       "Utworzono nowy czat."
     );
+    publishEvent("chat.created", {
+      chatId: newChat.id,
+      name: name,
+      creatorId: creatorId,
+      participants: allParticipantIds,
+      timestamp: new Date().toISOString(),
+    });
     res.status(201).json(newChat);
     res.status(201).json(newChat);
   } catch (err) {
@@ -118,7 +126,7 @@ export const createMessage = async (req, res) => {
 
   try {
     const result = await db.query(
-      `INSERT INTO "Chat_Messages" (chat_id, creator_id, text) VALUES ($1, $2, $3) RETURNING *`,
+      `INSERT INTO "Chat_Messages" (chat_id, creator_id, text) VALUES ($1, $2, $3) RETURNING id, chat_id, creator_id, text, created_at`,
       [chatId, creatorId, text]
     );
     const newMessage = result.rows[0];
@@ -130,6 +138,13 @@ export const createMessage = async (req, res) => {
       { messageId: newMessage.id, chatId, creatorId },
       "Stworzono i rozgłoszono nową wiadomość."
     );
+    publishEvent("message.created", {
+      messageId: newMessage.id,
+      chatId: chatId,
+      creatorId: creatorId,
+      text: text,
+      timestamp: new Date().toISOString(),
+    });
     res.status(201).json(newMessage);
   } catch (err) {
     log.error(

@@ -1,4 +1,5 @@
 import * as db from "../db/index.js";
+import { publishEvent } from "../utils/rabbitmq-client.js";
 
 export const getAllEvents = async (req, res) => {
   const log = req.log;
@@ -117,12 +118,20 @@ export const createEvent = async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id`,
       [name, bio, event_date, creator_id, header_picture_id, profile_picture_id]
     );
+    const newEvent = result.rows[0];
 
     log.info(
       { eventId: newEvent.id, creatorId: creator_id },
       "Stworzono nowe wydarzenie."
     );
-    res.status(201).json({ message: "Event stworzony!", data: result.rows[0] });
+    publishEvent("event.created", {
+      eventId: newEvent.id,
+      name: name,
+      creatorId: creator_id,
+      eventDate: event_date,
+      timestamp: new Date().toISOString(),
+    });
+    res.status(201).json({ message: "Event stworzony!", data: newEvent });
   } catch (err) {
     log.error(
       { err, creatorId: creator_id, body: req.body },
@@ -169,6 +178,13 @@ export const updateEvent = async (req, res) => {
     );
 
     log.info({ eventId: id }, "Zaktualizowano wydarzenie.");
+    publishEvent("event.updated", {
+      eventId: id,
+      name: updatedData.name,
+      bio: updatedData.bio,
+      eventDate: updatedData.event_date,
+      timestamp: new Date().toISOString(),
+    });
     res.status(200).json(result.rows[0]);
   } catch (err) {
     log.error({ err, eventId: id }, "Błąd serwera podczas aktualizacji wydarzenia.");
@@ -199,6 +215,10 @@ export const deleteEvent = async (req, res) => {
     }
 
     log.info({ eventId: id }, "Usunięto wydarzenie.");
+    publishEvent("event.deleted", {
+      eventId: id,
+      timestamp: new Date().toISOString(),
+    });
     res.status(200).json({ message: "Event został usunięty" });
   } catch (err) {
     log.error({ err, eventId: id }, "Błąd serwera podczas usuwania wydarzenia.");
@@ -225,6 +245,11 @@ export const toggleFollowEvent = async (req, res) => {
         [id, user_id]
       );
       log.info({ eventId: id }, "Usunięto follow o id: " + id);
+      publishEvent("event.unfollowed", {
+        eventId: id,
+        userId: user_id,
+        timestamp: new Date().toISOString(),
+      });
       return res.status(200).json({ message: "Follow został usunięty" });
     }
 
@@ -234,6 +259,11 @@ export const toggleFollowEvent = async (req, res) => {
     );
 
     log.info({ eventId: id }, "Dodano follow o id: " + id);
+    publishEvent("event.followed", {
+      eventId: id,
+      userId: user_id,
+      timestamp: new Date().toISOString(),
+    });
     res.status(201).json({ message: "Follow został dodany" });
   } catch (err) {
     log.error({ err, eventId: id }, "Błąd serwera podczas dodawania followa.");

@@ -339,6 +339,114 @@ Endpointy planowane do implementacji:
 
 ---
 
+## 📡 RabbitMQ Events
+
+User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle user-related events:
+
+### User Account Events
+
+**`user.registered`** - Published when a new user registers
+```json
+{
+  "userId": "uuid",
+  "email": "string",
+  "name": "string",
+  "surname": "string",
+  "is_company": boolean,
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.updated`** - Published when a user's profile is updated
+```json
+{
+  "userId": "uuid",
+  "name": "string",
+  "surname": "string",
+  "email": "string",
+  "bio": "string",
+  "is_company": boolean,
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.deleted`** - Published when a user account is deleted
+```json
+{
+  "userId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Follow Events
+
+**`user.followed`** - Published when a user follows another user
+```json
+{
+  "followerId": "uuid",
+  "followeeId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.unfollowed`** - Published when a user unfollows another user
+```json
+{
+  "followerId": "uuid",
+  "followeeId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Friendship Request Events
+
+**`user.friendRequested`** - Published when a friend request is sent
+```json
+{
+  "requesterId": "uuid",
+  "requesteeId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.friendAccepted`** - Published when a friend request is accepted
+```json
+{
+  "userId": "uuid",
+  "friendId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.friendRequestCancelled`** - Published when a friend request is cancelled by the requester
+```json
+{
+  "userId": "uuid",
+  "otherUserId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.friendRequestRejected`** - Published when a friend request is rejected by the requestee
+```json
+{
+  "userId": "uuid",
+  "otherUserId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`user.friendRemoved`** - Published when a friendship is removed
+```json
+{
+  "userId": "uuid",
+  "friendId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+---
+
 ## ⚠️ Obsługa Błędów
 
 | Kod | Komunikat | Opis |

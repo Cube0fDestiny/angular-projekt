@@ -39,7 +39,10 @@ services:
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
   post-service:
     container_name: post-service
@@ -70,7 +73,10 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
     
   # image-service:
   #   container_name: image-service
@@ -121,7 +127,10 @@ services:
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
   
   # notification-service:
   #   container_name: notification-service

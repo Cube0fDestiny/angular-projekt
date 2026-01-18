@@ -150,6 +150,38 @@ socket.on('newMessage', (message) => {
 
 ---
 
+## 📡 RabbitMQ Events
+
+Chat-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle chat-related events:
+
+### Chat Management Events
+
+**`chat.created`** - Published when a new chat is created
+```json
+{
+  "chatId": "uuid",
+  "name": "string",
+  "creatorId": "uuid",
+  "participants": ["uuid", "uuid"],
+  "timestamp": "ISO8601"
+}
+```
+
+### Message Events
+
+**`message.created`** - Published when a new message is sent in a chat
+```json
+{
+  "messageId": "uuid",
+  "chatId": "uuid",
+  "creatorId": "uuid",
+  "text": "string",
+  "timestamp": "ISO8601"
+}
+```
+
+---
+
 ## ⚠️ Obsługa Błędów
 
 | Kod | Komunikat | Opis |

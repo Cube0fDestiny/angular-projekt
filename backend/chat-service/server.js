@@ -12,8 +12,10 @@ import pinoHttp from "pino-http";
 import chatRoutes from "./routes/chatRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import * as db from "./db/index.js";
+import { connectRabbitMQ } from "./utils/rabbitmq-client.js";
 
-const logger = pino({
+export const logger = pino({
+  name: "ChatService",
   transport:
     process.env.NODE_ENV !== "production"
       ? { target: "pino-pretty" }
@@ -22,7 +24,10 @@ const logger = pino({
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const app = express();
+const startServer = async () => {
+  await connectRabbitMQ();
+
+  const app = express();
 
 app.use(pinoHttp({ logger }));
 app.use(cors());
@@ -88,7 +93,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    logger.info("[Socket.IO] Użytkownik ${socket.user.id} rozłączony");
+    logger.info(`[Socket.IO] Użytkownik ${socket.user.id} rozłączony`);
   });
 });
 
@@ -100,3 +105,9 @@ server.listen(PORT, () =>
 );
 
 app.use(errorHandler);
+};
+
+startServer().catch((err) => {
+  logger.fatal({ error: err }, "Chat-Service failed to start");
+  process.exit(1);
+});

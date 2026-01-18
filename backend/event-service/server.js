@@ -5,27 +5,38 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import eventRoutes from './routes/events.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { connectRabbitMQ } from './utils/rabbitmq-client.js';
 
-const logger = pino({
+dotenv.config();
+
+export const logger = pino({
+  name: 'EventService',
   transport:
     process.env.NODE_ENV !== 'production'
       ? { target: 'pino-pretty' }
       : undefined,
 });
 
-dotenv.config();
+const startServer = async () => {
+  await connectRabbitMQ();
 
-const app = express();
-const PORT = process.env.PORT || 3004;
+  const app = express();
+  const PORT = process.env.PORT || 3003;
 
-app.use(pinoHttp({ logger }));
-app.use(cors());
-app.use(express.json());
+  app.use(pinoHttp({ logger }));
+  app.use(cors());
+  app.use(express.json());
 
-app.use("/events", eventRoutes);
+  app.use("/events", eventRoutes);
 
-app.listen(PORT, () => {
-  logger.info(`[Event-Service] Serwer działa na porcie ${PORT}`);
+  app.use(errorHandler);
+
+  app.listen(PORT, () => {
+    logger.info(`🚀 Event-Service running on port ${PORT}`);
+  });
+};
+
+startServer().catch((err) => {
+  logger.fatal({ error: err }, "Event-Service failed to start");
+  process.exit(1);
 });
-
-app.use(errorHandler);

@@ -251,6 +251,63 @@ Endpointy planowane do implementacji:
 - Szybkie pobranie liczby komentarzy bez pełnych danych
 ---
 
+## 📡 RabbitMQ Events
+
+Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle post-related events:
+
+### Post Events
+
+**`post.created`** - Published when a new post is created
+```json
+{
+  "postId": "uuid",
+  "creatorId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`post.updated`** - Published when a post is updated
+```json
+{
+  "postId": "uuid",
+  "text": "string",
+  "timestamp": "ISO8601"
+}
+```
+
+**`post.deleted`** - Published when a post is deleted
+```json
+{
+  "postId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Comment Events
+
+**`comment.created`** - Published when a comment is created on a post
+```json
+{
+  "commentId": "uuid",
+  "postId": "uuid",
+  "creatorId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Reaction Events
+
+**`reaction.created`** - Published when a reaction is added to a post
+```json
+{
+  "postId": "uuid",
+  "userId": "uuid",
+  "reactionType": "string",
+  "timestamp": "ISO8601"
+}
+```
+---
+
 **Uwagi:**
 
 -   Endpointy usuwania wykonują operację "soft delete" (ustawiają flagę `deleted` na `true`), nie usuwając danych z bazy.

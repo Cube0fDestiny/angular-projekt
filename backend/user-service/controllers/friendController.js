@@ -1,4 +1,5 @@
 import * as db from "../db/index.js";
+import { publishEvent } from "../utils/rabbitmq-client.js";
 
 export const toggleFollow = async (req, res) => {
   const followerId = req.user.id;
@@ -26,6 +27,11 @@ export const toggleFollow = async (req, res) => {
       );
 
       log.info(`User ${followerId} unfollowed user ${followeeId}.`);
+      publishEvent("user.unfollowed", {
+        followerId: followerId,
+        followeeId: followeeId,
+        timestamp: new Date().toISOString(),
+      });
       return res.status(200).json({ message: "Successfully unfollowed." });
     }
     // 4. If it does not exist, follow the user.
@@ -39,6 +45,11 @@ export const toggleFollow = async (req, res) => {
         { follow: result.rows[0] },
         `User ${followerId} started following ${followeeId}.`
       );
+      publishEvent("user.followed", {
+        followerId: followerId,
+        followeeId: followeeId,
+        timestamp: new Date().toISOString(),
+      });
       return res.status(201).json({ message: "Successfully followed." });
     }
   } catch (err) {
@@ -167,6 +178,12 @@ export const requestFriend = async (req, res) => {
       `User ${userId} sent a friend request to ${friendId}`
     );
 
+    publishEvent("user.friendRequested", {
+      requesterId: userId,
+      requesteeId: friendId,
+      timestamp: new Date().toISOString(),
+    });
+
     return res
       .status(201)
       .json({ message: "Friend request sent successfully." });
@@ -228,6 +245,12 @@ export const acceptFriendRequest = async (req, res) => {
       `User ${userId} accepted friend request from ${requesterId}.`
     );
 
+    publishEvent("user.friendAccepted", {
+      userId: userId,
+      friendId: requesterId,
+      timestamp: new Date().toISOString(),
+    });
+
     return res.status(200).json({ message: "Friend request accepted." });
   } catch (err) {
     log.error({ err }, "Server error while accepting friend request.");
@@ -270,6 +293,15 @@ export const deleteFriendRequest = async (req, res) => {
       `User ${userId} ${action} friend request with ${otherUserId}.`
     );
 
+    publishEvent(
+      action === "cancelled" ? "user.friendRequestCancelled" : "user.friendRequestRejected",
+      {
+        userId: userId,
+        otherUserId: otherUserId,
+        timestamp: new Date().toISOString(),
+      }
+    );
+
     return res
       .status(200)
       .json({ message: `Friend request ${action} successfully.` });
@@ -307,6 +339,12 @@ export const removeFriend = async (req, res) => {
       { friendship: result.rows[0] },
       `User ${userId} removed friend ${friendId}.`
     );
+
+    publishEvent("user.friendRemoved", {
+      userId: userId,
+      friendId: friendId,
+      timestamp: new Date().toISOString(),
+    });
 
     return res.status(200).json({ message: "Friend removed successfully." });
   } catch (err) {

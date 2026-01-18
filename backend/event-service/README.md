@@ -236,6 +236,64 @@ Pobiera listę użytkowników obserwujących dane wydarzenie.
 
 ---
 
+## 📡 RabbitMQ Events
+
+Event-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle event-related events:
+
+### Event Management Events
+
+**`event.created`** - Published when a new event is created
+```json
+{
+  "eventId": "uuid",
+  "name": "string",
+  "creatorId": "uuid",
+  "eventDate": "ISO8601",
+  "timestamp": "ISO8601"
+}
+```
+
+**`event.updated`** - Published when an event is updated
+```json
+{
+  "eventId": "uuid",
+  "name": "string",
+  "bio": "string",
+  "eventDate": "ISO8601",
+  "timestamp": "ISO8601"
+}
+```
+
+**`event.deleted`** - Published when an event is deleted
+```json
+{
+  "eventId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Event Follow Events
+
+**`event.followed`** - Published when a user follows an event
+```json
+{
+  "eventId": "uuid",
+  "userId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+**`event.unfollowed`** - Published when a user unfollows an event
+```json
+{
+  "eventId": "uuid",
+  "userId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+---
+
 ## ⚠️ Obsługa Błędów
 
 | Kod | Komunikat | Opis |
