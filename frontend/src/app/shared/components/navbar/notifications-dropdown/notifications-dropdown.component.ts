@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output, Input, OnInit, inject } from '@angular/core';
 import { CommonModule, NgIf } from "@angular/common";
-import { Router, ActivatedRoute, ɵEmptyOutletComponent } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { OrangButtonComponent } from '../../../../shared/components/orang-button/orang-button.component';
 import { UserService } from '../../../../core/user/user.service';
 import { User, IncomingFriendRequest } from '../../../models/user.model';
@@ -11,7 +11,7 @@ import { forkJoin, map, switchMap } from 'rxjs';
   templateUrl: './notifications-dropdown.component.html',
   styleUrls: ['./notifications-dropdown.component.scss'],
   standalone: true, // Assuming standalone based on previous context
-  imports: [NgIf, CommonModule, OrangButtonComponent, ɵEmptyOutletComponent]
+  imports: [NgIf, CommonModule, OrangButtonComponent]
 })
 export class NotificationsDropdownComponent implements OnInit {
   @Output() profileClick = new EventEmitter<void>();

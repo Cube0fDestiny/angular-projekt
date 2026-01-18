@@ -1,0 +1,119 @@
+<div class="profile-sidebar">
+  
+  <!-- Bio Section -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <h3 class="section-title">Bio</h3>
+      <orang-button 
+        size="small" 
+        *ngIf="isOwnEvent && !isEditingBio" 
+        (click)="toggleEditingBio()"
+      >
+        Edit
+      </orang-button>
+    </div>
+    
+    <!-- Edit Form -->
+    <app-text-display variant="white" *ngIf="isEditingBio">
+      <form (ngSubmit)="updateBio()" class="flex flex-col gap-3">
+        <input
+          type="text"
+          [(ngModel)]="editedBio"
+          name="editedBio"
+          placeholder="Write something about yourself!"
+          class="w-full bg-transparent border-none p-0 text-inherit focus:outline-none"
+        >
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <orang-button type="submit" size="small" [istoggleable]="false">
+            confirm
+          </orang-button>
+          <orang-button type="button" (click)="toggleEditingBio()" size="small" [istoggleable]="false">
+            cancel
+          </orang-button>
+        </div>
+      </form>
+    </app-text-display>
+    
+    <!-- Display Bio -->
+    <app-text-display variant="white" *ngIf="event?.bio && !isEditingBio">
+      <p>{{ event?.bio }}</p>
+    </app-text-display>
+  </div>
+
+  <!-- Friends Section -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <span class="section-icon">👥</span>
+        Followers
+      </h3>
+      <orang-button (click)="goToFollowersList()" size="small">
+        See all
+      </orang-button>
+    </div>
+    
+    <div class="friends-grid">
+      <div 
+        *ngFor="let follower of followers.slice(0, 9)"
+        class="friend-card"
+        (click)="goToProfile(follower.user_id)">
+        
+        <img 
+          [src]="getAvatarUrl(follower)" 
+          [alt]="follower.name"
+          class="friend-avatar">
+        
+        <div class="friend-info">
+          <span class="friend-name">{{ follower.name }}</span>
+           <!-- <span class="friend-mutual" *ngIf="friend.mutualFriends">
+            {{ friend.mutualFriends }} mutual friends
+          </span> -->
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div *ngIf="followers.length === 0" class="empty-state">
+        <div class="empty-icon">👤</div>
+        <p>No followers yet</p>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  <!-- Photos Section -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <span class="section-icon">📸</span>
+        Photos
+      </h3>
+     <!-- <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
+        See all 
+      </a>-->
+    </div>
+    
+    <div class="photos-grid">
+      <div 
+        *ngFor="let photo of photos.slice(0, 9)"
+        class="photo-card">
+        
+        <img 
+          [src]="photo.url" 
+          [alt]="photo.caption || 'Photo'"
+          class="photo-image">
+        
+        <div class="photo-overlay" *ngIf="photo.caption">
+          {{ photo.caption }}
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div *ngIf="photos.length === 0" class="empty-state">
+        <div class="empty-icon">📸</div>
+        <p>No photos yet</p>
+      </div>
+    </div>
+  </div>
+  
+</div>

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MainComponent } from './main.component';
+import { EventPageHeaderComponent } from './event-page-header.component';
 
-describe('MainComponent', () => {
-  let component: MainComponent;
-  let fixture: ComponentFixture<MainComponent>;
+describe('EventPageHeaderComponent', () => {
+  let component: EventPageHeaderComponent;
+  let fixture: ComponentFixture<EventPageHeaderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainComponent]
+      imports: [EventPageHeaderComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MainComponent);
+    fixture = TestBed.createComponent(EventPageHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -25,16 +25,26 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  goToHome():void {
+    this.router.navigate(['/']);
+  }
+
   goToProfile(userId: number): void {
     // Just pass the ID - that's it!
     console.log("going to profile");
     this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
   }
 
+  goToEvents(): void {
+    // Just pass the ID - that's it!
+    console.log("going to events");
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/events']); });
+  }
+
   
   navItems = [
     { id: 'home', label: 'Strona główna', icon: '🏠' },
-    { id: 'friends', label: 'Znajomi', icon: '👥', badge: 5 },
+    { id: 'events', label: 'Wydarzenia', icon: '❗' },
     { id: 'messages', label: 'Wiadomości', icon: '💬', badge: 12 }
     //, { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 }
     //, { id: 'profile', label: 'Profil', icon: '👤' }
@@ -48,6 +58,10 @@ export class NavbarComponent implements OnInit {
     if(this.activeItem=='profile')
     {
       this.goToProfile(this.currentUser.id);
+    }
+    else if(this.activeItem=='events')
+    {
+      this.goToEvents();
     }
     else
     {

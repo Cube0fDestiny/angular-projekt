@@ -1,0 +1,81 @@
+<div style="background-color: var(--o-bwhite);">
+  <app-navbar></app-navbar>
+
+  <div class="profile-container">
+    <app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
+      <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          
+          <!-- Edit/Cancel Button -->
+          <orang-button 
+            (click)="toggleCreatingEvent()"
+          >
+            {{ isCreatingEvent ? 'Cancel' : 'Create New Event' }}
+          </orang-button>
+          
+          <!-- Content Area -->
+          <div class="flex-1" *ngIf="isCreatingEvent" >
+            <!-- Edit Mode -->
+            <form 
+              (ngSubmit)="createEvent()" 
+              class="flex items-center gap-3"
+            >
+              <input
+                [(ngModel)]="eventName"
+                type="text"
+                name="eventName"
+                placeholder="Event Name"
+                class="border border-none bg-white rounded-md p-3 outline-none focus:ring-2 focus:ring-orange-400"
+              >
+              <input
+                [(ngModel)]="eventDate"
+                type="datetime-local"
+                name="eventDate"
+                placeholder=""
+                class="border border-none bg-white rounded-md p-3 outline-none focus:ring-2 focus:ring-orange-400"
+              >
+              <textarea
+                [(ngModel)]="eventBio"
+                name="eventBio"
+                placeholder="Write something Orang!"
+                rows="1"
+                class="w-full border border-none bg-white rounded-md p-3 outline-none focus:ring-2 focus:ring-orange-400"
+              ></textarea>
+              <orang-button 
+                type="submit" 
+                [istoggleable]="false"
+              >
+                Confirm
+              </orang-button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </app-text-display>
+
+    <app-text-display variant="beige" title="All Events" class="max-w-9/10 w-full rounded-xl">
+      
+      <!-- Friends grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" *ngIf="!isLoading">
+        <div 
+          *ngFor="let event of events" 
+          class="friend-card bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors duration-200 cursor-pointer"
+        >
+          <!-- Custom content goes here -->
+          <div class="flex flex-col items-center text-center">
+            <img 
+              [src]="getAvatarUrl(event)" 
+              [alt]="event.name"
+              class="w-16 h-16 rounded-full mb-3 object-cover border-2"
+              (click)="goToEvent(event.id)"
+            >
+            <h4 
+              class="font-bold text-[var(--o-green)]"
+              (click)="goToEvent(event.id)"
+            >{{ event.name }}</h4>
+          </div>
+        </div>
+      </div>
+    </app-text-display>
+  </div>
+</div>

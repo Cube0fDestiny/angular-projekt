@@ -1,0 +1,43 @@
+<div class="profile-header">
+  <!-- Cover Photo -->
+  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="'url(' + coverImage + ')'">
+    <orang-button class="absolute bottom-5 right-5 px-3 py-2" size="small" [istoggleable]="false" *ngIf="isOwnEvent">✏️ Edit Cover</orang-button>
+  </div>
+  
+  <!-- Header Content -->
+  <div class="header-content">
+    <!-- Profile Picture -->
+    <div class="profile-picture-container">
+      <img 
+        [src]="getAvatarUrl(event!)" 
+        [alt]="event?.name" 
+        class="profile-picture">
+      <button class="edit-picture-btn" *ngIf="isOwnEvent">✏️</button>
+    </div>
+    
+    <!-- Profile Info -->
+    <div class="profile-info">
+      <h1 class="profile-name">{{ event?.name }}</h1>
+      
+      <!-- Stats -->
+      <div class="profile-stats">
+        <div class="stat">
+          <span>{{ daysUntilEvent || 0 }} Days Until Event</span>
+        </div>
+      </div>
+      
+      <!-- 3 BUTTONS (Dynamic based on relationship) -->
+      <div class="profile-actions">
+        <ng-container *ngIf="!isOwnEvent">
+          <orang-button *ngIf="!isFollowing" (click)="toggleFollow()" [istoggleable]="false">
+            👥 Follow
+          </orang-button>
+          <orang-button *ngIf="isFollowing" (click)="toggleFollow()" [istoggleable]="false">
+            👥 Unfollow
+          </orang-button>
+        </ng-container>
+        
+      </div>
+    </div>
+  </div>
+</div>

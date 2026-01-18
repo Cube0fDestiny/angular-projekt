@@ -6,6 +6,9 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { authGuard } from './core/auth/auth.guard'; // Import your guard
 import { SettingsComponent } from './features/settings/settings.component';
 import { FriendListComponent } from './features/friend-list/friend-list.component';
+import { EventsPageComponent } from './features/events/events-page.component';
+import { EventPageComponent } from './features/event/main/event-page.component';
+import { FollowerListComponent } from './features/follower-list/follower-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -17,9 +20,19 @@ export const routes: Routes = [
     component: HomeComponent, 
     canActivate: [authGuard] 
   },
+  { 
+    path: 'events', 
+    component: EventsPageComponent, 
+    canActivate: [authGuard] 
+  },
   {
     path: 'friends/:id',
     component: FriendListComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'followers/:id',
+    component: FollowerListComponent,
     canActivate: [authGuard]
   },
   { 
@@ -30,6 +43,11 @@ export const routes: Routes = [
   { 
     path: 'profile/:id', 
     component: ProfilePageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'event/:id', 
+    component: EventPageComponent, 
     canActivate: [authGuard] 
   },
   

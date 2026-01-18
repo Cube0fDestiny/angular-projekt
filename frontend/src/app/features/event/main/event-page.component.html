@@ -1,0 +1,18 @@
+<div style="background-color: var(--o-bwhite);">
+  <app-navbar></app-navbar>
+  <app-event-header></app-event-header>
+  <div class="profile-container">
+      <table style="width: 80%; border-collapse: collapse;  margin: 0 auto; border: none;">
+        <tr>
+          <!-- Profile Sidebar -->
+          <td style="width:30%; vertical-align: top; border: none;">
+            <app-event-sidebar></app-event-sidebar> 
+          </td>
+          <!-- Profile Wall -->
+          <td style="width:50%; vertical-align: top; padding: 20px; border: none;">
+            <app-wall location_type="event" [location_id]="eventId!"></app-wall>
+          </td>
+        </tr>
+      </table>
+  </div>
+</div>

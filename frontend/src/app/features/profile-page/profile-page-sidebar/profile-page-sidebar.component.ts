@@ -17,7 +17,7 @@ import { forkJoin } from 'rxjs';
 export class ProfilePageSidebarComponent implements OnInit {
 
   /** Main profile user */
-  @Input() user!: User;
+  @Input() user!: User | null;
 
   /** Placeholder for groups and photos (mock) */
   @Input() groups: any[] = [];
@@ -52,7 +52,7 @@ export class ProfilePageSidebarComponent implements OnInit {
   }
 
   updateBio():void {
-    if (!this.editedBio?.trim() || this.editedBio === this.user.bio) {
+    if (!this.editedBio?.trim() || this.editedBio === this.user!.bio) {
       this.isEditingBio = false;
       return;
     }
@@ -61,9 +61,9 @@ export class ProfilePageSidebarComponent implements OnInit {
       bio: this.editedBio
     }
 
-    this.userService.updateProfile(this.user.id, updatedProfile).subscribe({
+    this.userService.updateProfile(this.user!.id, updatedProfile).subscribe({
       next: () => {
-        this.user.bio = this.editedBio;
+        this.user!.bio = this.editedBio;
         console.log('Succesfully updated bio')
         this.isEditingBio = false;
       },

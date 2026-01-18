@@ -56,7 +56,7 @@ export class WallComponent implements OnInit {
       next: () => {
         console.log('Successfully created new post');
         this.isCreatingPost = false;
-        this.loadAllPosts()
+        this.loadAllPosts();
       },
       error: (error) => {
         console.error('Failed to create new post:', error);
