@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FullListComponent } from './full-list.component';
+import { GroupPageHeaderComponent } from './group-page-header.component';
 
-describe('FullListComponent', () => {
-  let component: FullListComponent;
-  let fixture: ComponentFixture<FullListComponent>;
+describe('GroupPageHeaderComponent', () => {
+  let component: GroupPageHeaderComponent;
+  let fixture: ComponentFixture<GroupPageHeaderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FullListComponent]
+      imports: [GroupPageHeaderComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FullListComponent);
+    fixture = TestBed.createComponent(GroupPageHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

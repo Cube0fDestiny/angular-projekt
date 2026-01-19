@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupHeaderComponent } from './group-header.component';
+import { GroupPageComponent } from './group-page.component';
 
-describe('GroupHeaderComponent', () => {
-  let component: GroupHeaderComponent;
-  let fixture: ComponentFixture<GroupHeaderComponent>;
+describe('ProfilePageComponent', () => {
+  let component: GroupPageComponent;
+  let fixture: ComponentFixture<GroupPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GroupHeaderComponent]
+      imports: [GroupPageComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GroupHeaderComponent);
+    fixture = TestBed.createComponent(GroupPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

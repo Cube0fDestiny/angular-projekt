@@ -15,10 +15,10 @@
           </orang-button>
           
           <!-- Content Area -->
-          <div class="flex-1">
+          <div class="flex-1" *ngIf="isCreatingPost">
             <!-- Edit Mode -->
             <form 
-              *ngIf="isCreatingPost" 
+               
               (ngSubmit)="createPost()" 
               class="flex items-center gap-3"
             >
