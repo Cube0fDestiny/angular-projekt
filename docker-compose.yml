@@ -1,0 +1,165 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.2.2-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+    restart:
+      unless-stopped
+
+  gateway:
+    container_name: gateway
+    build:
+      context: ./backend/gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped
+  
+  user-service:
+    container_name: user-service
+    build:
+      context: ./backend/user-service
+    environment:
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
+  post-service:
+    container_name: post-service
+    build:
+      context: ./backend/post-service
+    environment:
+      - PORT=3002
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
+  event-service:
+    container_name: event-service
+    build:
+      context: ./backend/event-service
+    environment:
+      - PORT=3003
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+    
+  image-service:
+    container_name: image-service
+    build:
+      context: ./backend/image-service
+    environment:
+      - PORT=3004
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+    restart: unless-stopped
+
+  group-service:
+    container_name: group-service
+    build:
+      context: ./backend/group-service
+    environment:
+      - PORT=3005
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+    restart: unless-stopped
+
+  chat-service:
+    container_name: chat-service
+    build:
+      context: ./backend/chat-service
+    environment:
+      - PORT=3006
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+  
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+    ports:
+      - "4200:4200"
+    environment:
+      - ANGULAR_APP_API_URL=http://gateway:3000
+    restart: unless-stopped
+    depends_on:
+      - gateway
+  
+  # notification-service:
+  #   container_name: notification-service
+  #   build:
+  #     context: ./notification-service
+  #   environment:
+  #     - PORT=3007
+  #     - JWT_SECRET=${JWT_SECRET}
+  #     - DB_USER=${DB_USER}
+  #     - DB_HOST=${DB_HOST}
+  #     - DB_PASSWORD=${DB_PASSWORD}
+  #     - DB_NAME=${DB_NAME}
+  #     - DB_PORT=${DB_PORT}
+  #     - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+  #     - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+  #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+  #   restart: unless-stopped
+
+volumes:
+  rabbitmq_data: {}
