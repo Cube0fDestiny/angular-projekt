@@ -115,7 +115,52 @@ Wysyła nową wiadomość do czatu. Wiadomość jest emitowana w czasie rzeczywi
   "chat_id": "uuid",
   "creator_id": "uuid",
   "text": "string",
-  "created_at": "timestamp"
+  "created_at": "timestamp",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ]
+}
+```
+
+---
+
+### 5. Wysłanie wiadomości z obrazami (Gateway)
+
+`POST /chats/:chatId/messages/with-images`
+
+**Gateway Route:** `POST /chats/:chatId/messages/with-images`
+
+**Wymagana autoryzacja (Uczestnik czatu)**
+
+Wysyła nową wiadomość z obrazami do czatu. Wiadomość jest emitowana w czasie rzeczywistym do wszystkich uczestników czatu.
+
+**Parametry:**
+| Parametr | Typ | Opis |
+|---|---|---|
+| :chatId | uuid | ID czatu |
+
+**Forma multipart:**
+- `text` (form field) - tekst wiadomości
+- `images` (file array) - pliki obrazów (opcjonalne, max 10 plików)
+- `images` (JSON field, opcjonalne) - tablica istniejących ID obrazów z kolejnością
+
+**Odpowiedź (201 Created):**
+```json
+{
+  "id": "uuid",
+  "chat_id": "uuid",
+  "creator_id": "uuid",
+  "text": "string",
+  "created_at": "timestamp",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ]
 }
 ```
 
@@ -143,7 +188,13 @@ socket.on('newMessage', (message) => {
   //   chat_id: "uuid",
   //   creator_id: "uuid",
   //   text: "string",
-  //   created_at: "timestamp"
+  //   created_at: "timestamp",
+  //   images: [
+  //     {
+  //       image_id: "uuid",
+  //       image_order: 0
+  //     }
+  //   ]
   // }
 });
 ```

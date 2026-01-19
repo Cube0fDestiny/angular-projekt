@@ -1,6 +1,49 @@
 import { publishEvent } from "../utils/rabbitmq-client.js";
 import * as db from "../db/index.js";
 
+const normalizeImagesPayload = (images) => {
+  if (!Array.isArray(images)) return [];
+
+  return images
+    .map((image, idx) => {
+      if (!image) return null;
+
+      if (typeof image === "string") {
+        return { image_id: image, image_order: idx };
+      }
+
+      const imageId = image.image_id || image.id;
+      if (!imageId) return null;
+
+      const order = Number.isInteger(image.image_order)
+        ? image.image_order
+        : idx;
+
+      return { image_id: imageId, image_order: order };
+    })
+    .filter(Boolean);
+};
+
+const attachImages = async (client, postId, images, log) => {
+  if (!images.length) return [];
+
+  const inserted = [];
+  for (const { image_id, image_order } of images) {
+    await client.query(
+      `INSERT INTO "Post_Images" (post_id, image_id, image_order)
+       VALUES ($1, $2, $3)`,
+      [postId, image_id, image_order],
+    );
+    inserted.push({ image_id, image_order });
+  }
+
+  log?.info(
+    { count: inserted.length, postId },
+    "Powiązano obrazy z postem",
+  );
+  return inserted;
+};
+
 export const getAllPosts = async (req, res) => {
   const log = req.log;
   try {
@@ -27,7 +70,18 @@ export const getAllPosts = async (req, res) => {
                   ) pr
               ),
               '{"totalCount": 0, "counts": []}'::json
-          ) as reactions
+          ) as reactions,
+          COALESCE(
+            (
+              SELECT json_agg(
+                json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
+                ORDER BY pi.image_order
+              )
+              FROM "Post_Images" pi
+              WHERE pi.post_id = p.id
+            ),
+            '[]'::json
+          ) as images
           FROM
               "Posts" AS p
           WHERE
@@ -54,9 +108,20 @@ export const getPostById = async (req, res) => {
 
   try {
     const postResult = await db.query(
-      `SELECT id, creator_id, "Text", location_id, location_type, created_at
-      FROM "Posts"
-      WHERE id = $1 AND deleted = false`,
+      `SELECT p.id, p.creator_id, p."Text", p.location_id, p.location_type, p.created_at,
+      COALESCE(
+        (
+          SELECT json_agg(
+            json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
+            ORDER BY pi.image_order
+          )
+          FROM "Post_Images" pi
+          WHERE pi.post_id = p.id
+        ),
+        '[]'::json
+      ) as images
+      FROM "Posts" p
+      WHERE p.id = $1 AND p.deleted = false`,
       [id],
     );
 
@@ -112,6 +177,17 @@ export const getPostsByUserId = async (req, res) => {
           p.location_id,
           p.location_type,
           p.created_at,
+          COALESCE(
+            (
+              SELECT json_agg(
+                json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
+                ORDER BY pi.image_order
+              )
+              FROM "Post_Images" pi
+              WHERE pi.post_id = p.id
+            ),
+            '[]'::json
+          ) as images,
           -- This is the same aggregation logic as in getAllPosts
           COALESCE(
               (
@@ -151,11 +227,16 @@ export const getPostsByUserId = async (req, res) => {
 
 export const createPost = async (req, res) => {
   const log = req.log;
-  const { content, location_id, location_type } = req.body;
+  const { content, location_id, location_type, images } = req.body;
   const creatorId = req.user.id;
 
+  const imagesPayload = normalizeImagesPayload(images);
+  const client = await db.getClient();
+
   try {
-    const result = await db.query(
+    await client.query("BEGIN");
+
+    const result = await client.query(
       `INSERT INTO "Posts" (creator_id, "Text", location_id, location_type) 
       VALUES ($1, $2, $3, $4) 
       RETURNING id, created_at, "Text", location_id, location_type, creator_id`,
@@ -163,18 +244,31 @@ export const createPost = async (req, res) => {
     );
     const newPost = result.rows[0];
 
+    const insertedImages = await attachImages(
+      client,
+      newPost.id,
+      imagesPayload,
+      log,
+    );
+
+    await client.query("COMMIT");
+
     publishEvent("post.created", {
       postId: newPost.id,
-      creatorId: newPost.creatorId,
+      creatorId: newPost.creator_id,
+      images: insertedImages,
     });
 
     log.info(`[Post-Service] Stworzono post o id: ${newPost.id}`);
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({ ...newPost, images: insertedImages });
   } catch (err) {
+    await client.query("ROLLBACK");
     log.error(err);
     res.status(500).json({
       error: err.message + " Błąd serwera podczas tworzenia posta",
     });
+  } finally {
+    client.release();
   }
 };
 
@@ -184,7 +278,7 @@ export const updatePost = async (req, res) => {
   const { content } = req.body;
 
   try {
-    const resulty = await db.query(
+    const result = await db.query(
       `UPDATE "Posts"
       SET "Text" = $1
       WHERE id = $2 AND deleted = false
@@ -192,8 +286,14 @@ export const updatePost = async (req, res) => {
       [content, id],
     );
 
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono posta o id: " + id });
+    }
+
     log.info(`[Post-Service] Zaktualizowano post o id: ${id}`);
-    res.status(200).json(resulty.rows[0]);
+    res.status(200).json(result.rows[0]);
   } catch (err) {
     log.error(err);
     res.status(500).json({

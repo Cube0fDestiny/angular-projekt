@@ -5,7 +5,7 @@ export const getAllEvents = async (req, res) => {
   const log = req.log;
   try {
     const result = await db.query(
-      `SELECT id, name, bio, event_date, creator_id FROM "Events"
+      `SELECT id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at FROM "Events"
       WHERE deleted = false
       ORDER BY event_date DESC`
     );
@@ -28,7 +28,8 @@ export const getEventById = async (req, res) => {
 
   try {
     const result = await db.query(
-      `SELECT * FROM "Events"
+      `SELECT id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at
+      FROM "Events"
       WHERE id = $1 AND deleted = false`,
       [id]
     );
@@ -66,7 +67,7 @@ export const getUserEvents = async (req, res) => {
       `
       WITH UserEvents AS (
         SELECT
-          id, name, bio, event_date, creator_id, 
+          id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at,
           'created' as user_relation,
           1 AS priority
         FROM "Events"
@@ -75,7 +76,7 @@ export const getUserEvents = async (req, res) => {
         UNION
 
         SELECT
-          e.id, e.name, e.bio, e.event_date, e.creator_id, 'followed' as user_relation,
+          e.id, e.name, e.bio, e.event_date, e.creator_id, e.header_picture_id, e.profile_picture_id, e.created_at, 'followed' as user_relation,
           2 AS priority
         FROM "Events" as e
         JOIN "Event_Follows" AS ef ON e.id = ef.event_id
@@ -83,7 +84,7 @@ export const getUserEvents = async (req, res) => {
       )
 
       SELECT DISTINCT ON (id)
-        id, name, bio, event_date, creator_id, user_relation
+        id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at, user_relation
       FROM UserEvents
       ORDER BY id, priority ASC; 
       `,
@@ -91,7 +92,7 @@ export const getUserEvents = async (req, res) => {
     );
 
     log.info(
-      { userId, eventCount: result.rowCount },
+      { userId: user_id, eventCount: result.rowCount },
       "Pobrano wydarzenia dla użytkownika."
     );
     res.status(200).json(result.rows);
@@ -115,7 +116,7 @@ export const createEvent = async (req, res) => {
   try {
     const result = await db.query(
       `INSERT INTO "Events" (name, bio, event_date, creator_id, header_picture_id, profile_picture_id) 
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id`,
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at`,
       [name, bio, event_date, creator_id, header_picture_id, profile_picture_id]
     );
     const newEvent = result.rows[0];
@@ -167,14 +168,24 @@ export const updateEvent = async (req, res) => {
       name: req.body.name || currentEvent.name,
       bio: req.body.bio || currentEvent.bio,
       event_date: req.body.event_date || currentEvent.event_date,
+      header_picture_id:
+        req.body.header_picture_id !== undefined
+          ? req.body.header_picture_id
+          : currentEvent.header_picture_id,
     };
 
     const result = await db.query(
       `UPDATE "Events"
-      SET name = $1, bio = $2, event_date = $3
-      WHERE id = $4 AND deleted = false
-      RETURNING *`,
-      [updatedData.name, updatedData.bio, updatedData.event_date, id]
+      SET name = $1, bio = $2, event_date = $3, header_picture_id = $4
+      WHERE id = $5 AND deleted = false
+      RETURNING id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at`,
+      [
+        updatedData.name,
+        updatedData.bio,
+        updatedData.event_date,
+        updatedData.header_picture_id,
+        id,
+      ]
     );
 
     log.info({ eventId: id }, "Zaktualizowano wydarzenie.");

@@ -123,7 +123,36 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 6. Usunięcie konta (Soft Delete)
+### 6. Aktualizacja profilu z obrazami (Gateway)
+
+`PUT /users/:id/profile-with-image`
+
+**Gateway Route:** `PUT /users/:id/profile-with-image`
+
+**Wymagana autoryzacja (Właściciel lub Admin)**
+
+Aktualizuje profil użytkownika z możliwością przesłania zdjęcia profilowego i w tle.
+
+**Forma multipart:**
+- `name` (form field, opcjonalne) - imię
+- `bio` (form field, opcjonalne) - biografia
+- `is_company` (form field, opcjonalne) - czy to konto firmowe
+- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
+- `header_picture` (file) - zdjęcie w tle (opcjonalne)
+
+**Odpowiedź (200 OK):**
+```json
+{
+  "message": "Profil został zaktualizowany",
+  "user_id": "uuid",
+  "profile_picture_id": "uuid",
+  "header_picture_id": "uuid"
+}
+```
+
+---
+
+### 7. Usunięcie konta (Soft Delete)
 `DELETE /:id`
 - *Wymagana autoryzacja (Właściciel lub Admin)*
 
@@ -137,7 +166,7 @@ Wymagane dla endpointów chronionych:
 
 ## � Endpointy: Śledzenie (Follow)
 
-### 7. Przełączanie śledzenia użytkownika
+### 8. Przełączanie śledzenia użytkownika
 `POST /:id/follow`
 - *Wymagana autoryzacja*
 
@@ -150,7 +179,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 8. Pobranie obserwujących użytkownika
+### 9. Pobranie obserwujących użytkownika
 `GET /:id/followers`
 - *Endpoint publiczny*
 
@@ -167,7 +196,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 9. Pobranie użytkowników śledzonych przez użytkownika
+### 10. Pobranie użytkowników śledzonych przez użytkownika
 `GET /:id/following`
 - *Endpoint publiczny*
 
@@ -186,7 +215,7 @@ Wymagane dla endpointów chronionych:
 
 ## 👥 Endpointy: Zaproszenia Przyjaźni
 
-### 10. Wysłanie zaproszenia przyjaźni
+### 11. Wysłanie zaproszenia przyjaźni
 `POST /:id/friend-request`
 - *Wymagana autoryzacja*
 
@@ -199,7 +228,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 11. Zaakceptowanie zaproszenia przyjaźni
+### 12. Zaakceptowanie zaproszenia przyjaźni
 `POST /friend-requests/:id/accept`
 - *Wymagana autoryzacja*
 
@@ -212,7 +241,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 12. Odrzucenie/Anulowanie zaproszenia przyjaźni
+### 13. Odrzucenie/Anulowanie zaproszenia przyjaźni
 `DELETE /friend-requests/:id`
 - *Wymagana autoryzacja*
 
@@ -227,7 +256,7 @@ Wymagane dla endpointów chronionych:
 
 ## 👫 Endpointy: Zarządzanie Przyjaciółmi
 
-### 13. Lista przyjaciół użytkownika
+### 14. Lista przyjaciół użytkownika
 `GET /friends/list`
 - *Wymagana autoryzacja*
 
@@ -242,7 +271,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 14. Usunięcie przyjaciela
+### 15. Usunięcie przyjaciela
 `DELETE /friends/:id`
 - *Wymagana autoryzacja*
 
@@ -255,7 +284,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 15. Pobranie przychodzących zaproszeń przyjaźni
+### 16. Pobranie przychodzących zaproszeń przyjaźni
 `GET /friend-requests/incoming`
 - *Wymagana autoryzacja*
 
@@ -271,7 +300,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 16. Pobranie wysłanych zaproszeń przyjaźni
+### 17. Pobranie wysłanych zaproszeń przyjaźni
 `GET /friend-requests/outgoing`
 - *Wymagana autoryzacja*
 
@@ -287,7 +316,7 @@ Wymagane dla endpointów chronionych:
 
 ---
 
-### 17. Pobranie zaproszeni do rozpatrzenia (oczekujące)
+### 18. Pobranie zaproszeni do rozpatrzenia (oczekujące)
 `GET /friend-requests/pending`
 - *Wymagana autoryzacja*
 

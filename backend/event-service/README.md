@@ -160,7 +160,42 @@ Aktualizuje szczegóły wydarzenia. Tylko twórca może edytować.
 
 ---
 
-### 6. Usunięcie wydarzenia (Soft Delete)
+### 6. Stworzenie wydarzenia z obrazami (Gateway)
+
+`POST /events/with-image`
+
+**Gateway Route:** `POST /events/with-image`
+
+**Wymagana autoryzacja**
+
+Tworzy nowe wydarzenie z możliwością przesłania zdjęć profilowego i w tle.
+
+**Forma multipart:**
+- `name` (form field) - nazwa wydarzenia
+- `bio` (form field) - opis
+- `event_date` (form field) - data ISO 8601
+- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
+- `header_picture` (file) - zdjęcie w tle (opcjonalne)
+
+**Odpowiedź (201 Created):**
+```json
+{
+  "message": "Event stworzony!",
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "bio": "string",
+    "event_date": "timestamp",
+    "creator_id": "uuid",
+    "header_picture_id": "uuid",
+    "profile_picture_id": "uuid"
+  }
+}
+```
+
+---
+
+### 7. Usunięcie wydarzenia (Soft Delete)
 `DELETE /:id`
 
 **Wymagana autoryzacja (Tylko twórca)**
@@ -181,7 +216,7 @@ Miękkie usunięcie wydarzenia (oznaczenie jako usunięte, bez usuwania z bazy).
 
 ---
 
-### 7. Toggle obserwowania wydarzenia
+### 8. Toggle obserwowania wydarzenia
 `POST /:id/follow`
 
 **Wymagana autoryzacja**
@@ -209,7 +244,7 @@ Dodaje lub usuwa obserwowanie wydarzenia przez zalogowanego użytkownika.
 
 ---
 
-### 8. Pobranie obserwujących wydarzenia
+### 9. Pobranie obserwujących wydarzenia
 `GET /:id/followers`
 
 **Endpoint publiczny**

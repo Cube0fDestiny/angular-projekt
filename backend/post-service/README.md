@@ -114,10 +114,43 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
+### 6\. Stworzenie posta z obrazami (Gateway)
+
+`POST /posts/with-images`
+
+**Gateway Route:** `POST /posts/with-images`
+
+**Wymagana autoryzacja**
+
+**Forma multipart:**
+- `content` (form field) - tekst posta
+- `location_id` (form field, opcjonalne)
+- `location_type` (form field, opcjonalne)
+- `images` (file array) - pliki obrazów
+
+**Odpowiedź (201 Created):**
+
+```
+{
+  "id": "uuid",
+  "creator_id": "uuid",
+  "Text": "string",
+  "location_id": "uuid",
+  "location_type": "string",
+  "created_at": "timestamp",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ]
+}
+```
+
 ---
 ## 🚀 Endpointy: Komentarze i Reakcje
 
-### 6\. Pobranie komentarzy do posta
+### 7\. Pobranie komentarzy do posta
 
 `GET /:postId/comments`
 
@@ -139,7 +172,7 @@ Wymagane dla endpointów chronionych:
 ]
 ```
 
-### 7\. Dodanie komentarza do posta
+### 8\. Dodanie komentarza do posta
 
 `POST /:postId/comments`
 

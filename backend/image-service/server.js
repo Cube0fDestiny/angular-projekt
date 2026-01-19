@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 
-import imageRoutes from "./routes/images.js";
+import imageRoutes from "./routes/imageRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();

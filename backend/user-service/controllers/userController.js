@@ -12,7 +12,7 @@ export const getAllUsers = async (req, res) => {
     const result = await db.query(
       `SELECT user_id, name, surname, email, bio, is_company, created_at
       FROM "Users"
-      WHERE deleted = false`
+      WHERE deleted = false`,
     );
 
     const users = result.rows.map((row) => ({
@@ -27,7 +27,7 @@ export const getAllUsers = async (req, res) => {
     }));
 
     req.log.info(
-      `[User-Service] Pobrano ${users.length} użytkowników z bazy danych`
+      `[User-Service] Pobrano ${users.length} użytkowników z bazy danych`,
     );
     res.status(200).json(users);
   } catch (err) {
@@ -46,7 +46,7 @@ export const getUserProfile = async (req, res) => {
       `SELECT user_id, name, surname, email, bio, is_company, created_at
       FROM "Users"
       WHERE user_id = $1 AND deleted = false`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
@@ -83,9 +83,10 @@ export const register = async (req, res) => {
   const { name, surname, email, password, is_company } = req.body;
 
   try {
-    const checkUser = await db.query(`SELECT * FROM "Users" WHERE email = $1 and deleted = false`, [
-      email,
-    ]);
+    const checkUser = await db.query(
+      `SELECT * FROM "Users" WHERE email = $1 and deleted = false`,
+      [email],
+    );
 
     if (checkUser.rows.length > 0) {
       return res
@@ -97,7 +98,7 @@ export const register = async (req, res) => {
 
     const result = await db.query(
       `INSERT INTO "Users" (name, surname, email, password, salt, is_company) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
-      [name, surname, email, hash, salt, is_company || false]
+      [name, surname, email, hash, salt, is_company || false],
     );
 
     const newUser = result.rows[0];
@@ -111,11 +112,11 @@ export const register = async (req, res) => {
       JWT_SECRET,
       {
         expiresIn: "12h",
-      }
+      },
     );
 
     req.log.info(
-      `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.user_id}`
+      `[User-Service] Zarejestrowano nowego użytkownika ID: ${newUser.user_id}`,
     );
 
     res.status(201).json({
@@ -148,7 +149,7 @@ export const login = async (req, res) => {
       WHERE email = $1
       ORDER BY created_at DESC
       LIMIT 1`,
-      [email]
+      [email],
     );
 
     const user = result.rows[0];
@@ -175,7 +176,7 @@ export const login = async (req, res) => {
       JWT_SECRET,
       {
         expiresIn: "12h",
-      }
+      },
     );
 
     req.log.info(`[User-Service] Zalogowano użytkownika ID: ${user.user_id}`);
@@ -201,14 +202,33 @@ export const login = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   const { id } = req.params;
-  const { name, surname, email, bio, is_company } = req.body;
+  const log = req.log;
+
+  const {
+    name,
+    surname,
+    email,
+    bio,
+    is_company,
+    profile_picture_id,
+    header_picture_id,
+  } = req.body;
+
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({ message: "Brak danych do aktualizacji." });
+  }
 
   try {
     const currentRes = await db.query(
-      `SELECT name, surname, email, bio, is_company FROM "Users" WHERE user_id = $1 AND deleted = false`,
-      [id]
+      `SELECT * FROM "Users" WHERE user_id = $1 AND deleted = false`,
+      [id],
     );
+
     if (currentRes.rows.length === 0) {
+      log.warn(
+        { userId: id },
+        "Nieudana próba aktualizacji nieistniejącego użytkownika.",
+      );
       return res
         .status(404)
         .json({ message: "Nie znaleziono użytkownika do edycji" });
@@ -216,44 +236,46 @@ export const updateProfile = async (req, res) => {
 
     const current = currentRes.rows[0];
 
-    const newName = name || current.name;
-    const newBio = bio !== undefined ? bio : current.bio;
-    const newIsCompany =
-      is_company !== undefined ? is_company : current.is_company;
-    const newSurname = surname || current.surname;
-    const newEmail = email || current.email;
+    const updatedData = {
+      name: name || current.name,
+      surname: surname || current.surname,
+      email: email || current.email,
+      bio: bio !== undefined ? bio : current.bio,
+      is_company: is_company !== undefined ? is_company : current.is_company,
+      profile_picture_id: profile_picture_id || current.profile_picture_id,
+      profile_header: header_picture_id || current.profile_header,
+    };
+
+    const fields = Object.keys(updatedData);
+    const setString = fields
+      .map((field, index) => `"${field}" = $${index + 1}`)
+      .join(", ");
+    const values = Object.values(updatedData);
 
     const updateQuery = `
-      UPDATE "Users"
-      SET name = $1, bio = $2, is_company = $3,
-      email = $4, surname = $5
-      WHERE user_id = $6 AND deleted = false
-      RETURNING user_id
-    `;
+            UPDATE "Users"
+            SET ${setString}
+            WHERE user_id = $${fields.length + 1} AND deleted = false
+            RETURNING user_id
+        `;
 
-    const result = await db.query(updateQuery, [
-      newName,
-      newBio,
-      newIsCompany,
-      newEmail,
-      newSurname,
-      id
-    ]);
+    const result = await db.query(updateQuery, [...values, id]);
 
-    req.log.info(`[User-Service] Zaktualizowano profil użytkownika ID: ${id}`);
-
+    log.info({ userId: id }, "Pomyślnie zaktualizowano profil użytkownika.");
     res.status(200).json({
       message: "Profil został zaktualizowany",
       user_id: result.rows[0].user_id,
     });
   } catch (err) {
-    req.log.error(err);
+    log.error(
+      { err, userId: id },
+      "Błąd serwera podczas aktualizacji profilu.",
+    );
     res.status(500).json({
-      error: err.message + " Błąd serwera podczas aktualizacji profilu",
+      error: "Błąd serwera podczas aktualizacji profilu",
     });
   }
 };
-
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
 
@@ -263,7 +285,7 @@ export const deleteUser = async (req, res) => {
       SET deleted = true
       WHERE user_id = $1 AND deleted = false
       RETURNING user_id`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
@@ -272,7 +294,7 @@ export const deleteUser = async (req, res) => {
         .json({ message: "Nie znaleziono użytkownika do usunęcia" });
     }
 
-    req.log.info(`[User-Service] Usunięto profil użytkownika ID: ${id}`);
+    req.log.info(`Usunięto profil użytkownika ID: ${id}`);
 
     res.status(200).json({
       message: "Profil został usunięty",

@@ -78,22 +78,22 @@ services:
     depends_on:
       - rabbitmq
     
-  # image-service:
-  #   container_name: image-service
-  #   build:
-  #     context: ./image-service
-  #   environment:
-  #     - PORT=3004
-  #     - JWT_SECRET=${JWT_SECRET}
-  #     - DB_USER=${DB_USER}
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_PORT=${DB_PORT}
-  #     - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
-  #     - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
-  #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
-  #   restart: unless-stopped
+  image-service:
+    container_name: image-service
+    build:
+      context: ./image-service
+    environment:
+      - PORT=3004
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+    restart: unless-stopped
 
   # group-service:
   #   container_name: group-service

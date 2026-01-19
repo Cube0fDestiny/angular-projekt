@@ -7,18 +7,17 @@ import pino from "pino";
 import pinoHttp from "pino-http";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { gatewayVerifyToken } from "./middleware/auth.js";
+import orchestrationRoutes from "./routes/orchestrationRoutes.js";
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
   transport:
     process.env.NODE_ENV !== "production"
-      ? {
-          target: "pino-pretty",
-        }
+      ? { target: "pino-pretty" }
       : undefined,
 });
 
-const service = [
+const services = [
   {
     route: "/users",
     target: "http://user-service:3001/users",
@@ -39,10 +38,6 @@ const service = [
     route: "/groups",
     target: "http://group-service:3005/groups",
   },
-  // {
-  //   route:"/chats",
-  //   target:"http://chat-service:3006"
-  // },
   {
     route: "/notifications",
     target: "http://notification-service:3007/notifications",
@@ -53,16 +48,16 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors());
-app.use(gatewayVerifyToken);
 app.use(pinoHttp({ logger }));
+app.use(gatewayVerifyToken);
 
-// Konfiguracja Proxy dla serwisów
-service.forEach(({ route, target }) => {
+app.use("/", orchestrationRoutes);
+
+services.forEach(({ route, target }) => {
   const proxyOptions = {
     target,
     changeOrigin: true,
     pathRewrite: {
-      // Usuwa prefiks - /example/123 -> /123
       [`^${route}`]: "",
     },
     onError: (err, req, res) => {
@@ -72,7 +67,7 @@ service.forEach(({ route, target }) => {
         JSON.stringify({
           message: "Usługa jest tymczasowo niedostępna.",
           service: route,
-        })
+        }),
       );
     },
   };
@@ -93,7 +88,7 @@ const chatServiceProxy = createProxyMiddleware({
       JSON.stringify({
         message: "Usługa jest tymczasowo niedostępna.",
         service: "/chats",
-      })
+      }),
     );
   },
 });
@@ -101,7 +96,8 @@ const chatServiceProxy = createProxyMiddleware({
 app.use("/chats", chatServiceProxy);
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => logger.info(`🚀 Gateway running on port ${PORT}`));
+
+server.listen(PORT, () => logger.info(`🚀 Gateway działa na porcie ${PORT}`));
 
 server.on("upgrade", (req, socket, head) => {
   logger.info({ url: req.url }, `Próba uaktualnienia połączenia do WebSocket`);
