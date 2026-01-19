@@ -1,0 +1,111 @@
+services:
+  # --- GŁÓWNE WEJŚCIE DO APLIKACJI (REVERSE PROXY) ---
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"   # Port HTTP
+      - "443:443" # Port HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - gateway
+      - frontend
+
+  # --- FRONTEND ANGULAR ---
+  frontend:
+    image: twoja-nazwa-uzytkownika/frontend:latest # Użyj swojej nazwy z Docker Hub
+    container_name: frontend
+    restart: unless-stopped
+
+  # --- API GATEWAY (serwis wewnętrzny) ---
+  gateway:
+    image: twoja-nazwa-uzytkownika/gateway:latest
+    container_name: gateway
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET}
+
+  # --- BROKER WIADOMOŚCI ---
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
+    restart: unless-stopped
+
+  # --- BAZY DANYCH ---
+  user-db:
+    image: postgres:14-alpine
+    container_name: user_db
+    environment:
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+      - POSTGRES_DB=${USER_DB_NAME}
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+      - ./init-scripts/user-db-init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  post-db:
+    image: postgres:14-alpine
+    container_name: post_db
+    environment:
+      - POSTGRES_USER=${POST_DB_USER}
+      - POSTGRES_PASSWORD=${POST_DB_PASSWORD}
+      - POSTGRES_DB=${POST_DB_NAME}
+    volumes:
+      - post-db-data:/var/lib/postgresql/data
+      - ./init-scripts/post-db-init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+  
+  # ... dodaj tutaj bazy dla event-db, image-db, group-db, chat-db ...
+
+  # --- MIKROSERWISY ---
+  user-service:
+    image: twoja-nazwa-uzytkownika/user-service:latest
+    container_name: user_service
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_HOST=user-db
+      - DB_USER=${USER_DB_USER}
+      - DB_PASSWORD=${USER_DB_PASSWORD}
+      - DB_NAME=${USER_DB_NAME}
+    depends_on:
+      - user-db
+
+  post-service:
+    image: twoja-nazwa-uzytkownika/post-service:latest
+    container_name: post_service
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      - DB_HOST=post-db
+      - DB_USER=${POST_DB_USER}
+      - DB_PASSWORD=${POST_DB_PASSWORD}
+      - DB_NAME=${POST_DB_NAME}
+    depends_on:
+      - post-db
+      - rabbitmq
+
+  # ... powtórz dla wszystkich swoich serwisów (event, image, group, chat) ...
+  # Pamiętaj, aby każdy wskazywał na swoją własną bazę danych w DB_HOST
+
+volumes:
+  caddy_data:
+  caddy_config:
+  rabbitmq-data:
+  user-db-data:
+  post-db-data:
+  # ... wolumeny dla pozostałych baz danych

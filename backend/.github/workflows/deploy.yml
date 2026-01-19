@@ -1,0 +1,44 @@
+name: Deploy Backend to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build services
+        run: docker compose build
+
+      - name: Push services to Docker Hub
+        run: docker compose push
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Przejdź do folderu z aplikacją na serwerze
+            cd ~/app
+            
+            # Pobierz najnowsze wersje obrazów z Docker Hub
+            docker compose pull
+            
+            # Uruchom ponownie wszystkie kontenery z nowymi obrazami
+            docker compose up -d --remove-orphans
+            
+            # Opcjonalnie: posprzątaj stare, nieużywane obrazy
+            docker image prune -af
