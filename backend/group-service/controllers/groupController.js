@@ -110,10 +110,10 @@ export const createGroup = async (req, res) => {
   const log = req.log;
  
 
-  const { name, bio, header_picture_id, profile_picture_id, free_join } =
+  const { name, bio, header_picture_id, profile_picture_id, free_join_b } =
     req.body;
   const creator_id = req.user.id; 
-
+    const free_join = free_join_b || "false";
   ///return res.status(200).json({message:"uid="+creator_id});
   try
   {
@@ -123,7 +123,7 @@ export const createGroup = async (req, res) => {
     const group_result = await db.query
     (
       `
-      INSERT INTO "Groups"(name, bio,header_picture_id,profile_picture_id)
+      INSERT INTO "Groups"(name, bio,header_picture_id,profile_picture_id,free_join)
       VALUES ($1, $2, $3, $4,$5)
       RETURNING *
         `,[name,bio,header_picture_id,profile_picture_id,free_join]
@@ -136,16 +136,13 @@ export const createGroup = async (req, res) => {
     VALUES($1,$2,true,owner) RETURNING *
     `
     const membershipValues=[req.user.id,newGroup.id];
-    await db.query("COMMIT");
-    //res.status(200).json({message:"Grupa została dodane",memvalues:membershipValues })
+    await db.query("COMMIT"); 
     const membershipResult = await db.query
     ( `INSERT INTO "Group_Memberships"(user_id,group_id,valid,member_type)
     VALUES($1,$2,$3,$4) RETURNING *
     `,
     [req.user.id,newGroup.id,true,'owner']
-    );
-    //await db.query(membershipQuery,membershipValues);
-    //res.status(201).json({ message: "Event stworzony!", data: result.rows[0] });
+    ); 
     await db.query("COMMIT");
     log.info(
       {group_id: newGroup.id, creatorID: req.user.id},"utworzono nową grupę"
@@ -154,7 +151,7 @@ export const createGroup = async (req, res) => {
     res.status(200).json({message:"Grupa została dodane"})
   }
   catch (err) {
-    await client.query("ROLLBACK");
+    await db.query("ROLLBACK");
     log.error(
       { err, creatorId: creator_id, body: req.body },
       "Błąd serwera podczas tworzenia grupy."
