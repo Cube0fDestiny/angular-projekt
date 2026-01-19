@@ -11,7 +11,7 @@ import { User } from '../../shared/models/user.model';
 import { forkJoin } from 'rxjs';
 
 @Component({
-  selector: 'app-settings',
+  selector: 'app-friend-list',
   standalone: true,
   imports: [
     CommonModule,

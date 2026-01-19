@@ -9,6 +9,9 @@ import { FriendListComponent } from './features/friend-list/friend-list.componen
 import { EventsPageComponent } from './features/events/events-page.component';
 import { EventPageComponent } from './features/event/main/event-page.component';
 import { FollowerListComponent } from './features/follower-list/follower-list.component';
+import { MemberListComponent } from './features/member-list/member-list.component';
+import { GroupsPageComponent } from './features/groups/groups-page.component';
+import { GroupPageComponent } from './features/group/main/group-page.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,6 +28,11 @@ export const routes: Routes = [
     component: EventsPageComponent, 
     canActivate: [authGuard] 
   },
+  { 
+    path: 'groups', 
+    component: GroupsPageComponent, 
+    canActivate: [authGuard] 
+  },
   {
     path: 'friends/:id',
     component: FriendListComponent,
@@ -33,6 +41,11 @@ export const routes: Routes = [
   {
     path: 'followers/:id',
     component: FollowerListComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'members/:id',
+    component: MemberListComponent,
     canActivate: [authGuard]
   },
   { 
@@ -48,6 +61,11 @@ export const routes: Routes = [
   { 
     path: 'event/:id', 
     component: EventPageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'group/:id', 
+    component: GroupPageComponent, 
     canActivate: [authGuard] 
   },
   

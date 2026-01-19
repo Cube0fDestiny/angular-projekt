@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem } from '../../shared/models/user.model';
+import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem, ApiResponse } from '../../shared/models/user.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -94,4 +94,11 @@ export class UserService {
       this.clearSession();
     }
   }
+
+  toggleFollowProfile(id: string): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/${id}/follow`, {});
+  }
+
+  
+
 }

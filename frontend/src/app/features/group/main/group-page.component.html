@@ -1,0 +1,18 @@
+<div style="background-color: var(--o-bwhite);">
+  <app-navbar></app-navbar>
+  <app-group-header></app-group-header>
+  <div class="profile-container">
+      <table style="width: 80%; border-collapse: collapse;  margin: 0 auto; border: none;">
+        <tr>
+          <!-- Profile Sidebar -->
+          <td style="width:30%; vertical-align: top; border: none;">
+            <app-group-sidebar></app-group-sidebar> 
+          </td>
+          <!-- Profile Wall -->
+          <td style="width:50%; vertical-align: top; padding: 20px; border: none;">
+            <app-wall location_type="group" [location_id]="groupId!"></app-wall>
+          </td>
+        </tr>
+      </table>
+  </div>
+</div>

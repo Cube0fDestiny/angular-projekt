@@ -20,7 +20,7 @@ export class ProfilePageHeaderComponent implements OnInit {
   userId: string | null = null;
   didSentFriendRequest = false;
   hasFriendRequest = false;
-
+  isFollowing = false;
   @Input() stats = {
     friends: 0,
     posts: 0,
@@ -150,20 +150,25 @@ export class ProfilePageHeaderComponent implements OnInit {
 
   loadFriendStatus():void {
     this.userService.getAllFriends().subscribe({
-    next: (friendItems) => {
-      console.log('loaded friends list')
-      friendItems.forEach(friendItem => {
-        if (friendItem.friend_id==this.userId){
-          this.isFriend = true;
-        }
-      });
-    },
-    error: (error) => {
-      console.error('Error loading friend list:', error);
-    }
-  });
+      next: (friendItems) => {
+        console.log('loaded friends list')
+        friendItems.forEach(friendItem => {
+          if (friendItem.friend_id==this.userId){
+            this.isFriend = true;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading friend list:', error);
+      }
+    });
   }
 
-  onUnfriend(): void { this.unfriend.emit(); }
-  onMore(): void { this.more.emit(); }
+  toggleFollow(): void{
+    this.userService.toggleFollowProfile(this.userId!).subscribe(res => {
+      console.log('toggled following event: ', res);
+      this.isFollowing = !this.isFollowing;
+    });
+  }
+
 }

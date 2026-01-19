@@ -9,11 +9,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { OrangButtonComponent } from '../../shared/components/orang-button/orang-button.component';
 import { User } from '../../shared/models/user.model';
 import { forkJoin } from 'rxjs';
-import { OrangEvent, EventFollower } from '../../shared/models/event.models';
-import { EventService } from '../../core/event/event.service';
+import { Group, GroupMember } from '../../shared/models/group.model';
+import { GroupService } from '../../core/group/group.service';
 
 @Component({
-  selector: 'app-follower-list',
+  selector: 'app-member-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,60 +23,60 @@ import { EventService } from '../../core/event/event.service';
     OrangButtonComponent,
     FormsModule
   ],
-  templateUrl: './follower-list.component.html',
+  templateUrl: './member-list.component.html',
 })
-export class FollowerListComponent implements OnInit {
+export class MemberListComponent implements OnInit {
+  members: GroupMember[] = [];
+  group!: Group | null;
   user!: User;
   currentUser!: User | null;
-  sectionTitle = 'Users Following Event';
   @Output() userClick = new EventEmitter<string>();
-  event: OrangEvent | null = null;
-  eventId: string | null = null;
-  followers: EventFollower[] = [];
+
+  sectionTitle = 'Group Members';
+  groupId: string | null = null;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private eventService: EventService
+    private groupService: GroupService
   ) {}
 
   ngOnInit(): void {
     // Subscribe to current user
     
-    this.eventId = this.route.snapshot.paramMap.get('id');
+    this.groupId = this.route.snapshot.paramMap.get('id');
     
     // Subscribe to current user
     this.userService.currentUser$.subscribe(user => this.currentUser = user);
 
-    this.loadEvent();
+    this.loadGroup();
   }
 
-  loadEvent(): void {
-    this.eventService.getEventById(this.eventId!).subscribe(event => {
-      this.event = event;
-      this.sectionTitle = `Users Following "${event.name}"`;
-      this.loadFollowers();
+  loadGroup(): void {
+    this.groupService.getGroupById(this.groupId!).subscribe(group => {
+      this.group = group;
+      this.sectionTitle = `Group "${group.name}" Members`;
+      this.loadMembers();
     });
   }
 
-  loadFollowers():void {
-    this.eventService.getEventFollowers(this.eventId!).subscribe(followers => {
-      this.followers = followers;
+  loadMembers():void {
+    this.groupService.getGroupMembers(this.groupId!).subscribe(members => {
+      this.members = members;
       console.log('loaded followers');
     })
   }
 
-  getAvatarUrl(follower: EventFollower): string {
-    return follower.profile_picture_id || 'assets/logo_icon.png';
+  getAvatarUrl(member: GroupMember): string {
+    return member.profile_picture_id || 'assets/logo_icon.png';
   }
 
-  goToFriendProfile(userId: string): void {
-    console.log(userId);
+  goToProfile(userId: string): void {
     this.router.navigate(['/profile', userId]);
   }
 
-  goToEvent(): void {
-    this.router.navigate(['/event', this.eventId]);
+  goToGroup(): void {
+    this.router.navigate(['/group', this.groupId]);
   }
 }
