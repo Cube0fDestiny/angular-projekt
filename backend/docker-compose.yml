@@ -10,8 +10,122 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
-    restart:
-      unless-stopped
+    restart: unless-stopped
+
+  # Databases
+  user-db:
+    image: postgres:16-alpine
+    container_name: user-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: user_service
+    ports:
+      - "6432:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+      - ./init-scripts/01-user-service.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  post-db:
+    image: postgres:16-alpine
+    container_name: post-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: post_service
+    ports:
+      - "6433:5432"
+    volumes:
+      - post_db_data:/var/lib/postgresql/data
+      - ./init-scripts/02-post-service.sql:/docker-entrypoint-initdb.d/02-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  event-db:
+    image: postgres:16-alpine
+    container_name: event-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: event_service
+    ports:
+      - "6434:5432"
+    volumes:
+      - event_db_data:/var/lib/postgresql/data
+      - ./init-scripts/03-event-service.sql:/docker-entrypoint-initdb.d/03-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  image-db:
+    image: postgres:16-alpine
+    container_name: image-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: image_service
+    ports:
+      - "6435:5432"
+    volumes:
+      - image_db_data:/var/lib/postgresql/data
+      - ./init-scripts/04-image-service.sql:/docker-entrypoint-initdb.d/04-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  group-db:
+    image: postgres:16-alpine
+    container_name: group-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: group_service
+    ports:
+      - "6436:5432"
+    volumes:
+      - group_db_data:/var/lib/postgresql/data
+      - ./init-scripts/05-group-service.sql:/docker-entrypoint-initdb.d/05-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  chat-db:
+    image: postgres:16-alpine
+    container_name: chat-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: chat_service
+    ports:
+      - "6437:5432"
+    volumes:
+      - chat_db_data:/var/lib/postgresql/data
+      - ./init-scripts/06-chat-service.sql:/docker-entrypoint-initdb.d/06-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   gateway:
     container_name: gateway
@@ -28,126 +142,166 @@ services:
     container_name: user-service
     build:
       context: ./user-service
+    ports:
+      - "3001:3001"
     environment:
       - PORT=3001
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=user-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=user_service
+      - DB_PORT=5432
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
   post-service:
     container_name: post-service
     build:
       context: ./post-service
+    ports:
+      - "3002:3002"
     environment:
       - PORT=3002
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=post-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=post_service
+      - DB_PORT=5432
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      post-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
   event-service:
     container_name: event-service
     build:
       context: ./event-service
+    ports:
+      - "3003:3003"
     environment:
       - PORT=3003
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=event-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=event_service
+      - DB_PORT=5432
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      event-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
     
   image-service:
     container_name: image-service
     build:
       context: ./image-service
+    ports:
+      - "3004:3004"
     environment:
       - PORT=3004
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=image-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=image_service
+      - DB_PORT=5432
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
     restart: unless-stopped
+    depends_on:
+      image-db:
+        condition: service_healthy
 
   group-service:
     container_name: group-service
     build:
       context: ./group-service
+    ports:
+      - "3005:3005"
     environment:
       - PORT=3005
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=group-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=group_service
+      - DB_PORT=5432
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
     restart: unless-stopped
+    depends_on:
+      group-db:
+        condition: service_healthy
 
   chat-service:
     container_name: chat-service
     build:
       context: ./chat-service
+    ports:
+      - "3006:3006"
     environment:
       - PORT=3006
       - JWT_SECRET=${JWT_SECRET}
       - DB_USER=${DB_USER}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=chat-db
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=chat_service
+      - DB_PORT=5432
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      chat-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
   
   # notification-service:
   #   container_name: notification-service
   #   build:
   #     context: ./notification-service
+  #   ports:
+  #     - "3007:3007"
   #   environment:
   #     - PORT=3007
   #     - JWT_SECRET=${JWT_SECRET}
   #     - DB_USER=${DB_USER}
-  #     - DB_HOST=${DB_HOST}
+  #     - DB_HOST=notification-db
   #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_PORT=${DB_PORT}
+  #     - DB_NAME=notification_service
+  #     - DB_PORT=5432
   #     - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
   #     - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
   #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
   #   restart: unless-stopped
+  #   depends_on:
+  #     - notification-db
 
 volumes:
   rabbitmq_data: {}
+  user_db_data: {}
+  post_db_data: {}
+  event_db_data: {}
+  image_db_data: {}
+  group_db_data: {}
+  chat_db_data: {}
