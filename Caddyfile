@@ -1,6 +1,6 @@
 orang.studio {
     # Przekieruj żądania do API (REST i WS) do Gatewaya
-    handle_path /api/* {
+    handle /api/* {
         reverse_proxy gateway:3000
     }
 
