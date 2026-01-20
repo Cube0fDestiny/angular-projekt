@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 80
 
 # Komenda uruchamiająca serwer deweloperski Angulara
-CMD [ "npm", "run", "start", "--", "--host", "0.0.0.0" ]
+CMD [ "npm", "start"]
