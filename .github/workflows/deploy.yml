@@ -19,9 +19,32 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build services
+        env:
+          # Ta sekcja sprawia, że Docker Compose widzi te zmienne
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_PASS }}
+          RABBITMQ_URL: amqp://${{ secrets.RABBITMQ_USER }}:${{ secrets.RABBITMQ_PASS }}@rabbitmq:5672
         run: docker compose build
 
       - name: Push services to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_PASS }}
+          RABBITMQ_URL: amqp://${{ secrets.RABBITMQ_USER }}:${{ secrets.RABBITMQ_PASS }}@rabbitmq:5672
         run: docker compose push
 
       - name: Deploy to VPS
@@ -31,14 +54,16 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Przejdź do folderu z aplikacją na serwerze
             cd ~/app
             
-            # Pobierz najnowsze wersje obrazów z Docker Hub
+            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> .env
+            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> .env
+            
             docker compose pull
-            
-            # Uruchom ponownie wszystkie kontenery z nowymi obrazami
             docker compose up -d --remove-orphans
-            
-            # Opcjonalnie: posprzątaj stare, nieużywane obrazy
-            docker image prune -af

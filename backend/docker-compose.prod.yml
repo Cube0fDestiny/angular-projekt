@@ -17,13 +17,13 @@ services:
 
   # --- FRONTEND ANGULAR ---
   frontend:
-    image: noka993/frontend:latest # Użyj swojej nazwy z Docker Hub
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/frontend:latest # Użyj swojej nazwy z Docker Hub
     container_name: frontend
     restart: unless-stopped
 
   # --- API GATEWAY (serwis wewnętrzny) ---
   gateway:
-    image: noka993/gateway:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/gateway:latest
     container_name: gateway
     restart: unless-stopped
     environment:
@@ -43,7 +43,7 @@ services:
 
   # --- MIKROSERWISY ---
   user-service:
-    image: noka993/user-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/user-service:latest
     container_name: user_service
     restart: unless-stopped
     environment:
@@ -55,7 +55,7 @@ services:
       - DB_NAME=${DB_NAME}
 
   post-service:
-    image: noka993/post-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/post-service:latest
     container_name: post_service
     restart: unless-stopped
     environment:
@@ -70,7 +70,7 @@ services:
       - rabbitmq
 
   event-service:
-    image: noka993/event-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/event-service:latest
     container_name: event_service
     restart: unless-stopped
     environment:
@@ -85,7 +85,7 @@ services:
       - rabbitmq
 
   image-service:
-    image: noka993/image-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/image-service:latest
     container_name: image_service
     restart: unless-stopped
     environment:
@@ -97,7 +97,7 @@ services:
       - DB_NAME=${DB_NAME}
 
   group-service:
-    image: noka993/group-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/group-service:latest
     container_name: group_service
     restart: unless-stopped
     environment:
@@ -109,7 +109,7 @@ services:
       - DB_NAME=${DB_NAME}
 
   chat-service:
-    image: noka993/chat-service:latest
+    image: ${{ secrets.DOCKERHUB_USERNAME}}/chat-service:latest
     container_name: chat_service
     restart: unless-stopped
     environment:
