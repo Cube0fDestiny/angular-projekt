@@ -51,14 +51,14 @@ app.use(cors());
 app.use(pinoHttp({ logger }));
 app.use(gatewayVerifyToken);
 
-app.use("/", orchestrationRoutes);
+app.use("/api", orchestrationRoutes);
 
 services.forEach(({ route, target }) => {
   const proxyOptions = {
     target,
     changeOrigin: true,
     pathRewrite: {
-      [`^${route}`]: "",
+      [`^/api${route}`]: "",
     },
     onError: (err, req, res) => {
       req.log.error({ err, service: route }, "Błąd proxy");
@@ -71,7 +71,7 @@ services.forEach(({ route, target }) => {
       );
     },
   };
-  app.use(route, createProxyMiddleware(proxyOptions));
+  app.use(`/api${route}`, createProxyMiddleware(proxyOptions));
 });
 
 const chatServiceProxy = createProxyMiddleware({
@@ -79,7 +79,7 @@ const chatServiceProxy = createProxyMiddleware({
   changeOrigin: true,
   ws: true,
   pathRewrite: {
-    "^/chats": "",
+    "^/api/chats": "",
   },
   onError: (err, req, res) => {
     req.log.error({ err, service: "/chats" }, "Błąd proxy");
@@ -93,7 +93,7 @@ const chatServiceProxy = createProxyMiddleware({
   },
 });
 
-app.use("/chats", chatServiceProxy);
+app.use("/api/chats", chatServiceProxy);
 
 const PORT = process.env.PORT || 3000;
 
