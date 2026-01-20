@@ -14,6 +14,7 @@ services:
       unless-stopped
 
   gateway:
+    image: noka993/gateway
     container_name: gateway
     build:
       context: ./backend/gateway
@@ -25,6 +26,7 @@ services:
     restart: unless-stopped
   
   user-service:
+    image: noka993/user-service
     container_name: user-service
     build:
       context: ./backend/user-service
@@ -45,6 +47,7 @@ services:
       - rabbitmq
 
   post-service:
+    image: noka993/post-service
     container_name: post-service
     build:
       context: ./backend/post-service
@@ -62,6 +65,7 @@ services:
       - rabbitmq
 
   event-service:
+    image: noka993/event-service
     container_name: event-service
     build:
       context: ./backend/event-service
@@ -79,6 +83,7 @@ services:
       - rabbitmq
     
   image-service:
+    image: noka993/image-service
     container_name: image-service
     build:
       context: ./backend/image-service
@@ -96,6 +101,7 @@ services:
     restart: unless-stopped
 
   group-service:
+    image: noka993/group-service
     container_name: group-service
     build:
       context: ./backend/group-service
@@ -113,6 +119,7 @@ services:
     restart: unless-stopped
 
   chat-service:
+    image: noka993/chat-service
     container_name: chat-service
     build:
       context: ./backend/chat-service
@@ -133,6 +140,7 @@ services:
       - rabbitmq
   
   frontend:
+    image: noka993/frontend
     container_name: frontend
     build:
       context: ./frontend
