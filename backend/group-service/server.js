@@ -8,9 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const logger = pino({
   transport:
-    process.env.NODE_ENV !== 'production'
-      ? { target: 'pino-pretty' }
-      : undefined,
+    { target: 'pino-pretty' },
 });
 
 dotenv.config();

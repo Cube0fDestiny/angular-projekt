@@ -11,10 +11,7 @@ dotenv.config();
 
 export const logger = pino({
   name: 'EventService',
-  transport:
-    process.env.NODE_ENV !== 'production'
-      ? { target: 'pino-pretty' }
-      : undefined,
+  transport: { target: 'pino-pretty' },
 });
 
 const startServer = async () => {

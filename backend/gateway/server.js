@@ -11,10 +11,7 @@ import orchestrationRoutes from "./routes/orchestrationRoutes.js";
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
-  transport:
-    process.env.NODE_ENV !== "production"
-      ? { target: "pino-pretty" }
-      : undefined,
+  transport: { target: "pino-pretty" },
 });
 
 const services = [

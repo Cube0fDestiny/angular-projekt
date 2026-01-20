@@ -11,10 +11,7 @@ import { connectRabbitMQ } from "./utils/rabbitmq-client.js";
 
 export const logger = pino({
   name: "UserService",
-  transport:
-    process.env.NODE_ENV !== "production"
-      ? { target: "pino-pretty" }
-      : undefined,
+  transport: { target: "pino-pretty" },
 });
 
 const startServer = async () => {
