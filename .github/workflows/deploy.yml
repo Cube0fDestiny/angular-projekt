@@ -31,6 +31,9 @@ jobs:
           RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_DEFAULT_USER }}
           RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_DEFAULT_PASS }}
           RABBITMQ_URL: amqp://${{ secrets.RABBITMQ_DEFAULT_USER }}:${{ secrets.RABBITMQ_DEFAULT_PASS }}@rabbitmq:5672
+          PBKDF2_ITERATIONS: ${{ secrets.PBKDF2_ITERATIONS }}
+          PBKDF2_KEYLEN: ${{ secrets.PBKDF2_KEYLEN }}
+          PBKDF2_DIGEST: ${{ secrets.PBKDF2_DIGEST }}
         run: docker compose build
 
       - name: Push services to Docker Hub
