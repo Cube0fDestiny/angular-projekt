@@ -51,14 +51,14 @@ app.use(cors());
 app.use(pinoHttp({ logger }));
 app.use(gatewayVerifyToken);
 
-app.use("/api", orchestrationRoutes);
+app.use("/", orchestrationRoutes);
 
 services.forEach(({ route, target }) => {
   const proxyOptions = {
     target,
     changeOrigin: true,
     pathRewrite: {
-      [`^/api${route}`]: "",
+      [`^${route}`]: "",
     },
     onError: (err, req, res) => {
       req.log.error({ err, service: route }, "Błąd proxy");
@@ -71,7 +71,7 @@ services.forEach(({ route, target }) => {
       );
     },
   };
-  app.use(`/api${route}`, createProxyMiddleware(proxyOptions));
+  app.use(route, createProxyMiddleware(proxyOptions));
 });
 
 const chatServiceProxy = createProxyMiddleware({
@@ -79,10 +79,10 @@ const chatServiceProxy = createProxyMiddleware({
   changeOrigin: true,
   ws: true,
   pathRewrite: {
-    "^/api/chats": "",
+    "^/chats": "",
   },
   onError: (err, req, res) => {
-    req.log.error({ err, service: "/chats" }, "Błąd proxy");
+    req.log.error({ err, service: "/chats" }, "Błåd proxy");
     res.writeHead(503, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
@@ -93,7 +93,7 @@ const chatServiceProxy = createProxyMiddleware({
   },
 });
 
-app.use("/api/chats", chatServiceProxy);
+app.use("/chats", chatServiceProxy);
 
 const PORT = process.env.PORT || 3000;
 
