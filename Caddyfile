@@ -1,0 +1,11 @@
+orang.studio {
+    # Przekieruj żądania do API (REST i WS) do Gatewaya
+    handle_path /api/* {
+        reverse_proxy gateway:3000
+    }
+
+    # Cała reszta ruchu idzie do frontendu
+    handle {
+        reverse_proxy frontend:4200
+    }
+}
