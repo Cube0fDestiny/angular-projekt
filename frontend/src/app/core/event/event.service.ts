@@ -16,7 +16,7 @@ import {
   providedIn: 'root'
 })
 export class EventService {
-  private readonly apiUrl = 'http://localhost:3000/events';
+  private readonly apiUrl = '/api/events';
 
   constructor(private http: HttpClient) {}
 

@@ -13,7 +13,7 @@ interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly apiUrl = 'http://localhost:3000/users';
+  private readonly apiUrl = '/api/users';
 
   /** Re-expose user stream for components */
   constructor(

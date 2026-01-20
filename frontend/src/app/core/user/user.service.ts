@@ -6,7 +6,7 @@ import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem, Api
   providedIn: 'root'
 })
 export class UserService {
-  private readonly apiUrl = 'http://localhost:3000/users';
+  private readonly apiUrl = '/api/users';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();

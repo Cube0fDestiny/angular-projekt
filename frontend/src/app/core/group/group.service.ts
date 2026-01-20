@@ -7,7 +7,7 @@ import { Group, GroupMember, ApiResponse, UpdateGroupData, CreateGroupData, Chan
   providedIn: 'root'
 })
 export class GroupService {
-  private readonly apiUrl = 'http://localhost:3000/groups';
+  private readonly apiUrl = '/api/groups';
 
   constructor(private http: HttpClient) {}
 
