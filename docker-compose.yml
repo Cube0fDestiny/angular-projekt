@@ -145,7 +145,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "80:80"
+      - "4200:80"
     environment:
       - ANGULAR_APP_API_URL=http://gateway:3000
     restart: unless-stopped
