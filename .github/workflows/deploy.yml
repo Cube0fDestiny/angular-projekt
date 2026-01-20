@@ -45,6 +45,9 @@ jobs:
           RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_USER }}
           RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_PASS }}
           RABBITMQ_URL: amqp://${{ secrets.RABBITMQ_USER }}:${{ secrets.RABBITMQ_PASS }}@rabbitmq:5672
+          PBKDF2_ITERATIONS: ${{ secrets.PBKDF2_ITERATIONS }}
+          PBKDF2_KEYLEN: ${{ secrets.PBKDF2_KEYLEN }}
+          PBKDF2_DIGEST: ${{ secrets.PBKDF2_DIGEST }}
         run: docker compose push
 
       - name: Deploy to VPS
@@ -64,6 +67,10 @@ jobs:
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> .env
             echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> .env
-            
+            echo "RABBITMQ_URL=amqp://${{ secrets.RABBITMQ_DEFAULT_USER }}:${{ secrets.RABBITMQ_DEFAULT_PASS }}@rabbitmq:5672" >> .env
+            echo "PBKDF2_ITERATIONS=${{ secrets.PBKDF2_ITERATIONS }}" >> .env
+            echo "PBKDF2_KEYLEN=${{ secrets.PBKDF2_KEYLEN }}" >> .env
+            echo "PBKDF2_DIGEST=${{ secrets.PBKDF2_DIGEST }}" >> .env
+
             docker compose pull
             docker compose up -d --remove-orphans
