@@ -165,22 +165,26 @@ services:
     depends_on:
       - gateway
   
-  # notification-service:
-  #   container_name: notification-service
-  #   build:
-  #     context: ./notification-service
-  #   environment:
-  #     - PORT=3007
-  #     - JWT_SECRET=${JWT_SECRET}
-  #     - DB_USER=${DB_USER}
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_PORT=${DB_PORT}
-  #     - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
-  #     - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
-  #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
-  #   restart: unless-stopped
+  notification-service:
+    image: noka993/notification-service
+    container_name: notification-service
+    build:
+      context: ./backend/notification-service
+    environment:
+      - PORT=3007
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
 volumes:
   caddy_data: {}
