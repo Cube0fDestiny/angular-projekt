@@ -124,7 +124,7 @@
               size="small" 
               type="submit"
               untoggleable="true"
-              disabled="!comment.replyText?.trim()"
+              [disabled]="!comment.replyText?.trim()"
             >
               Post
             </orang-button>

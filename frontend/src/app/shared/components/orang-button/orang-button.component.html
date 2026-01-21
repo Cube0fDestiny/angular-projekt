@@ -4,6 +4,7 @@
          rounded-tl-xl rounded-br-xl rounded-tr-sm rounded-bl-sm"
   [ngClass]="[isActive ? activeClasses : inactiveClasses, sizeClasses]"
   (click)="toggleActive($event)"
+  [disabled]="disabled"
 >
   <ng-content></ng-content>
 </button>

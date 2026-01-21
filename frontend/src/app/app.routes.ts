@@ -12,6 +12,7 @@ import { FollowerListComponent } from './features/follower-list/follower-list.co
 import { MemberListComponent } from './features/member-list/member-list.component';
 import { GroupsPageComponent } from './features/groups/groups-page.component';
 import { GroupPageComponent } from './features/group/main/group-page.component';
+import { ChatComponent } from './features/chat/chat.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,6 +32,11 @@ export const routes: Routes = [
   { 
     path: 'groups', 
     component: GroupsPageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'chats', 
+    component: ChatComponent, 
     canActivate: [authGuard] 
   },
   {

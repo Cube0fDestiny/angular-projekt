@@ -27,9 +27,6 @@
         <div class="stat">
           <span>{{ stats.posts || 0 }} Posts</span>
         </div>
-        <div class="stat">
-          <span>{{ stats.photos || 0 }} Photos</span>
-        </div>
       </div>
       
       <!-- 3 BUTTONS (Dynamic based on relationship) -->
@@ -60,8 +57,8 @@
           <orang-button *ngIf="hasFriendRequest&&!isFriend" (click)="acceptFriendRequest(user!.id)" [istoggleable]="false">
             👥 Accept Invite
           </orang-button>
-          <orang-button (click)="onMessage()">
-            💬 Message
+          <orang-button *ngIf="isFriend" (click)="createChat()">
+            💬 Chat
           </orang-button>
           <!--<orang-button (click)="onMore()">
             ⋮ More

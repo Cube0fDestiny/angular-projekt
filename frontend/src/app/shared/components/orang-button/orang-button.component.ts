@@ -5,13 +5,14 @@ import { NgClass } from '@angular/common';
   selector: 'orang-button',
   imports: [NgClass],
   templateUrl: './orang-button.component.html',
-  styleUrls: ['./orang-button.component.css']
+  styleUrls: ['./orang-button.component.scss']
 })
 export class OrangButtonComponent {
   @Input() isActive = true;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() size: 'default' | 'small' = 'default';
   @Input() istoggleable = true;
+  @Input() disabled = false;
 
   activeClasses = `
     bg-[var(--o-orange)]

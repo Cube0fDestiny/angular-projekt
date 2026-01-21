@@ -1,9 +1,10 @@
 import { NgIf } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
+import { ChatService } from '../../../core/chat/chat.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -42,7 +43,9 @@ export class ProfilePageHeaderComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    public userService: UserService
+    public userService: UserService,
+    private router: Router,
+    private chatService: ChatService
   ) {}
 
   ngOnInit(): void {
@@ -92,7 +95,6 @@ export class ProfilePageHeaderComponent implements OnInit {
   onEditProfile(): void { this.editProfile.emit(); }
   onAddStory(): void { this.addStory.emit(); }
   onViewAs(): void { this.viewAs.emit(); }
-  onMessage(): void { this.message.emit(); }
 
   onAddFriend(userId: string): void {
     console.log('sent friend request to: ', userId);
@@ -168,6 +170,22 @@ export class ProfilePageHeaderComponent implements OnInit {
     this.userService.toggleFollowProfile(this.userId!).subscribe(res => {
       console.log('toggled following event: ', res);
       this.isFollowing = !this.isFollowing;
+    });
+  }
+
+  createChat():void {
+    const newChat = {
+      name: this.user!.name,
+      participantIds: [this.user!.id]
+    }
+    this.chatService.createChat(newChat).subscribe({
+      next: () => {
+        console.log('Successfully created new chat');
+        this.router.navigate(['/chats']);
+      },
+      error: (error) => {
+        console.error('Failed to create new chat:', error);
+      }
     });
   }
 

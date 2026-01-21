@@ -1,12 +1,12 @@
-// models/chat.model.ts
 export interface Chat {
   id: string;
   name: string;
   creator_id: string;
   created_at: string;
+  last_message?: Message; // Optional: Add if you want to show last message in chat list
 }
 
-export interface ChatMessage {
+export interface Message {
   id: string;
   chat_id: string;
   creator_id: string;
@@ -25,33 +25,4 @@ export interface CreateChatRequest {
 
 export interface SendMessageRequest {
   text: string;
-}
-
-export interface SendMessageWithImagesRequest {
-  text: string;
-  images?: File[]; // For new file uploads
-  existingImageIds?: Array<{ image_id: string; image_order: number }>; // For existing images
-}
-
-export interface RabbitMQChatEvent {
-  chatId: string;
-  name: string;
-  creatorId: string;
-  participants: string[];
-  timestamp: string;
-}
-
-export interface RabbitMQMessageEvent {
-  messageId: string;
-  chatId: string;
-  creatorId: string;
-  text: string;
-  timestamp: string;
-}
-
-export interface ChatParticipant {
-  id: string;
-  name?: string;
-  email?: string;
-  // Add other user fields as needed
 }
