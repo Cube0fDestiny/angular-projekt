@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   rabbitmq:
     image: rabbitmq:4.2.2-management-alpine
@@ -113,6 +111,8 @@ services:
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
   chat-service:
     container_name: chat-service
