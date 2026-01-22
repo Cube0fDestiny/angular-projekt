@@ -131,7 +131,10 @@ services:
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
   chat-service:
     image: noka993/chat-service
