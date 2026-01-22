@@ -8,14 +8,15 @@ RUN npm install
 
 COPY . .
 
-# Build with production configuration by default
+# Build with production configuration
 RUN npm run build -- --configuration=production
 
 # Production stage - serve with nginx
 FROM nginx:alpine
 
 COPY --from=builder /app/dist/orangular /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 4200
 
 CMD ["nginx", "-g", "daemon off;"]
