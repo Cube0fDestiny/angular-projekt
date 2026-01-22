@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 import { UserService } from '../user/user.service';
+import { environment } from '../../../environments/environment';
 
 interface AuthResponse {
   user: User;
@@ -13,7 +14,7 @@ interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly apiUrl = '/api/users';
+  private readonly apiUrl = `${environment.apiUrl}/users`;
 
   /** Re-expose user stream for components */
   constructor(

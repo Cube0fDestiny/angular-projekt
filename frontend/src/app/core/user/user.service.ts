@@ -2,11 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem, ApiResponse } from '../../shared/models/user.model';
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private readonly apiUrl = '/api/users';
+  private readonly apiUrl = `${environment.apiUrl}/users`;
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();

@@ -11,12 +11,13 @@ import {
   UpdateEventData,
   ApiResponse
 } from '../../shared/models/event.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventService {
-  private readonly apiUrl = '/api/events';
+  private readonly apiUrl = `${environment.apiUrl}/events`;
 
   constructor(private http: HttpClient) {}
 

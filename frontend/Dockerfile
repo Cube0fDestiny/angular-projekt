@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -8,6 +8,14 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 4200
+# Build with production configuration by default
+RUN npm run build -- --configuration=production
 
-CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "4200", "--disable-host-check"]
+# Production stage - serve with nginx
+FROM nginx:alpine
+
+COPY --from=builder /app/dist/orangular /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
