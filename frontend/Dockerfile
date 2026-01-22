@@ -14,7 +14,7 @@ RUN npm run build -- --configuration=production
 # Production stage - serve with nginx
 FROM nginx:alpine
 
-COPY --from=builder /app/dist/orangular /usr/share/nginx/html
+COPY --from=builder /app/dist/orangular/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 4200
