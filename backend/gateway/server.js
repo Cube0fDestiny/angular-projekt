@@ -75,6 +75,8 @@ const chatServiceProxy = createProxyMiddleware({
   target: "http://chat-service:3006",
   changeOrigin: true,
   ws: true,
+  // Express strips the mount path; add it back so Socket.IO path /chats/socket works
+  pathRewrite: (path) => `/chats${path}`,
   onError: (err, req, res) => {
     req.log.error({ err, service: "/chats" }, "Bład proxy");
     res.writeHead(503, { "Content-Type": "application/json" });
@@ -93,6 +95,8 @@ const notificationServiceProxy = createProxyMiddleware({
   target: "http://notification-service:3007",
   changeOrigin: true,
   ws: true,
+  // Restore mount path for Socket.IO at /notifications/socket
+  pathRewrite: (path) => `/notifications${path}`,
   onError: (err, req, res) => {
     req.log.error({ err, service: "/notifications" }, "Błåd proxy");
     res.writeHead(503, { "Content-Type": "application/json" });
