@@ -1,493 +1,408 @@
-# 📄 Dokumentacja API: User-Service
+# Serwis Powiadomień
 
-Serwis obsługujący zarządzanie użytkownikami, rejestrację oraz autentykację (JWT + PBKDF2).
+Serwis powiadomień w czasie rzeczywistym zbudowany na Express.js, Socket.IO i RabbitMQ. Ten serwis odbiera powiadomienia z kolejki komunikatów i dostarcza je do podłączonych użytkowników przez WebSocket.
 
-**Base URL:** `http://localhost:3001/users`
+## Funkcjonalności
 
----
+- **Powiadomienia w czasie rzeczywistym**: Wykorzystuje Socket.IO do komunikacji WebSocket
+- **Integracja z kolejką komunikatów**: Konsumuje powiadomienia z RabbitMQ (11 typów zdarzeń)
+- **Trwałość w bazie danych**: Przechowuje powiadomienia w PostgreSQL do późniejszego odczytu
+- **Autentykacja użytkownika**: Autentykacja oparta na JWT dla bezpiecznych połączeń
+- **Zarządzanie powiadomieniami**: Oznaczanie jako przeczytane, usuwanie i pobieranie powiadomień
+- **Licznik nieprzeczytanych**: Śledzenie nieprzeczytanych powiadomień
+- **Inteligentne routowanie**: Automatyczne określanie odbiorcy na podstawie typu zdarzenia
+- **Integracja wielousługowa**: Zintegrowane ze wszystkimi 5 głównymi serwisami
 
-## 🔐 Autentykacja
-Wymagane dla endpointów chronionych:
-- Nagłówek: `Authorization: Bearer <token_jwt>`
-- Token wygasa po: **12h**
+## Instalacja
 
----
+```bash
+npm install
+```
 
-## 🚀 Endpointy
+## Konfiguracja
 
-### 1. Rejestracja użytkownika
-`POST /register`
+Utwórz plik `.env` w głównym katalogu z następującymi zmiennymi:
 
-**Body:**
-{
-  "name": "string",
-  "surname": "string",
-  "email": "string",
-  "password": "string",
-  "is_company": boolean
-}
+```env
+PORT=3007
+JWT_SECRET=twoj-sekretny-klucz
+NODE_ENV=development
 
-**Odpowiedź (201 Created):**
-{
-  "user": {
-    "id": "uuid",
-    "name": "string",
-    "surname": "string",
-    "email": "string",
-    "is_company": boolean,
-    "avatar": "url"
-  },
-  "token": "string"
-}
+# Konfiguracja bazy danych
+DB_USER=admin
+DB_PASSWORD=admin123
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=angular_projekt
 
----
+# Konfiguracja RabbitMQ
+RABBITMQ_URL=amqp://rabbitmq:5672
+```
 
-### 2. Logowanie
-`POST /login`
+## Połączenie Frontend
 
-**Body:**
-{
-  "email": "string",
-  "password": "string"
-}
+Frontend połącza się z serwisem powiadomień poprzez **Gateway** (nie bezpośrednio do portu 3007):
 
-**Odpowiedź (200 OK):**
-{
-  "user": {
-    "id": "uuid",
-    "name": "string",
-    "surname": "string",
-    "email": "string",
-    "is_company": boolean,
-    "avatar": "url"
-  },
-  "token": "string"
-}
+```typescript
+import { io } from 'socket.io-client';
 
----
+export class NotificationService {
+  private socket = io('http://localhost:3000', {
+    path: '/notifications',  // Gateway proxy do notification-service
+    auth: {
+      token: localStorage.getItem('token')  // ⚠️ WYMAGANE: Ważny JWT token!
+    }
+  });
 
-### 3. Pobranie wszystkich użytkowników
-`GET /`
-- *Endpoint publiczny*
+  constructor() {
+    this.socket.on('connect', () => {
+      console.log('Connected to notifications via gateway');
+    });
 
-**Odpowiedź (200 OK):**
-[
-  {
-    "id": "uuid",
-    "name": "string",
-    "surname": "string",
-    "email": "string",
-    "bio": "string",
-    "is_company": boolean,
-    "created_at": "date",
-    "avatar": "url"
+    this.socket.on('notification', (notification) => {
+      // Obsługa nowego powiadomienia w czasie rzeczywistym
+      console.log('New notification:', notification);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Disconnected from notifications');
+    });
+
+    this.socket.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
   }
-]
-
----
-
-### 4. Profil użytkownika
-`GET /:id`
-- *Endpoint publiczny*
-
-**Odpowiedź (200 OK):**
-{
-  "id": "uuid",
-  "name": "string",
-  "surname": "string",
-  "email": "string",
-  "bio": "string",
-  "is_company": boolean,
-  "created_at": "date",
-  "avatar": "url"
-}
-
----
-
-### 5. Aktualizacja profilu
-`PUT /:id`
-- *Wymagana autoryzacja (Właściciel lub Admin)*
-
-**Body (wszystkie pola opcjonalne):**
-{
-  "name": "string",
-  "bio": "string",
-  "is_company": boolean
-}
-
-**Odpowiedź (200 OK):**
-{
-  "message": "Profil został zaktualizowany",
-  "user_id": "uuid"
-}
-
----
-
-### 6. Aktualizacja profilu z obrazami (Gateway)
-
-`PUT /users/:id/profile-with-image`
-
-**Gateway Route:** `PUT /users/:id/profile-with-image`
-
-**Wymagana autoryzacja (Właściciel lub Admin)**
-
-Aktualizuje profil użytkownika z możliwością przesłania zdjęcia profilowego i w tle.
-
-**Forma multipart:**
-- `name` (form field, opcjonalne) - imię
-- `bio` (form field, opcjonalne) - biografia
-- `is_company` (form field, opcjonalne) - czy to konto firmowe
-- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
-- `header_picture` (file) - zdjęcie w tle (opcjonalne)
-
-**Odpowiedź (200 OK):**
-```json
-{
-  "message": "Profil został zaktualizowany",
-  "user_id": "uuid",
-  "profile_picture_id": "uuid",
-  "header_picture_id": "uuid"
 }
 ```
 
----
+### Wymagania autentykacji ⚠️
 
-### 7. Usunięcie konta (Soft Delete)
-`DELETE /:id`
-- *Wymagana autoryzacja (Właściciel lub Admin)*
-
-**Odpowiedź (200 OK):**
-{
-  "message": "Profil został usunięty",
-  "user_id": "uuid"
-}
-
----
-
-## � Endpointy: Śledzenie (Follow)
-
-### 8. Przełączanie śledzenia użytkownika
-`POST /:id/follow`
-- *Wymagana autoryzacja*
-
-**Odpowiedź (201 Created / 200 OK):**
-```
-{
-  "message": "Successfully followed." | "Successfully unfollowed."
-}
-```
-
----
-
-### 9. Pobranie obserwujących użytkownika
-`GET /:id/followers`
-- *Endpoint publiczny*
-
-**Odpowiedź (200 OK):**
-```
-[
+- **Token JWT jest WYMAGANY** do nawiązania połączenia WebSocket
+- Token musi być ważny i podpisany tym samym `JWT_SECRET` co serwis
+- Bez tokenu połączenie zostanie odrzucone z błędem: `"Authentication error: Token not provided"`
+- Token powinien zawierać pole `id` (UUID użytkownika)
+- Przykład payload tokenu:
+  ```json
   {
-    "follower": "uuid",
-    "username": "string",
-    "avatar": "url"
+    "id": "uuid-of-user",
+    "name": "User Name",
+    "email": "user@example.com"
   }
-]
+  ```
+
+**Uwaga**: Połączenie WebSocket jest zwalniane z autentykacji **na poziomie Gateway'a** (dla kompatybilności), ale **serwis notification-service** wymaga ważnego JWT w handshake'u Socket.IO. Token pobierany z `localStorage` powinien być tokenom otrzymanym podczas logowania użytkownika.
+
+## Schemat bazy danych
+
+Serwis wymaga następującej tabeli w PostgreSQL:
+
+```sql
+CREATE TABLE "Notifications" (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES "Users"(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_notifications_user_id ON "Notifications"(user_id);
+CREATE INDEX idx_notifications_user_id_is_read ON "Notifications"(user_id, is_read);
+CREATE INDEX idx_notifications_created_at ON "Notifications"(created_at DESC);
 ```
 
----
+## Uruchamianie serwisu
 
-### 10. Pobranie użytkowników śledzonych przez użytkownika
-`GET /:id/following`
-- *Endpoint publiczny*
-
-**Odpowiedź (200 OK):**
+```bash
+node server.js
 ```
-[
-  {
-    "followee": "uuid",
-    "username": "string",
-    "avatar": "url"
+
+## Endpointy API
+
+### Pobierz powiadomienia
+
+```http
+GET /notifications?limit=20&offset=0
+```
+
+Nagłówki:
+```
+x-user-data: {"id": "74ewr670-2d43-4244-9c3c-50dweqcbc6859", "name": "Jan Kowalski"}
+```
+
+### Pobierz liczbę nieprzeczytanych
+
+```http
+GET /notifications/unread-count
+```
+
+### Oznacz jako przeczytane
+
+```http
+PATCH /notifications/:id/read
+```
+
+### Oznacz wszystkie jako przeczytane
+
+```http
+PATCH /notifications/read-all
+```
+
+### Usuń powiadomienie
+
+```http
+DELETE /notifications/:id
+```
+
+### Usuń wszystkie powiadomienia
+
+```http
+DELETE /notifications/
+```
+
+### Utwórz powiadomienie (testowanie)
+
+```http
+POST /notifications/
+Content-Type: application/json
+
+{
+  "userId": "74be1670-2d43-4244-9c3c-5062ccbc6859",
+  "type": "post.liked",
+  "title": "Twój post został polubiony",
+  "message": "Jan Kowalski polubił twój post",
+  "data": {
+    "postId": 123,
+    "likedBy": "Jan Kowalski"
   }
-]
-```
-
----
-
-## 👥 Endpointy: Zaproszenia Przyjaźni
-
-### 11. Wysłanie zaproszenia przyjaźni
-`POST /:id/friend-request`
-- *Wymagana autoryzacja*
-
-**Odpowiedź (201 Created):**
-```
-{
-  "message": "Friend request sent successfully."
 }
 ```
 
----
+## Zdarzenia WebSocket
 
-### 12. Zaakceptowanie zaproszenia przyjaźni
-`POST /friend-requests/:id/accept`
-- *Wymagana autoryzacja*
+### Serwer → Klient
 
-**Odpowiedź (200 OK):**
-```
-{
-  "message": "Friend request accepted."
-}
-```
+- **`newNotification`**: Wysyłane gdy otrzymano nowe powiadomienie
+  ```javascript
+  socket.on('newNotification', (notification) => {
+    console.log(notification);
+  });
+  ```
 
----
+- **`notificationDeleted`**: Wysyłane gdy powiadomienie zostało usunięte
+  ```javascript
+  socket.on('notificationDeleted', (data) => {
+    console.log(data.notificationId);
+  });
+  ```
 
-### 13. Odrzucenie/Anulowanie zaproszenia przyjaźni
-`DELETE /friend-requests/:id`
-- *Wymagana autoryzacja*
+- **`error`**: Wysyłane gdy wystąpił błąd
+  ```javascript
+  socket.on('error', (message) => {
+    console.error(message);
+  });
+  ```
 
-**Odpowiedź (200 OK):**
-```
-{
-  "message": "Friend request cancelled successfully." | "Friend request rejected successfully."
-}
-```
+### Klient → Serwer
 
----
+- **`markAsRead`**: Oznacz powiadomienie jako przeczytane
+  ```javascript
+  socket.emit('markAsRead', notificationId);
+  ```
 
-## 👫 Endpointy: Zarządzanie Przyjaciółmi
+- **`deleteNotification`**: Usuń powiadomienie
+  ```javascript
+  socket.emit('deleteNotification', notificationId);
+  ```
 
-### 14. Lista przyjaciół użytkownika
-`GET /friends/list`
-- *Wymagana autoryzacja*
+## Zdarzenia RabbitMQ
 
-**Odpowiedź (200 OK):**
-```
-[
-  {
-    "friend_id": "uuid"
-  }
-]
-```
+Serwis konsumuje powiadomienia z RabbitMQ z następującymi kluczami routingu (11 typów):
 
----
+### Powiadomienia ogólne
+- `notification.created`: Utworzono ogólne powiadomienie
+- `notification.*`: Wszystkie powiadomienia (wildcard)
 
-### 15. Usunięcie przyjaciela
-`DELETE /friends/:id`
-- *Wymagana autoryzacja*
+### Interakcje społecznościowe (user-service)
+- `user.friendRequested`: Otrzymano zaproszenie do znajomych
+- `user.mentioned`: Użytkownik został wspomniany w poście/komentarzu
 
-**Odpowiedź (200 OK):**
-```
-{
-  "message": "Friend removed successfully."
-}
-```
+### Interakcje z postami (post-service)
+- `post.liked`: Post został polubiony
+- `post.commented`: Post otrzymał komentarz
 
----
+### Grupy (group-service)
+- `group.invited`: Użytkownik został zaproszony do grupy
+- `group.created`: Utworzono nową grupę
+- `group.memberAccepted`: Użytkownik został zaakceptowany do grupy
 
-### 16. Pobranie przychodzących zaproszeń przyjaźni
-`GET /friend-requests/incoming`
-- *Wymagana autoryzacja*
+### Czaty (chat-service)
+- `chat.created`: Utworzono nowy czat
+- `message.created`: Otrzymano nową wiadomość w czacie
 
-**Odpowiedź (200 OK):**
-```
-[
-  {
-    "from_user_id": "uuid",
-    "created_at": "timestamp"
-  }
-]
-```
+## Integracja z serwisami
 
----
+### user-service
+Publikuje zdarzenia dotyczące interakcji między użytkownikami:
+- `user.friendRequested` - Powiadomienie dla otrzymującego zaproszenie (nie dla wysyłającego)
+- `user.friendAccepted` - Powiadomienie po zaakceptowaniu zaproszenia
+- `user.friendRemoved` - Powiadomienie po usunięciu ze znajomych
+- `user.followed` / `user.unfollowed` - Powiadomienia o obserwowaniu
 
-### 17. Pobranie wysłanych zaproszeń przyjaźni
-`GET /friend-requests/outgoing`
-- *Wymagana autoryzacja*
+### post-service
+Publikuje zdarzenia dotyczące postów i komentarzy:
+- `post.created` - Nowy post utworzony
+- `comment.created` - Nowy komentarz dodany
+- `reaction.created` - Post został polubiony/zareagowano
 
-**Odpowiedź (200 OK):**
-```
-[
-  {
-    "to_user_id": "uuid",
-    "created_at": "timestamp"
-  }
-]
-```
+### event-service
+Publikuje zdarzenia dotyczące wydarzeń:
+- `event.created` / `event.updated` / `event.deleted` - Zarządzanie wydarzeniami
+- `event.followed` / `event.unfollowed` - Obserwowanie wydarzeń
 
----
+### chat-service
+Publikuje zdarzenia dotyczące czatów:
+- `chat.created` - Powiadamia wszystkich uczestników czatu (oprócz twórcy)
+- `message.created` - Powiadamia wszystkich uczestników (oprócz nadawcy)
 
-### 18. Pobranie zaproszeni do rozpatrzenia (oczekujące)
-`GET /friend-requests/pending`
-- *Wymagana autoryzacja*
+### group-service
+Publikuje zdarzenia dotyczące grup:
+- `group.created` - Nowa grupa utworzona
+- `group.memberAccepted` - Użytkownik zaakceptowany do grupy
 
-**Odpowiedź (200 OK):**
-```
-[
-  {
-    "id": "uuid",
-    "requester": "uuid",
-    "requestee": "uuid",
-    "active": false,
-    "created_at": "timestamp"
-  }
-]
-```
+## Przykładowe struktury wiadomości
 
----
-
-## �📋 Proponowane Endpointy
-
-Endpointy planowane do implementacji:
-
-### P1. Wyszukiwanie użytkowników
-`GET /search?query=string&limit=10`
-- *Endpoint publiczny*
-- **Parametry:** query (string), limit (liczba wyników)
-- Wyszukiwanie po imieniu, nazwisku lub email
-
-### P2. Użytkownicy rekomendowani
-`GET /recommended`
-- *Endpoint publiczny*
-- Zwracanie sugestii użytkowników do obsłużenia (np. pracownicy branży)
-
-### P3. Status przyjaźni/śledzenia
-`GET /:id/friendship-status`
-- *Wymagana autoryzacja*
-- Sprawdzenie statusu relacji między zalogowanym użytkownikiem a danym użytkownikiem
-- **Odpowiedź:** `{ "status": "friend" | "following" | "pending" | "blocked" | "none" }`
-
-### P4. Zablokowanie użytkownika
-`POST /:id/block`
-- *Wymagana autoryzacja*
-- **Odpowiedź:** `{ "message": "User blocked successfully." }`
-
-### P5. Weryfikacja email
-`POST /verify-email`
-- **Body:** `{ "email": "string", "code": "string" }`
-- Endpoint do potwierdzenia adresu email z użyciem kodu weryfikacyjnego
-
----
-
-## 📡 RabbitMQ Events
-
-User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle user-related events:
-
-### User Account Events
-
-**`user.registered`** - Published when a new user registers
+### Zaproszenie do znajomych
 ```json
 {
-  "userId": "uuid",
-  "email": "string",
-  "name": "string",
-  "surname": "string",
-  "is_company": boolean,
-  "timestamp": "ISO8601"
+  "requesterId": "74be1670-2d43-4244-9c3c-5062ccbc6859",
+  "requesteeId": "18f07541-d674-4d56-8371-0dda9cdcabfb",
+  "timestamp": "2026-01-22T18:49:54.747Z"
 }
 ```
 
-**`user.updated`** - Published when a user's profile is updated
+### Nowa wiadomość w czacie
 ```json
 {
-  "userId": "uuid",
-  "name": "string",
-  "surname": "string",
-  "email": "string",
-  "bio": "string",
-  "is_company": boolean,
-  "timestamp": "ISO8601"
+  "messageId": "uuid-v4",
+  "chatId": "chat-uuid",
+  "creatorId": "sender-uuid",
+  "text": "Witaj świecie!",
+  "timestamp": "2026-01-22T18:49:54.747Z"
 }
 ```
 
-**`user.deleted`** - Published when a user account is deleted
+### Utworzenie czatu
 ```json
 {
-  "userId": "uuid",
-  "timestamp": "ISO8601"
+  "chatId": "chat-uuid",
+  "name": "Nazwa czatu",
+  "creatorId": "creator-uuid",
+  "participants": ["user1-uuid", "user2-uuid", "user3-uuid"],
+  "timestamp": "2026-01-22T18:49:54.747Z"
 }
 ```
 
-### Follow Events
-
-**`user.followed`** - Published when a user follows another user
+### Zaakceptowanie członka grupy
 ```json
 {
-  "followerId": "uuid",
-  "followeeId": "uuid",
-  "timestamp": "ISO8601"
+  "groupId": "group-uuid",
+  "userId": "accepted-user-uuid",
+  "acceptedBy": "admin-uuid",
+  "timestamp": "2026-01-22T18:49:54.747Z"
 }
 ```
 
-**`user.unfollowed`** - Published when a user unfollows another user
-```json
-{
-  "followerId": "uuid",
-  "followeeId": "uuid",
-  "timestamp": "ISO8601"
-}
+## Architektura
+
+Serwis wykorzystuje modułową architekturę:
+
+- **server.js**: Główny punkt wejścia aplikacji i konfiguracja Socket.IO
+- **controllers/notificationController.js**: Logika biznesowa powiadomień
+- **routes/notificationRoutes.js**: Definicje tras REST API
+- **utils/rabbitmq-client.js**: Połączenie z RabbitMQ i inteligentna konsumpcja wiadomości
+- **middleware/**: Autentykacja i obsługa błędów
+- **db/index.js**: Pula połączeń z bazą danych
+
+### Przepływ powiadomień
+
+```
+[Serwis] → Publikuje zdarzenie → [RabbitMQ] → [Notification Service]
+                                                        ↓
+                                                  [PostgreSQL]
+                                                        ↓
+                                                  [Socket.IO]
+                                                        ↓
+                                              [Podłączeni użytkownicy]
 ```
 
-### Friendship Request Events
+### Logika routingu
 
-**`user.friendRequested`** - Published when a friend request is sent
-```json
-{
-  "requesterId": "uuid",
-  "requesteeId": "uuid",
-  "timestamp": "ISO8601"
-}
+Serwis automatycznie określa odbiorcę powiadomienia na podstawie pól w zdarzeniu:
+- `requesteeId` → powiadomienie dla otrzymującego zaproszenie do znajomych
+- `userId` → ogólne powiadomienie
+- `mentionedUserId` → powiadomienie o wzmiance
+- `likedUserId` → powiadomienie o polubieniu
+- `invitedUserId` → powiadomienie o zaproszeniu do grupy
+- `participants[]` → powiadomienia dla uczestników czatu (oprócz twórcy)
+- Dla `message.created`: pobiera uczestników z tabeli `Chat_Participants`
+
+## Status integracji
+
+✅ **Wszystkie serwisy zintegrowane**
+
+| Serwis | Zdarzenia | Status |
+|--------|-----------|--------|
+| user-service | 5 typów | ✅ Aktywny |
+| post-service | 3 typy | ✅ Aktywny |
+| event-service | 5 typów | ✅ Aktywny |
+| chat-service | 2 typy | ✅ Aktywny |
+| group-service | 2 typy | ✅ Aktywny |
+
+**Łącznie: 17 różnych typów zdarzeń z 5 serwisów**
+
+## Docker
+
+Budowanie i uruchamianie z Docker:
+
+```bash
+docker build -t notification-service .
+docker run -p 3007:3007 --env-file .env notification-service
 ```
 
-**`user.friendAccepted`** - Published when a friend request is accepted
-```json
-{
-  "userId": "uuid",
-  "friendId": "uuid",
-  "timestamp": "ISO8601"
-}
+Lub za pomocą docker-compose:
+
+```bash
+docker compose -f docker-compose.dev.yml up -d notification-service
 ```
 
-**`user.friendRequestCancelled`** - Published when a friend request is cancelled by the requester
-```json
-{
-  "userId": "uuid",
-  "otherUserId": "uuid",
-  "timestamp": "ISO8601"
-}
+## Testowanie
+
+### Sprawdzanie połączenia z RabbitMQ
+
+```bash
+docker logs notification-service | grep "RabbitMQ"
+# Powinno pokazać: "RabbitMQ connected" i "Notification consumer started"
 ```
 
-**`user.friendRequestRejected`** - Published when a friend request is rejected by the requestee
-```json
-{
-  "userId": "uuid",
-  "otherUserId": "uuid",
-  "timestamp": "ISO8601"
-}
+### Sprawdzanie bound routing keys
+
+```bash
+docker logs notification-service | grep "Queue bound"
+# Powinno pokazać 11 kluczy routingu
 ```
 
-**`user.friendRemoved`** - Published when a friendship is removed
-```json
-{
-  "userId": "uuid",
-  "friendId": "uuid",
-  "timestamp": "ISO8601"
-}
-```
+### Test end-to-end
 
----
+1. Wyślij zaproszenie do znajomych (user-service)
+2. Sprawdź powiadomienia odbiorcy przez REST API lub Socket.IO
+3. Powiadomienie powinno pojawić się w czasie rzeczywistym
 
-## ⚠️ Obsługa Błędów
+Zobacz `/tmp/test_friend_full.sh` dla pełnego przykładu testowego.
 
-| Kod | Komunikat | Opis |
-|:--- |:--- |:--- |
-| 400 | Bad Request | Błąd walidacji danych lub email zajęty. |
-| 401 | Unauthorized | Błędne hasło lub token wygasł (jwt expired). |
-| 403 | Forbidden | Brak tokena lub brak uprawnień do edycji innego profilu. |
-| 404 | Not Found | Nie znaleziono użytkownika o podanym ID. |
-| 500 | Server Error | Błąd bazy danych lub konfiguracji serwera. |
+## Licencja
 
----
-
-**Uwagi:**
-- Avatary są generowane automatycznie przez pravatar.cc na podstawie adresu email.
-- Pole bio jest domyślnie puste (null) przy rejestracji.
+ISC

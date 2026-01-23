@@ -79,7 +79,7 @@ const chatServiceProxy = createProxyMiddleware({
     "^/chats": "",
   },
   onError: (err, req, res) => {
-    req.log.error({ err, service: "/chats" }, "Błåd proxy");
+    req.log.error({ err, service: "/chats" }, "Bład proxy");
     res.writeHead(503, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
@@ -92,6 +92,24 @@ const chatServiceProxy = createProxyMiddleware({
 
 app.use("/chats", chatServiceProxy);
 
+const notificationServiceProxy = createProxyMiddleware({
+  target: "http://notification-service:3007",
+  changeOrigin: true,
+  ws: true,
+  onError: (err, req, res) => {
+    req.log.error({ err, service: "/notifications" }, "Błåd proxy");
+    res.writeHead(503, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        message: "Usługa jest tymczasowo niedostępna.",
+        service: "/notifications",
+      }),
+    );
+  },
+});
+
+app.use("/notifications", notificationServiceProxy);
+
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => logger.info(`🚀 Gateway działa na porcie ${PORT}`));
@@ -100,6 +118,8 @@ server.on("upgrade", (req, socket, head) => {
   logger.info({ url: req.url }, `Próba uaktualnienia połączenia do WebSocket`);
   if (req.url.startsWith("/chats")) {
     chatServiceProxy.upgrade(req, socket, head);
+  } else if (req.url.startsWith("/notifications")) {
+    notificationServiceProxy.upgrade(req, socket, head);
   } else {
     socket.destroy();
   }

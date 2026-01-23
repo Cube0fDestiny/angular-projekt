@@ -5,25 +5,35 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import groupRoutes from './routes/groupRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { connectRabbitMQ } from './utils/rabbitmq-client.js';
 
-const logger = pino({
-  transport:
-    { target: 'pino-pretty' },
+export const logger = pino({
+  name: 'GroupService',
+  transport: { target: 'pino-pretty' },
 });
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3004;
+const startServer = async () => {
+  await connectRabbitMQ();
 
-app.use(pinoHttp({ logger }));
-app.use(cors());
-app.use(express.json());
+  const app = express();
+  const PORT = process.env.PORT || 3005;
 
-app.use("/groups", groupRoutes);
+  app.use(pinoHttp({ logger }));
+  app.use(cors());
+  app.use(express.json());
 
-app.listen(PORT, () => {
-  logger.info(`[Group-Service] Serwer działa na porcie ${PORT}`);
+  app.use("/groups", groupRoutes);
+
+  app.use(errorHandler);
+
+  app.listen(PORT, () => {
+    logger.info(`[Group-Service] Serwer działa na porcie ${PORT}`);
+  });
+};
+
+startServer().catch((err) => {
+  logger.error({ error: err }, "Failed to start server");
+  process.exit(1);
 });
-
-app.use(errorHandler);

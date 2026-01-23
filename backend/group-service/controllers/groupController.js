@@ -1,4 +1,5 @@
 import * as db from "../db/index.js";
+import { publishEvent } from "../utils/rabbitmq-client.js";
 
 export const getAllGroups= async (req, res) => {
   const log = req.log;
@@ -148,6 +149,15 @@ export const createGroup = async (req, res) => {
       {group_id: newGroup.id, creatorID: req.user.id},"utworzono nową grupę"
 
     )
+    
+    // Publish group.created event
+    publishEvent("group.created", {
+      groupId: newGroup.id,
+      name: newGroup.name,
+      creatorId: req.user.id,
+      timestamp: new Date().toISOString(),
+    });
+    
     res.status(200).json({message:"Grupa została dodane"})
   }
   catch (err) {
@@ -407,6 +417,15 @@ export const requestGroupJoin= async (req, res) => {
         const acceptres= await db.query(`UPDATE "Group_Memberships"
         SET valid=true
         WHERE user_id=$1 AND group_id=$2 RETURNING *`,[target_id,groupId]);
+        
+        // Publish member accepted event - this person is now a member
+        publishEvent("group.memberAccepted", {
+          groupId: groupId,
+          userId: target_id,
+          acceptedBy: user_id,
+          timestamp: new Date().toISOString(),
+        });
+        
         log.info("Zaakceptowano użytkownika " + user_id + " do grupy" + groupId)
         return res.status(200).json({message: "Zaakceptowano użytkownika " + user_id + " do grupy" + groupId})
   

@@ -16,7 +16,7 @@ services:
   gateway:
     container_name: gateway
     build:
-      context: ./gateway
+      context: ./backend/gateway
     ports:
       - "3000:3000"
     environment:
@@ -27,7 +27,7 @@ services:
   user-service:
     container_name: user-service
     build:
-      context: ./user-service
+      context: ./backend/user-service
     environment:
       - PORT=3001
       - JWT_SECRET=${JWT_SECRET}
@@ -47,7 +47,7 @@ services:
   post-service:
     container_name: post-service
     build:
-      context: ./post-service
+      context: ./backend/post-service
     environment:
       - PORT=3002
       - JWT_SECRET=${JWT_SECRET}
@@ -64,7 +64,7 @@ services:
   event-service:
     container_name: event-service
     build:
-      context: ./event-service
+      context: ./backend/event-service
     environment:
       - PORT=3003
       - JWT_SECRET=${JWT_SECRET}
@@ -81,7 +81,7 @@ services:
   image-service:
     container_name: image-service
     build:
-      context: ./image-service
+      context: ./backend/image-service
     environment:
       - PORT=3004
       - JWT_SECRET=${JWT_SECRET}
@@ -98,7 +98,7 @@ services:
   group-service:
     container_name: group-service
     build:
-      context: ./group-service
+      context: ./backend/group-service
     environment:
       - PORT=3005
       - JWT_SECRET=${JWT_SECRET}
@@ -110,12 +110,15 @@ services:
       - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
       - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
       - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
 
   chat-service:
     container_name: chat-service
     build:
-      context: ./chat-service
+      context: ./backend/chat-service
     environment:
       - PORT=3006
       - JWT_SECRET=${JWT_SECRET}
@@ -132,34 +135,39 @@ services:
     depends_on:
       - rabbitmq
   
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./backend/notification-service
+    environment:
+      - PORT=3007
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
+      - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
+      - PBKDF2_DIGEST=${PBKDF2_DIGEST}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
   frontend:
     container_name: frontend
     build:
-      context: ../frontend
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
       - "4200:4200"
-    environment:
-      - ANGULAR_APP_API_URL=http://gateway:3000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
     restart: unless-stopped
     depends_on:
       - gateway
-  
-  # notification-service:
-  #   container_name: notification-service
-  #   build:
-  #     context: ./notification-service
-  #   environment:
-  #     - PORT=3007
-  #     - JWT_SECRET=${JWT_SECRET}
-  #     - DB_USER=${DB_USER}
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_PORT=${DB_PORT}
-  #     - PBKDF2_ITERATIONS=${PBKDF2_ITERATIONS}
-  #     - PBKDF2_KEYLEN=${PBKDF2_KEYLEN}
-  #     - PBKDF2_DIGEST=${PBKDF2_DIGEST}
-  #   restart: unless-stopped
 
 volumes:
   rabbitmq_data: {}
