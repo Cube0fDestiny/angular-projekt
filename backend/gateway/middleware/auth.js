@@ -7,15 +7,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 /**
  * Middleware do weryfikacji tokena JWT. Jeśli token jest poprawny,
  * dekoduje go i umieszcza jego zawartość jako string w nagłówku 'x-user-data'.
- * WebSocket connections są zwalniane z tego warunku (no auth required for ws upgrade).
+ * Applies to all requests including WebSocket upgrades.
  */
 export const gatewayVerifyToken = (req, res, next) => {
-    // Skip auth for WebSocket upgrade requests and WebSocket paths
-    const path = req.url.split('?')[0]; // Get path without query params
-    if (path.startsWith('/chats') || path.startsWith('/notifications')) {
-        return next();
-    }
-
     try {
         const authHeader = req.headers.authorization;
         if (authHeader) {
