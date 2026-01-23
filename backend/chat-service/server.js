@@ -34,6 +34,7 @@ app.use("/chats", chatRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
+  path: "/chats/socket", // Explicit Socket.IO endpoint for gateway proxy
   cors: {
     origin: "*",
     methods: ["GET", "POST"],

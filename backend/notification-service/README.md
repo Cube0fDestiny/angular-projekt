@@ -90,7 +90,23 @@ export class NotificationService {
   }
   ```
 
-**Uwaga**: Połączenie WebSocket jest zwalniane z autentykacji **na poziomie Gateway'a** (dla kompatybilności), ale **serwis notification-service** wymaga ważnego JWT w handshake'u Socket.IO. Token pobierany z `localStorage` powinien być tokenom otrzymanym podczas logowania użytkownika.
+**Uwaga**: Połączenie WebSocket jest zwalniane z autentykacji **na poziomie Gateway'a** (dla kompatybilności), ale **serwis notification-service** wymaga ważnego JWT w handshake'u Socket.IO. Token pobierany z `localStorage` powinien być tokenem otrzymanym podczas logowania użytkownika.
+
+### Połączenie WebSocket przez Gateway
+
+- Endpoint Socket.IO: `ws://localhost:3000/notifications/socket`
+- Handshake:
+
+```javascript
+import { io } from 'socket.io-client';
+
+const notificationSocket = io('http://localhost:3000/notifications/socket', {
+  auth: { token: 'YOUR_JWT_TOKEN' }
+});
+
+notificationSocket.on('connect', () => console.log('Połączono z powiadomieniami'));
+notificationSocket.on('notification', (payload) => console.log('Powiadomienie', payload));
+```
 
 ## Schemat bazy danych
 

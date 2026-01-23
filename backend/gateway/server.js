@@ -72,12 +72,9 @@ services.forEach(({ route, target }) => {
 });
 
 const chatServiceProxy = createProxyMiddleware({
-  target: "http://chat-service:3006/chats",
+  target: "http://chat-service:3006",
   changeOrigin: true,
   ws: true,
-  pathRewrite: {
-    "^/chats": "",
-  },
   onError: (err, req, res) => {
     req.log.error({ err, service: "/chats" }, "Bład proxy");
     res.writeHead(503, { "Content-Type": "application/json" });

@@ -81,22 +81,39 @@ curl -X POST http://localhost:3000/images \
 
 Chat Service obsługuje komunikację w czasie rzeczywistym za pośrednictwem WebSocket.
 
-### Połączenie WebSocket
+### Połączenie WebSocket (Gateway → Chat Service)
 ```
-ws://localhost:3000/chats
+ws://localhost:3000/chats/socket
 ```
 
 ### Handshake z autentykacją
 ```javascript
-const socket = io('http://localhost:3000/chats', {
-  auth: {
-    token: 'YOUR_JWT_TOKEN'
-  }
+const socket = io('http://localhost:3000/chats/socket', {
+  auth: { token: 'YOUR_JWT_TOKEN' }
 });
 
-// Nasłuchiwanie nowych wiadomości
 socket.on('newMessage', (message) => {
   console.log('Nowa wiadomość:', message);
+});
+```
+
+---
+
+## 🔔 WebSocket (Notification Service)
+
+### Połączenie WebSocket (Gateway → Notification Service)
+```
+ws://localhost:3000/notifications/socket
+```
+
+### Handshake z autentykacją
+```javascript
+const notificationSocket = io('http://localhost:3000/notifications/socket', {
+  auth: { token: 'YOUR_JWT_TOKEN' }
+});
+
+notificationSocket.on('notification', (payload) => {
+  console.log('Powiadomienie:', payload);
 });
 ```
 
