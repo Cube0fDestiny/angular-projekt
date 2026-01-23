@@ -38,7 +38,7 @@ const attachImages = async (client, messageId, images, log) => {
 export const getUserChats = async (req, res) => {
   const userId = req.user.id;
   const log = req.log;
-
+  const client = await db.pool.connect(); // Add this line
   try {
     const result = await client.query(
       `SELECT c.id, c.name, c.creator_id, c.created_at
@@ -59,6 +59,8 @@ export const getUserChats = async (req, res) => {
     res
       .status(500)
       .json({ error: err.message + " Błąd serwera podczas pobierania czatów" });
+  } finally {
+    client.release(); // Don't forget to release!
   }
 };
 

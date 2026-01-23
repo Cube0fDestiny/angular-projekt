@@ -3,7 +3,6 @@ export interface Chat {
   name: string;
   creator_id: string;
   created_at: string;
-  last_message?: Message; // Optional: Add if you want to show last message in chat list
 }
 
 export interface Message {

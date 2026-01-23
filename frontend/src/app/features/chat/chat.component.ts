@@ -1,22 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NavbarComponent } from '../../shared/components/navbar/main/navbar.component';
 import { User } from '../../shared/models/user.model';
 import { UserService } from '../../core/user/user.service';
-import { ChatService } from '../../core/chat/chat.service';
+import { ChatSocketService } from '../../core/chat/chat-socket.service';
+import { ChatHttpService } from '../../core/chat/chat-http.service';
 import { Chat, Message } from '../../shared/models/chat.model';
-import { CommonModule, NgIf } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Subscription, combineLatest } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { OrangButtonComponent } from "../../shared/components/orang-button/orang-button.component";
 
-
 @Component({
   selector: 'app-chat-main',
-  imports: [NavbarComponent, CommonModule, NgIf, OrangButtonComponent, FormsModule],
+  imports: [NavbarComponent, CommonModule, FormsModule, OrangButtonComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css'
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit, OnDestroy {
   
   currentUser!: User | null;
   isShowingChats = false;
@@ -24,13 +24,15 @@ export class ChatComponent {
   chats: Chat[] = [];
   messages: Message[] = [];
   activeChatId: string | null = null;
+  activeChatName: string = '';
   newMessageText = '';
 
   private subscriptions: Subscription[] = [];
 
   constructor(
     public userService: UserService,
-    private chatService: ChatService
+    private chatSocketService: ChatSocketService,
+    private chatHttpService: ChatHttpService
   ) {}
 
   ngOnInit(): void {
@@ -38,55 +40,37 @@ export class ChatComponent {
       this.currentUser = user;
     });
 
-    // Load chats
+    // Initialize socket connection
+    this.chatSocketService.initializeSocket();
+    
     this.subscriptions.push(
-      this.chatService.chats$.subscribe(chats => {
-        this.chats = chats;
+      this.chatSocketService.messages$.subscribe(allMessages => {
+        // If we have an active chat, get its messages
+        this.messages = allMessages;
       })
     );
 
-    // Subscribe to messages for active chat
-    this.subscriptions.push(
-      this.chatService.messages$.subscribe(() => {
-        if (this.activeChatId) {
-          this.messages = this.chatService.getMessagesForChat(this.activeChatId);
-        }
-      })
-    );
-
-    // Subscribe to active chat changes
-    this.subscriptions.push(
-      this.chatService.activeChat$.subscribe(chatId => {
-        this.activeChatId = chatId;
-        if (chatId) {
-          this.messages = this.chatService.getMessagesForChat(chatId);
-        } else {
-          this.messages = [];
-        }
-      })
-    );
-
-    // Initial load
-    this.chatService.getChats().subscribe();
+    // Load all chats
+    this.loadAllChats();
   }
-
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.chatService.disconnect();
+    this.chatSocketService.disconnect();
   }
 
   selectChat(chatId: string): void {
-    this.chatService.setActiveChat(chatId);
+    this.chatSocketService.changeCurrentChat(chatId);
+    this.activeChatId = chatId;
     this.isShowingMessages = true;
   }
 
   createMessage(): void {
-    if (!this.activeChatId || !this.newMessageText.trim()) return;
+    if (!this.newMessageText.trim()) return;
 
-    this.chatService.sendMessage(this.activeChatId, this.newMessageText).subscribe({
+    this.chatHttpService.sendMessage(this.activeChatId!, this.newMessageText).subscribe({
       next: () => {
         this.newMessageText = '';
-        console.log('message sent!');
+        console.log('Message sent!');
       },
       error: (error) => {
         console.error('Failed to send message:', error);
@@ -94,6 +78,24 @@ export class ChatComponent {
     });
   }
 
+  loadAllChats(): void {
+    this.chatHttpService.getChats().subscribe({
+      next: (chats) => {
+        this.chats = chats;
+        console.log('Loaded chats:', chats);
+        this.isShowingChats = true;
+      },
+      error: (error) => {
+        console.error('Failed to load chats:', error);
+      }
+    });
+  }
 
-
+  // Helper methods
+  formatTime(timestamp: string): string {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  }
 }

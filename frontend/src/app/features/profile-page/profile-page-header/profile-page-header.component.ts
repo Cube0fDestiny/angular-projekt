@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
-import { ChatService } from '../../../core/chat/chat.service';
+import { ChatHttpService } from '../../../core/chat/chat-http.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -45,7 +45,7 @@ export class ProfilePageHeaderComponent implements OnInit {
     private route: ActivatedRoute,
     public userService: UserService,
     private router: Router,
-    private chatService: ChatService
+    private chatHttpService: ChatHttpService
   ) {}
 
   ngOnInit(): void {
@@ -175,10 +175,10 @@ export class ProfilePageHeaderComponent implements OnInit {
 
   createChat():void {
     const newChat = {
-      name: this.user!.name,
+      name: `${this.user!.name} ${this.user!.surname}`,
       participantIds: [this.user!.id]
     }
-    this.chatService.createChat(newChat).subscribe({
+    this.chatHttpService.createChat(newChat).subscribe({
       next: () => {
         console.log('Successfully created new chat');
         this.router.navigate(['/chats']);
