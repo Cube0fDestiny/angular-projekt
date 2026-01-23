@@ -338,6 +338,24 @@ Edytuje tekst wysłanej wiadomości.
 
 ---
 
+## WebSocket (przez Gateway)
+
+- Endpoint Socket.IO: `ws://localhost:3000/chats/socket`
+- Handshake:
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000/chats/socket', {
+  auth: { token: 'YOUR_JWT_TOKEN' }
+});
+
+socket.on('connect', () => console.log('Połączono z czatem'));
+socket.on('newMessage', (msg) => console.log('Nowa wiadomość', msg));
+```
+
+---
+
 ### P5. Usunięcie wiadomości
 `DELETE /:chatId/messages/:messageId`
 

@@ -37,7 +37,7 @@ const startServer = async () => {
 
   const server = http.createServer(app);
   const io = new Server(server, {
-    path: "/",  // Use root path since gateway proxies /notifications to this service
+    path: "/notifications/socket", // Explicit Socket.IO endpoint for gateway proxy
     cors: {
       origin: "*",
       methods: ["GET", "POST"],
