@@ -62,7 +62,7 @@ export const getAllPosts = async (req, res) => {
               WHERE post_id = p.id
             ),
             0
-          ) as like_count,
+          ) as orang_count,
           COALESCE(
             (
               SELECT json_agg(
@@ -116,7 +116,7 @@ export const getPostById = async (req, res) => {
           WHERE post_id = p.id
         ),
         0
-      ) as like_count,
+      ) as orang_count,
       COALESCE(
         (
           SELECT json_agg(
@@ -178,7 +178,7 @@ export const getPostsByLocationId = async (req, res) => {
               WHERE post_id = p.id
             ),
             0
-          ) as like_count,
+          ) as orang_count,
           COALESCE(
             (
               SELECT json_agg(
