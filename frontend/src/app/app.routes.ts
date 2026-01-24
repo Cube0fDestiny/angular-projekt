@@ -65,12 +65,27 @@ export const routes: Routes = [
     canActivate: [authGuard] 
   },
   { 
+    path: 'profile/:id/:postId', 
+    component: ProfilePageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
     path: 'event/:id', 
     component: EventPageComponent, 
     canActivate: [authGuard] 
   },
   { 
+    path: 'event/:id/:postId', 
+    component: EventPageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
     path: 'group/:id', 
+    component: GroupPageComponent, 
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'group/:id/:postId', 
     component: GroupPageComponent, 
     canActivate: [authGuard] 
   },

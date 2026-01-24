@@ -10,7 +10,7 @@
           </td>
           <!-- Profile Wall -->
           <td style="width:50%; vertical-align: top; padding: 20px; border: none;">
-            <app-wall location_type="group" [location_id]="groupId!"></app-wall>
+            <app-wall *ngIf="!isloading" location_type="group" [location_id]="groupId!" [highlightedPost]="highlightedPostId!" [allowedUsers]="allowedUsers"></app-wall>
           </td>
         </tr>
       </table>

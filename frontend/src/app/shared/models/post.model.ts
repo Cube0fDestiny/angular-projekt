@@ -13,7 +13,7 @@ export interface Comment {
 
 // Reaction type
 export interface Reaction {
-  type: string;
+  liked: boolean;
 }
 
 // MAIN POST MODEL
@@ -24,7 +24,13 @@ export interface Post {
   location_id: string;
   location_type: string;
   created_at: Date;
-  deleted: false;
+  deleted?: boolean;
+  images?: {
+    image_id: string;
+    image_order: number;
+  }
+  orang_count: number;
+  comment_count: number;
 }
 
 // Types for creating/updating posts

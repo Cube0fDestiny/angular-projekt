@@ -21,6 +21,9 @@ export class WallComponent implements OnInit {
   @Input() posts: Post[] = [];
   @Input() location_type: 'wall' | 'profile' | 'group' | 'event' = 'wall';
   @Input() location_id: string = '';
+  @Input() highlightedPost: string = '';
+  @Input() allowedUsers: string[] = [];
+  canPost = false;
 
   currentUser!: User | null;
 
@@ -104,6 +107,9 @@ export class WallComponent implements OnInit {
   
   ngOnInit() {
     this.userService.currentUser$.subscribe(user => this.currentUser = user);
+    if(this.allowedUsers.includes(this.currentUser!.id)&&(this.location_type!='wall')){
+      this.canPost = true;
+    }
     this.loadAllPosts();
   }
   
@@ -111,18 +117,39 @@ export class WallComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    this.postsSubscription = this.postService.getAllPosts().subscribe({
-      next: (posts) => {
-        this.posts = posts;
-        this.isLoading = false;
-        this.loadPosts();
-      },
-      error: (error) => {
-        this.error = 'Failed to load posts. Please try again later.';
-        this.isLoading = false;
-        console.error('Error loading posts:', error);
-      }
-    });
+    if(this.location_id){
+      this.postService.getPostByLocationId(this.location_id).subscribe({
+        next: (posts) => {
+          this.posts = posts;
+          if (this.highlightedPost) {
+            const highlighted = this.posts.find(p => p.id === this.highlightedPost);
+            const others = this.posts.filter(p => p.id !== this.highlightedPost);
+            this.posts = highlighted ? [highlighted, ...others] : this.posts;
+          }
+          this.isLoading = false;
+          this.loadPosts();
+        },
+        error: (error) => {
+          this.error = 'Failed to load posts. Please try again later.';
+          this.isLoading = false;
+          console.error('Error loading posts:', error);
+        }
+      });
+    } else{
+      this.postService.getAllPosts().subscribe({
+        next: (posts) => {
+          this.posts = posts;
+          this.isLoading = false;
+          this.loadPosts();
+        },
+        error: (error) => {
+          this.error = 'Failed to load posts. Please try again later.';
+          this.isLoading = false;
+          console.error('Error loading posts:', error);
+        }
+      });
+    }
+
   }
 
   ngOnDestroy(): void {

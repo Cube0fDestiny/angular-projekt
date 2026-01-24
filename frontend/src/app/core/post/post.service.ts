@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Post } from '../../shared/models/post.model';
+import { Post, Reaction } from '../../shared/models/post.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -23,6 +23,10 @@ export class PostService {
 
   getPostById(id: string): Observable<Post> {
     return this.http.get<Post>(`${this.apiUrl}/${id}`);
+  }
+
+  getPostByLocationId(id: string): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/location/${id}`);
   }
 
   /* ============================
@@ -76,7 +80,10 @@ export class PostService {
      Reactions
      ============================ */
 
-  toggleReaction(postId: string, reaction: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${postId}/reactions`, { reaction });
+  toggleReaction(postId: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/${postId}/reactions`, {});
+  }
+  getReaction(postId: string): Observable<Reaction> {
+    return this.http.get<Reaction>(`${this.apiUrl}/${postId}/reactions`);
   }
 }
