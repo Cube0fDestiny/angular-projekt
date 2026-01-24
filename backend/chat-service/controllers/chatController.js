@@ -242,3 +242,64 @@ export const createMessage = async (req, res) => {
     client.release();
   }
 };
+
+export const deleteChat = async (req, res) => {
+  const { chatId } = req.params;
+  const userId = req.user.id;
+  const log = req.log;
+  const client = await db.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Check if chat exists and user is a participant
+    const chatResult = await client.query(
+      `SELECT id FROM "Chats" WHERE id = $1`,
+      [chatId]
+    );
+
+    if (chatResult.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Czat nie został znaleziony" });
+    }
+
+    // Check if user is a participant
+    const participantResult = await client.query(
+      `SELECT user_id FROM "Chat_Participants" WHERE chat_id = $1 AND user_id = $2`,
+      [chatId, userId]
+    );
+
+    if (participantResult.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({ error: "Tylko uczestnicy mogą usunąć czat" });
+    }
+
+    // Delete related data
+    await client.query(
+      `DELETE FROM "Chat_Message_Images" WHERE message_id IN (SELECT id FROM "Chat_Messages" WHERE chat_id = $1)`,
+      [chatId]
+    );
+    await client.query(`DELETE FROM "Chat_Messages" WHERE chat_id = $1`, [chatId]);
+    await client.query(`DELETE FROM "Chat_Participants" WHERE chat_id = $1`, [chatId]);
+    await client.query(`DELETE FROM "Chats" WHERE id = $1`, [chatId]);
+
+    await client.query("COMMIT");
+
+    log.info({ chatId, userId }, "Usunięto czat.");
+    publishEvent("chat.deleted", {
+      chatId: chatId,
+      deletedBy: userId,
+      timestamp: new Date().toISOString(),
+    });
+
+    res.status(200).json({ message: "Czat został usunięty" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    log.error({ err, chatId, userId }, "Błąd serwera podczas usuwania czatu.");
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas usuwania czatu",
+    });
+  } finally {
+    client.release();
+  }
+};

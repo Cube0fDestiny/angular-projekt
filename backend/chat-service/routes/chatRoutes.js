@@ -4,6 +4,7 @@ import {
   createChat,
   getChatMessages,
   createMessage,
+  deleteChat,
 } from "../controllers/chatController.js";
 import {
   attachUserFromHeaders,
@@ -33,5 +34,8 @@ router.get(
 // Wyślij nową wiadomość do konkretnego czatu
 // Middleware `isChatParticipant` chroni ten endpoint
 router.post("/:chatId/messages", requireAuth, isChatParticipant, createMessage);
+
+// Usuń czat (tylko twórca)
+router.delete("/:chatId", requireAuth, deleteChat);
 
 export default router;
