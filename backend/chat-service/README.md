@@ -28,7 +28,8 @@ Pobiera listę wszystkich czatów, w których użytkownik jest uczestnikiem.
     "id": "uuid",
     "name": "string",
     "creator_id": "uuid",
-    "created_at": "timestamp"
+    "created_at": "timestamp",
+    "participantsIds": ["uuid", "uuid", "..."]
   }
 ]
 ```
