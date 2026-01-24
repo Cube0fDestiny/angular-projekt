@@ -30,7 +30,27 @@ Wymagane dla endpointów chronionych:
     "Text": "string",
     "location_id": "uuid",
     "location_type": "string",
-    "created_at": "timestamp"
+    "created_at": "timestamp",
+    "images": [
+      {
+        "image_id": "uuid",
+        "image_order": 0
+      }
+    ],
+    "reactions": {
+      "totalCount": 10,
+      "counts": [
+        {
+          "type": "like",
+          "count": 5
+        },
+        {
+          "type": "love",
+          "count": 5
+        }
+      ]
+    },
+    "comment_count": 3
   }
 ]
 ```
@@ -51,7 +71,27 @@ Wymagane dla endpointów chronionych:
     "Text": "string",
     "location_id": "uuid",
     "location_type": "string",
-    "created_at": "timestamp"
+    "created_at": "timestamp",
+    "images": [
+      {
+        "image_id": "uuid",
+        "image_order": 0
+      }
+    ],
+    "reactions": {
+      "totalCount": 10,
+      "counts": [
+        {
+          "type": "like",
+          "count": 5
+        },
+        {
+          "type": "love",
+          "count": 5
+        }
+      ]
+    },
+    "comment_count": 3
   }
 ]
 ```
@@ -71,7 +111,27 @@ Wymagane dla endpointów chronionych:
   "Text": "string",
   "location_id": "uuid",
   "location_type": "string",
-  "created_at": "timestamp"
+  "created_at": "timestamp",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ],
+  "reactions": {
+    "totalCount": 10,
+    "counts": [
+      {
+        "type": "like",
+        "count": 5
+      },
+      {
+        "type": "love",
+        "count": 5
+      }
+    ]
+  },
+  "comment_count": 3
 }
 ```
 
