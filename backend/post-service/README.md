@@ -35,7 +35,28 @@ Wymagane dla endpointów chronionych:
 ]
 ```
 
-### 2\. Pobranie konkretnego posta
+### 2\. Pobranie postów dla lokalizacji
+
+`GET /location/:locationId`
+
+**Endpoint publiczny**
+
+**Odpowiedź (200 OK):**
+
+```
+[
+  {
+    "id": "uuid",
+    "creator_id": "uuid",
+    "Text": "string",
+    "location_id": "uuid",
+    "location_type": "string",
+    "created_at": "timestamp"
+  }
+]
+```
+
+### 3\. Pobranie konkretnego posta
 
 `GET /:id`
 
@@ -54,7 +75,7 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 3\. Stworzenie nowego posta
+### 4\. Stworzenie nowego posta
 
 `POST /`
 
@@ -84,7 +105,7 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 4\. Aktualizacja posta
+### 5\. Aktualizacja posta
 
 `PUT /:id`
 
@@ -100,7 +121,7 @@ Wymagane dla endpointów chronionych:
 
 **Odpowiedź (200 OK):** Pełny, zaktualizowany obiekt posta.
 
-### 5\. Usunięcie posta (Soft Delete)
+### 6\. Usunięcie posta (Soft Delete)
 
 `DELETE /:id`
 
@@ -114,7 +135,7 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 6\. Stworzenie posta z obrazami (Gateway)
+### 7\. Stworzenie posta z obrazami (Gateway)
 
 `POST /posts/with-images`
 
@@ -150,7 +171,7 @@ Wymagane dla endpointów chronionych:
 ---
 ## 🚀 Endpointy: Komentarze i Reakcje
 
-### 7\. Pobranie komentarzy do posta
+### 8\. Pobranie komentarzy do posta
 
 `GET /:postId/comments`
 
@@ -172,7 +193,7 @@ Wymagane dla endpointów chronionych:
 ]
 ```
 
-### 8\. Dodanie komentarza do posta
+### 9\. Dodanie komentarza do posta
 
 `POST /:postId/comments`
 
@@ -190,7 +211,7 @@ Wymagane dla endpointów chronionych:
 
 **Odpowiedź (201 Created):** Pełny obiekt nowego komentarza.
 
-### 8\. Aktualizacja komentarza
+### 10\. Aktualizacja komentarza
 
 `PUT /comments/:commentId`
 
@@ -206,7 +227,7 @@ Wymagane dla endpointów chronionych:
 
 **Odpowiedź (200 OK):** Pełny, zaktualizowany obiekt komentarza.
 
-### 9\. Usunięcie komentarza (Soft Delete)
+### 11\. Usunięcie komentarza (Soft Delete)
 
 `DELETE /comments/:commentId`
 
@@ -220,7 +241,7 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 10\. Przełączanie reakcji na poście
+### 12\. Przełączanie reakcji na poście
 
 `POST /:id/reactions`
 
@@ -242,7 +263,7 @@ Ten endpoint obsługuje dodawanie, usuwanie i aktualizację reakcji.
 -   **200:** `{ "message": "Reakcja została usunięta" }` (gdy użytkownik klika tę samą reakcję ponownie)
 -   **200:** `{ "message": "Reakcja została zaktualizowana" }` (gdy użytkownik zmienia typ reakcji)
 
-### 11. Pobranie mojej reakcji na poście
+### 13\. Pobranie mojej reakcji na poście
 
 `GET /:id/reactions`
 

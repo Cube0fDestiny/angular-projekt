@@ -5,6 +5,7 @@ import {
   updatePost,
   deletePost,
   getPostById,
+  getPostsByLocationId,
   getPostsByUserId,
 } from "../controllers/postController.js";
 
@@ -34,6 +35,7 @@ router.use(attachUserFromHeaders);
 // Posts enpoints
 router.get("/", getAllPosts);
 router.get("/user", requireAuth, getPostsByUserId);
+router.get("/location/:locationId", getPostsByLocationId);
 router.get("/:id", getPostById);
 router.post("/", requireAuth, createPost);
 router.put("/:id", requireAuth, isPostOwner, updatePost);

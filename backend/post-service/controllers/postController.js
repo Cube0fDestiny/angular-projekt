@@ -163,6 +163,67 @@ export const getPostById = async (req, res) => {
   }
 };
 
+export const getPostsByLocationId = async (req, res) => {
+  const log = req.log;
+  const { locationId } = req.params;
+
+  try {
+    const result = await db.query(
+      `
+      SELECT
+          p.id,
+          p.creator_id,
+          p."Text",
+          p.location_id,
+          p.location_type,
+          p.created_at,
+          COALESCE(
+            (
+              SELECT json_agg(
+                json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
+                ORDER BY pi.image_order
+              )
+              FROM "Post_Images" pi
+              WHERE pi.post_id = p.id
+            ),
+            '[]'::json
+          ) as images,
+          COALESCE(
+              (
+                  SELECT json_build_object(
+                      'totalCount', COUNT(*),
+                      'counts', json_agg(json_build_object('type', pr.reaction_type, 'count', pr.count))
+                  )
+                  FROM (
+                      SELECT reaction_type, COUNT(*) as count
+                      FROM "Post_Reactions"
+                      WHERE post_id = p.id
+                      GROUP BY reaction_type
+                  ) pr
+              ),
+              '{"totalCount": 0, "counts": []}'::json
+          ) as reactions
+      FROM
+          "Posts" AS p
+      WHERE
+          p.location_id = $1 AND p.deleted = false
+      ORDER BY
+          p.created_at DESC;
+      `,
+      [locationId],
+    );
+
+    log.info(`[Post-Service] Pobrano ${result.rows.length} postów dla lokalizacji ${locationId}`);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    log.error(err);
+    res.status(500).json({
+      error:
+        err.message + " Błąd serwera podczas pobierania postów dla lokalizacji",
+    });
+  }
+};
+
 export const getPostsByUserId = async (req, res) => {
   const log = req.log;
   const userId = req.user.id;

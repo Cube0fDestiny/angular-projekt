@@ -35,7 +35,7 @@ router.get(
 // Middleware `isChatParticipant` chroni ten endpoint
 router.post("/:chatId/messages", requireAuth, isChatParticipant, createMessage);
 
-// Usuń czat (tylko twórca)
+// Usuń czat
 router.delete("/:chatId", requireAuth, deleteChat);
 
 export default router;
