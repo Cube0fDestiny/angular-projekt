@@ -27,6 +27,13 @@ export class NotificationsDropdownComponent implements OnInit {
   closeDropdown() {
     this.isOpen = false;
   }
+
+  getNotificationIcon(): string{
+    if(this.isOpen){
+      return `assets/icons/notification_on.png`;
+    }
+    return `assets/icons/notification_off.png`;
+  }
   
   sectionTitle = 'All Friends';
   @Output() userClick = new EventEmitter<string>();

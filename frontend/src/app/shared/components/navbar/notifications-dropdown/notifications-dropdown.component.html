@@ -2,9 +2,8 @@
   <!-- Trigger button (user avatar/name) -->
   <div
     class="nav-item"
-    (click)="toggleDropdown()"
-    aria-label="User menu"> 
-      <span class="nav-icon">🔔</span>
+    (click)="toggleDropdown()"> 
+      <img [src]="getNotificationIcon()">
       <span *ngIf="friendRequests.length>0" class="nav-badge">{{ friendRequests.length }} </span>
   </div> 
   <!-- Dropdown content -->

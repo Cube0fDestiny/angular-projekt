@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.component';
 import { UserService } from '../../../../core/user/user.service';
@@ -15,6 +15,7 @@ import { NotificationsDropdownComponent } from '../notifications-dropdown/notifi
 export class NavbarComponent implements OnInit {
   
   currentUser: any;
+  @Input() location: string = '';
     
   constructor(private userService: UserService, private router: Router) {}
   
@@ -23,6 +24,34 @@ export class NavbarComponent implements OnInit {
     this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;  // Updates automatically!
     });
+  }
+
+  getMessageIcon(): string{
+    if(this.location=='chat'){
+      return `assets/icons/messages_on.png`;
+    }
+    return `assets/icons/messages_off.png`;
+  }
+
+  getGroupsIcon(): string{
+    if(this.location=='group'){
+      return `assets/icons/group_on.png`;
+    }
+    return `assets/icons/group_off.png`;
+  }
+
+  getEventsIcon(): string{
+    if(this.location=='event'){
+      return `assets/icons/events_on.png`;
+    }
+    return `assets/icons/events_off.png`;
+  }
+
+  getCompanyIcon(): string{
+    if(this.location=='company'){
+      return `assets/icons/company_on.png`;
+    }
+    return `assets/icons/company_off.png`;
   }
 
   goToHome():void {
@@ -41,14 +70,24 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/']).then(() => { this.router.navigate(['/events']); });
   }
 
-  
-  navItems = [
-    { id: 'home', label: 'Strona główna', icon: '🏠' },
-    { id: 'events', label: 'Wydarzenia', icon: '❗' },
-    { id: 'messages', label: 'Wiadomości', icon: '💬', badge: 12 }
-    //, { id: 'notifications', label: 'Powiadomienia', icon: '🔔', badge: 3 }
-    //, { id: 'profile', label: 'Profil', icon: '👤' }
-  ];
+  goToMessages(): void {
+    // Just pass the ID - that's it!
+    console.log("going to messages");
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/chats']); });
+  }
+
+  goToGroups(): void {
+    // Just pass the ID - that's it!
+    console.log("going to groups");
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/groups']); });
+  }
+
+  goToCompany(): void {
+    // Just pass the ID - that's it!
+    console.log("going to companies");
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/companies']); });
+  }
+
   isDropdownOpen = false;
   activeItem = 'home';
 

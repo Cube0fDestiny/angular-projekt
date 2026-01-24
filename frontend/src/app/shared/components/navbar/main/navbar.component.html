@@ -17,24 +17,36 @@
 
     <!-- Main Navigation (tylko wizualnie) -->
     <div class="nav-items">
-      <div 
-        *ngFor="let item of navItems" 
-        class="nav-item"
-        [class.active]="activeItem === item.id"
-        (click)="setActive(item.id)"
+      <div class="nav-item"
+        (click)="goToMessages()"
       >
-        <span class="nav-icon">{{item.icon}}</span>
-        <span *ngIf="item.badge" class="nav-badge">{{item.badge}}</span>
+        <img [src]="getMessageIcon()">
+      </div>
+      <div class="nav-item"
+        (click)="goToEvents()"
+      >
+        <img [src]="getEventsIcon()">
+      </div>
+      <div class="nav-item"
+        (click)="goToGroups()"
+      >
+        <img [src]="getGroupsIcon()">
+      </div>
+      <div class="nav-item"
+        (click)="goToCompany()"
+      >
+        <img [src]="getCompanyIcon()">
       </div>
       <div class="user-menu">
         <notifications-dropdown> </notifications-dropdown>
       </div>
       <!-- User Menu -->
       <div class="user-menu">
-        <div class="user-info" (click)="setActive('profile')">
+        <div class="nav-item" (click)="setActive('profile')">
           <img [src]="currentUser.avatar" alt="Avatar" class="user-avatar"> 
-          
         </div>
+      </div>
+      <div class="user-menu">
         <profile-dropdown> </profile-dropdown>
       </div>
     </div>
