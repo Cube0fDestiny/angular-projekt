@@ -36,7 +36,42 @@ Pobiera listę wszystkich czatów, w których użytkownik jest uczestnikiem.
 
 ---
 
-### 2. Stworzenie nowego czatu
+### 2. Usunięcie czatu
+`DELETE /:chatId`
+
+**Wymagana autoryzacja (Uczestnik czatu)**
+
+Usuwa czat wraz ze wszystkimi wiadomościami i powiązanymi danymi. Każdy uczestnik czatu może go usunąć.
+
+**Parametry:**
+| Parametr | Typ | Opis |
+|---|---|---|
+| :chatId | uuid | ID czatu do usunięcia |
+
+**Odpowiedź (200 OK):**
+```json
+{
+  "message": "Czat został usunięty"
+}
+```
+
+**Odpowiedź (403 Forbidden):**
+```json
+{
+  "error": "Tylko uczestnicy mogą usunąć czat"
+}
+```
+
+**Odpowiedź (404 Not Found):**
+```json
+{
+  "error": "Czat nie został znaleziony"
+}
+```
+
+---
+
+### 3. Stworzenie nowego czatu
 `POST /`
 
 **Wymagana autoryzacja**
@@ -63,7 +98,7 @@ Tworzy nowy czat (prywatny lub grupowy) z podanymi uczestnikami. Twórca czatu j
 
 ---
 
-### 3. Pobranie wiadomości z czatu
+### 4. Pobranie wiadomości z czatu
 `GET /:chatId/messages`
 
 **Wymagana autoryzacja (Uczestnik czatu)**
@@ -90,7 +125,7 @@ Pobiera historię wiadomości z konkretnego czatu, posortowanych od najnowszych.
 
 ---
 
-### 4. Wysłanie wiadomości
+### 5. Wysłanie wiadomości
 `POST /:chatId/messages`
 
 **Wymagana autoryzacja (Uczestnik czatu)**
@@ -128,7 +163,7 @@ Wysyła nową wiadomość do czatu. Wiadomość jest emitowana w czasie rzeczywi
 
 ---
 
-### 5. Wysłanie wiadomości z obrazami (Gateway)
+### 6. Wysłanie wiadomości z obrazami (Gateway)
 
 `POST /chats/:chatId/messages/with-images`
 
