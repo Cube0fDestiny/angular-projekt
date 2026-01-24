@@ -81,7 +81,15 @@ export const getAllPosts = async (req, res) => {
               WHERE pi.post_id = p.id
             ),
             '[]'::json
-          ) as images
+          ) as images,
+          COALESCE(
+            (
+              SELECT COUNT(*)::int
+              FROM "Post_Comments"
+              WHERE post_id = p.id AND deleted = false
+            ),
+            0
+          ) as comment_count
           FROM
               "Posts" AS p
           WHERE
@@ -119,7 +127,15 @@ export const getPostById = async (req, res) => {
           WHERE pi.post_id = p.id
         ),
         '[]'::json
-      ) as images
+      ) as images,
+      COALESCE(
+        (
+          SELECT COUNT(*)::int
+          FROM "Post_Comments"
+          WHERE post_id = p.id AND deleted = false
+        ),
+        0
+      ) as comment_count
       FROM "Posts" p
       WHERE p.id = $1 AND p.deleted = false`,
       [id],
@@ -202,7 +218,15 @@ export const getPostsByLocationId = async (req, res) => {
                   ) pr
               ),
               '{"totalCount": 0, "counts": []}'::json
-          ) as reactions
+          ) as reactions,
+          COALESCE(
+            (
+              SELECT COUNT(*)::int
+              FROM "Post_Comments"
+              WHERE post_id = p.id AND deleted = false
+            ),
+            0
+          ) as comment_count
       FROM
           "Posts" AS p
       WHERE
@@ -264,7 +288,15 @@ export const getPostsByUserId = async (req, res) => {
                   ) pr
               ),
               '{"totalCount": 0, "counts": []}'::json
-          ) as reactions
+          ) as reactions,
+          COALESCE(
+            (
+              SELECT COUNT(*)::int
+              FROM "Post_Comments"
+              WHERE post_id = p.id AND deleted = false
+            ),
+            0
+          ) as comment_count
       FROM
           "Posts" AS p
       WHERE
