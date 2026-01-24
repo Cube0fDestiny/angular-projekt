@@ -37,19 +37,7 @@ Wymagane dla endpointów chronionych:
         "image_order": 0
       }
     ],
-    "reactions": {
-      "totalCount": 10,
-      "counts": [
-        {
-          "type": "like",
-          "count": 5
-        },
-        {
-          "type": "love",
-          "count": 5
-        }
-      ]
-    },
+    "like_count": 10,
     "comment_count": 3
   }
 ]
@@ -78,19 +66,7 @@ Wymagane dla endpointów chronionych:
         "image_order": 0
       }
     ],
-    "reactions": {
-      "totalCount": 10,
-      "counts": [
-        {
-          "type": "like",
-          "count": 5
-        },
-        {
-          "type": "love",
-          "count": 5
-        }
-      ]
-    },
+    "like_count": 10,
     "comment_count": 3
   }
 ]
@@ -118,19 +94,7 @@ Wymagane dla endpointów chronionych:
       "image_order": 0
     }
   ],
-  "reactions": {
-    "totalCount": 10,
-    "counts": [
-      {
-        "type": "like",
-        "count": 5
-      },
-      {
-        "type": "love",
-        "count": 5
-      }
-    ]
-  },
+  "like_count": 10,
   "comment_count": 3
 }
 ```
@@ -301,29 +265,22 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 12\. Przełączanie reakcji na poście
+### 12\. Przełączanie reakcji (like) na poście
 
 `POST /:id/reactions`
 
 **Wymagana autoryzacja**
 
-Ten endpoint obsługuje dodawanie, usuwanie i aktualizację reakcji.
+Ten endpoint obsługuje dodawanie i usuwanie lajka. Nie wymaga body.
 
-**Body:**
-
-```
-{
-  "reaction": "string"
-}
-```
+**Body:** Pusty (nie wymagany)
 
 **Odpowiedzi (200 OK / 201 Created):**
 
--   **201:** `{ "message": "Reakcja została stworzona" }` (gdy użytkownik reaguje po raz pierwszy)
--   **200:** `{ "message": "Reakcja została usunięta" }` (gdy użytkownik klika tę samą reakcję ponownie)
--   **200:** `{ "message": "Reakcja została zaktualizowana" }` (gdy użytkownik zmienia typ reakcji)
+-   **201:** `{ "message": "Reakcja została stworzona", "liked": true }` (gdy użytkownik lajkuje po raz pierwszy)
+-   **200:** `{ "message": "Reakcja została usunięta", "liked": false }` (gdy użytkownik odlajkowuje)
 
-### 13\. Pobranie mojej reakcji na poście
+### 13\. Sprawdzenie czy użytkownik lajkował post
 
 `GET /:id/reactions`
 
@@ -333,9 +290,11 @@ Ten endpoint obsługuje dodawanie, usuwanie i aktualizację reakcji.
 
 ```
 {
-  "reaction": "string" lub null
+  "liked": true
 }
 ```
+
+Zwraca `true` jeśli użytkownik polubił post, `false` jeśli nie.
 
 ---
 ## ⚠️ Obsługa Błędów
@@ -411,12 +370,12 @@ Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 
 ### Reaction Events
 
-**`reaction.created`** - Published when a reaction is added to a post
+**`reaction.created`** - Published when a like is added to a post
 ```json
 {
   "postId": "uuid",
   "userId": "uuid",
-  "reactionType": "string",
+  "reactionType": "like",
   "timestamp": "ISO8601"
 }
 ```

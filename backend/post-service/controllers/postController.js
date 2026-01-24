@@ -55,22 +55,14 @@ export const getAllPosts = async (req, res) => {
           p.location_id,
           p.location_type,
           p.created_at,
-          -- Aggregate reactions into a JSON object directly in the query
           COALESCE(
-              (
-                  SELECT json_build_object(
-                      'totalCount', COUNT(*),
-                      'counts', json_agg(json_build_object('type', pr.reaction_type, 'count', pr.count))
-                  )
-                  FROM (
-                      SELECT reaction_type, COUNT(*) as count
-                      FROM "Post_Reactions"
-                      WHERE post_id = p.id
-                      GROUP BY reaction_type
-                  ) pr
-              ),
-              '{"totalCount": 0, "counts": []}'::json
-          ) as reactions,
+            (
+              SELECT COUNT(*)::int
+              FROM "Post_Reactions"
+              WHERE post_id = p.id
+            ),
+            0
+          ) as like_count,
           COALESCE(
             (
               SELECT json_agg(
@@ -119,6 +111,14 @@ export const getPostById = async (req, res) => {
       `SELECT p.id, p.creator_id, p."Text", p.location_id, p.location_type, p.created_at,
       COALESCE(
         (
+          SELECT COUNT(*)::int
+          FROM "Post_Reactions"
+          WHERE post_id = p.id
+        ),
+        0
+      ) as like_count,
+      COALESCE(
+        (
           SELECT json_agg(
             json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
             ORDER BY pi.image_order
@@ -147,30 +147,8 @@ export const getPostById = async (req, res) => {
         .json({ message: "Nie znaleziono posta o id: " + id });
     }
 
-    const postWithReactions = postResult.rows[0];
-
-    const reactionsResult = await db.query(
-      `SELECT reaction_type, COUNT(*) as count
-      FROM "Post_Reactions"
-      WHERE post_id = $1
-      GROUP BY reaction_type`,
-      [id],
-    );
-
-    let totalCount = 0;
-    const reactionCounts = reactionsResult.rows.map((row) => {
-      const count = parseInt(row.count);
-      totalCount += count;
-      return { type: row.reaction_type, count: count };
-    });
-
-    postWithReactions.reactions = {
-      totalCount: totalCount,
-      counts: reactionCounts,
-    };
-
     log.info(`[Post-Service] Pobrano post o id: ${id}`);
-    res.status(200).json(postWithReactions);
+    res.status(200).json(postResult.rows[0]);
   } catch (err) {
     log.error(err);
     res.status(500).json({
@@ -195,6 +173,14 @@ export const getPostsByLocationId = async (req, res) => {
           p.created_at,
           COALESCE(
             (
+              SELECT COUNT(*)::int
+              FROM "Post_Reactions"
+              WHERE post_id = p.id
+            ),
+            0
+          ) as like_count,
+          COALESCE(
+            (
               SELECT json_agg(
                 json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
                 ORDER BY pi.image_order
@@ -204,21 +190,6 @@ export const getPostsByLocationId = async (req, res) => {
             ),
             '[]'::json
           ) as images,
-          COALESCE(
-              (
-                  SELECT json_build_object(
-                      'totalCount', COUNT(*),
-                      'counts', json_agg(json_build_object('type', pr.reaction_type, 'count', pr.count))
-                  )
-                  FROM (
-                      SELECT reaction_type, COUNT(*) as count
-                      FROM "Post_Reactions"
-                      WHERE post_id = p.id
-                      GROUP BY reaction_type
-                  ) pr
-              ),
-              '{"totalCount": 0, "counts": []}'::json
-          ) as reactions,
           COALESCE(
             (
               SELECT COUNT(*)::int
