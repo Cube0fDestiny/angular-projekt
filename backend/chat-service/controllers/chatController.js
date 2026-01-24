@@ -49,11 +49,25 @@ export const getUserChats = async (req, res) => {
       [userId]
     );
 
+    // Fetch participants for each chat
+    const chatsWithParticipants = await Promise.all(
+      result.rows.map(async (chat) => {
+        const participantsResult = await client.query(
+          `SELECT user_id FROM "Chat_Participants" WHERE chat_id = $1`,
+          [chat.id]
+        );
+        return {
+          ...chat,
+          participantsIds: participantsResult.rows.map(p => p.user_id)
+        };
+      })
+    );
+
     log.info(
       { userId, chatCount: result.rowCount },
       "Pobrano czaty użytkownika."
     );
-    res.status(200).json(result.rows);
+    res.status(200).json(chatsWithParticipants);
   } catch (err) {
     log.error({ err, userId }, "Błąd serwera podczas pobierania czatów.");
     res
