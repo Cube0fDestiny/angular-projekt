@@ -24,13 +24,13 @@ export const toggleReaction = async (req, res) => {
 
     await db.query(
       `INSERT INTO "Post_Reactions" (post_id, user_id, reaction_type) VALUES ($1, $2, $3)`,
-      [id, user_id, 'like'],
+      [id, user_id, 'orang'],
     );
 
     publishEvent("reaction.created", {
       postId: id,
       userId: user_id,
-      reactionType: 'like',
+      reactionType: 'orang',
     });
 
     req.log.info(`[Post-Service] Stworzono reakcje o id: ${id}`);
