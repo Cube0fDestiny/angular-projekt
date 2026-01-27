@@ -1,0 +1,175 @@
+<!-- image-upload.component.html -->
+<div class="relative">
+  <!-- Trigger Button - This is what you'll use in your parent component -->
+  <button 
+    type="button"
+    class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--o-orange)] text-white rounded-lg hover:bg-[var(--o-dorange)] transition-colors font-semibold"
+    (click)="openUpload()"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+    </svg>
+    {{ buttonText }}
+  </button>
+
+  <!-- Upload Modal/Overlay -->
+  <div 
+    *ngIf="isOpen"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/30 backdrop-blur-sm p-4"
+    (click)="closeUpload($event)"
+  >
+    <div 
+      class="bg-[var(--o-beige)] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-300">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-800">Upload Image</h2>
+          <button 
+            type="button"
+            class="text-gray-600 hover:text-gray-800 transition-colors"
+            (click)="closeUpload()"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <!-- File Input Area -->
+        <div 
+          class="border-2 border-dashed border-gray-400 rounded-xl p-8 text-center cursor-pointer transition-all hover:border-[var(--o-orange)] hover:bg-[var(--o-dbeige)]"
+          (click)="fileInput.click()"
+          [class.border-[var(--o-orange)]]="isDragging"
+        >
+          <svg class="w-12 h-12 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <p class="text-gray-800 mb-1 font-semibold">Drag & drop your image here</p>
+          <p class="text-gray-600 text-sm mb-4 font-medium">or click to browse files</p>
+          <button 
+            type="button"
+            class="px-4 py-2 bg-[var(--o-orange)] text-white rounded-lg hover:bg-[var(--o-dorange)] transition-colors text-sm font-semibold"
+          >
+            Select Image
+          </button>
+        </div>
+
+        <!-- Hidden file input -->
+        <input 
+          #fileInput
+          type="file" 
+          accept="image/*"
+          class="hidden"
+          (change)="onFileSelected($event)"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        />
+
+        <!-- Preview Section -->
+        <div *ngIf="imagePreview" class="mt-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Preview</h3>
+          <div class="bg-[var(--o-dbeige)] rounded-lg p-4">
+            <div class="flex items-start gap-4">
+              <img 
+                [src]="imagePreview" 
+                [alt]="selectedFile?.name" 
+                class="w-24 h-24 object-cover rounded-lg border border-gray-400"
+              />
+              <div class="flex-1">
+                <p class="text-gray-800 font-semibold truncate">{{ selectedFile?.name }}</p>
+                <p class="text-gray-700 text-sm mt-1 font-medium">{{ fileSize }}</p>
+                <p class="text-gray-700 text-sm font-medium">{{ selectedFile?.type }}</p>
+              </div>
+              <button 
+                type="button"
+                class="text-gray-600 hover:text-red-600 transition-colors"
+                (click)="removeFile()"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Progress -->
+        <div *ngIf="isUploading" class="mt-6">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-800 font-semibold">Uploading...</span>
+            <span class="text-[var(--o-orange)] font-semibold">{{ uploadProgress }}%</span>
+          </div>
+          <div class="w-full bg-gray-300 rounded-full h-2.5">
+            <div 
+              class="bg-[var(--o-orange)] h-2.5 rounded-full transition-all duration-300"
+              [style.width]="uploadProgress + '%'"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Upload Result -->
+        <div *ngIf="uploadResult" class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-green-800 font-semibold">Upload successful!</p>
+              <p class="text-green-700 text-sm mt-1 font-medium">Image ID: {{ uploadResult.id }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="mt-6 p-4 bg-red-100 border border-red-300 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-red-800 font-semibold">Upload failed</p>
+              <p class="text-red-700 text-sm mt-1 font-medium">{{ errorMessage }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-6 border-t border-gray-300 bg-[var(--o-dbeige)] rounded-b-xl">
+        <div class="flex justify-end gap-3">
+          <button 
+            type="button"
+            class="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+            (click)="closeUpload()"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button"
+            class="px-4 py-2 bg-[var(--o-orange)] text-white rounded-lg hover:bg-[var(--o-dorange)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            (click)="upload()"
+            [disabled]="!selectedFile || isUploading"
+          >
+            <span *ngIf="!isUploading">Upload Image</span>
+            <span *ngIf="isUploading" class="flex items-center gap-2">
+              <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Uploading...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

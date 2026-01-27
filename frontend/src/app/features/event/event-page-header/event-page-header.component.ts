@@ -6,11 +6,12 @@ import { OrangButtonComponent } from "../../../shared/components/orang-button/or
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
 import { OrangEvent, EventFollower } from '../../../shared/models/event.models';
 import { EventService } from '../../../core/event/event.service';
+import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-event-header',
   templateUrl: './event-page-header.component.html',
-  imports: [NgIf, OrangButtonComponent],
+  imports: [NgIf, OrangButtonComponent, ImageUploadComponent],
   styleUrls: ['./event-page-header.component.scss']
 })
 export class EventPageHeaderComponent implements OnInit {
@@ -45,6 +46,17 @@ export class EventPageHeaderComponent implements OnInit {
     public userService: UserService,
     public eventService: EventService
   ) {}
+
+  onImageUploaded(imageId: string): void{
+    this.eventService.updateEvent(this.eventId!, {header_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed header picture');
+      },
+      error: (error) => {
+        console.error('failed to change header image: ', error);
+      }
+    })
+  }
 
   getAvatarUrl(event: OrangEvent): string {
     return event?.profile_picture_id || 'assets/logo_icon.png';

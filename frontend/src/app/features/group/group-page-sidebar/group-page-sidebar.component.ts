@@ -99,7 +99,7 @@ export class GroupPageSidebarComponent implements OnInit {
   loadGroup(): void {
     this.groupService.getGroupById(this.groupId!).subscribe(group => {
       this.group = group;
-      if(this.currentUser!.id==group.creator_id){
+      if(this.currentUser!.id==group.member_data.owner_id){
         this.isOwnGroup = true;
       }
       this.editedBio = group.bio;

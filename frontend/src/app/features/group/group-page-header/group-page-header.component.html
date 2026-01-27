@@ -1,7 +1,13 @@
 <div class="profile-header">
   <!-- Cover Photo -->
-  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="'url(' + coverImage + ')'">
-    <orang-button class="absolute bottom-5 right-5 px-3 py-2" size="small" [istoggleable]="false" *ngIf="isOwnGroup">✏️ Edit Cover</orang-button>
+  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="headerImageUrl">
+    <div class="absolute bottom-5 right-5 p-8" *ngIf="isOwnGroup">
+      <app-image-upload
+        (imageUploaded)="onHeaderImageUploaded($event)"
+        buttonText="Edit Header"
+        >
+      </app-image-upload>
+    </div>
   </div>
   
   <!-- Header Content -->
@@ -9,31 +15,38 @@
     <!-- Profile Picture -->
     <div class="profile-picture-container">
       <img 
-        [src]="getAvatarUrl(group!)" 
+        [src]="profileImageUrl" 
         [alt]="group?.name" 
         class="profile-picture">
-      <button class="edit-picture-btn" *ngIf="isOwnGroup">✏️</button>
+      
+      <div class="edit-picture-btn" *ngIf="isOwnGroup">
+        <app-image-upload
+          (imageUploaded)="onProfileImageUploaded($event)"
+          buttonText="Edit"
+          >
+        </app-image-upload>
+      </div>
     </div>
     
     <!-- Profile Info -->
     <div class="profile-info">
       <h1 class="profile-name">{{ group?.name }}</h1>
       
-      <!-- Stats 
+      <!-- Stats -->
       <div class="profile-stats">
         <div class="stat">
-          <span>{{ daysUntilEvent || 0 }} Days Until Event</span>
+          <span>{{ group?.member_data?.members }} Group members</span>
         </div>
-      </div>-->
+      </div>
       
       <!-- 3 BUTTONS (Dynamic based on relationship) -->
       <div class="profile-actions">
         <ng-container *ngIf="!isOwnGroup">
           <orang-button *ngIf="!isFollowing"  [istoggleable]="false">
-            👥 Follow
+            👥 Join
           </orang-button>
           <orang-button *ngIf="isFollowing" [istoggleable]="false">
-            👥 Unfollow
+            👥 Leave
           </orang-button>
         </ng-container>
         

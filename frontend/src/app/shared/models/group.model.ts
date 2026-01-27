@@ -3,7 +3,6 @@ export interface Group {
   id: string;
   name: string;
   bio: string;
-  creator_id: string;
   header_picture_id?: string;
   profile_picture_id?: string;
   created_at?: string;

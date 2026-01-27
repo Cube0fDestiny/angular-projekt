@@ -12,6 +12,10 @@
         [src]="getAvatarUrl(event!)" 
         [alt]="event?.name" 
         class="profile-picture">
+      <app-image-upload
+        (imageUploaded)="onImageUploaded($event)"
+        >
+      </app-image-upload>
       <button class="edit-picture-btn" *ngIf="isOwnEvent">✏️</button>
     </div>
     

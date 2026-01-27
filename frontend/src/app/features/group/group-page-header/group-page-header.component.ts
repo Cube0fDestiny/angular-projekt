@@ -6,17 +6,22 @@ import { OrangButtonComponent } from "../../../shared/components/orang-button/or
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
 import { Group, GroupMember } from '../../../shared/models/group.model';
 import { GroupService } from '../../../core/group/group.service';
+import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
+import { ImageService } from '../../../core/image/image.service';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-group-header',
   templateUrl: './group-page-header.component.html',
-  imports: [NgIf, OrangButtonComponent],
+  imports: [NgIf, OrangButtonComponent, ImageUploadComponent],
   styleUrls: ['./group-page-header.component.scss']
 })
 export class GroupPageHeaderComponent implements OnInit {
   @Input() user: User | null = null;
   @Input() isOwnGroup = false;
   @Input() isFriend = false;
+  headerImageUrl: string = '';
+  profileImageUrl: string = '';
 
   group: Group | null = null;
   groupId: string | null = null;
@@ -27,6 +32,41 @@ export class GroupPageHeaderComponent implements OnInit {
 
   /** Default cover image */
   coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
+  profileImage = 'assets/logo_icon.png';
+
+  getHeaderUrl(): void {
+    if (!this.group?.header_picture_id) {
+      this.headerImageUrl = `url(${this.coverImage})`;
+      return;
+    }
+    
+    this.imageService.getImage(this.group.header_picture_id).subscribe({
+      next: (imageUrl) => {
+        this.headerImageUrl = `url(${imageUrl})`;
+        console.log('laoded header image');
+      },
+      error: () => {
+        this.headerImageUrl = `url(${this.coverImage})`;
+      }
+    });
+  }
+
+  getProfileUrl(): void {
+    if (!this.group?.profile_picture_id) {
+      this.profileImageUrl = this.profileImage;
+      return;
+    }
+    
+    this.imageService.getImage(this.group.profile_picture_id).subscribe({
+      next: (imageUrl) => {
+        this.profileImageUrl = imageUrl;
+        console.log('laoded profile image');
+      },
+      error: () => {
+        this.profileImageUrl = this.profileImage;
+      }
+    });
+  }
 
   @Output() editProfile = new EventEmitter<void>();
   @Output() addStory = new EventEmitter<void>();
@@ -42,7 +82,8 @@ export class GroupPageHeaderComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     public userService: UserService,
-    public groupService: GroupService
+    public groupService: GroupService,
+    private imageService: ImageService
   ) {}
 
   getAvatarUrl(group: Group): string {
@@ -60,14 +101,40 @@ export class GroupPageHeaderComponent implements OnInit {
     this.loadGroup();
   }
 
+  onHeaderImageUploaded(imageId: string): void{
+    this.groupService.updateGroup(this.groupId!, {header_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed header picture');
+        this.getHeaderUrl();
+      },
+      error: (error) => {
+        console.error('failed to change header picture: ', error);
+      }
+    })
+  }
+
+  onProfileImageUploaded(imageId: string): void{
+    this.groupService.updateGroup(this.groupId!, {profile_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed profile picture');
+        this.getProfileUrl();
+      },
+      error: (error) => {
+        console.error('failed to change profile picture: ', error);
+      }
+    })
+  }
+
   loadGroup(): void {
-    if (!this.groupId) return;
+    console.log('function hapend: ', this.groupId);
     this.groupService.getGroupById(this.groupId!).subscribe(group => {
       this.group = group;
-      if(this.currentUser!.id==group.creator_id){
+      if(this.currentUser!.id==group.member_data.owner_id){
         this.isOwnGroup = true;
       }
       this.loadFollowingState();
+      this.getHeaderUrl();
+      this.getProfileUrl()
     });
   }
 
