@@ -135,15 +135,41 @@ Wymagane dla endpointów chronionych:
 
 **Wymagana autoryzacja (Właściciel lub Admin)**
 
-**Body:**
+**Body (wszystkie pola opcjonalne):**
 
-```
+```json
 {
-  "content": "string"
+  "content": "string",
+  "main_image_id": "uuid"
 }
 ```
 
-**Odpowiedź (200 OK):** Pełny, zaktualizowany obiekt posta.
+**Parametry:**
+- `content` (string, opcjonalne) - nowa treść posta
+- `main_image_id` (UUID, opcjonalne) - ID obrazu, który ma zostać ustawiony jako główny (musi być już powiązany z postem w tabeli `Post_Images`). Po ustawieniu, obraz ten będzie miał `image_order = 0`, a pozostałe obrazy zostaną przesunięte.
+
+**Uwaga:** Ten endpoint przyjmuje tylko UUID istniejącego obrazu (który musi być wcześniej powiązany z postem). Nie można przesłać nowych plików obrazów przy aktualizacji - do tego należy użyć endpointu tworzenia posta z obrazami (`POST /posts/with-images`), a następnie zaktualizować kolejność za pomocą `main_image_id`.
+
+**Odpowiedź (200 OK):** Pełny, zaktualizowany obiekt posta z aktualną listą obrazów posortowaną według `image_order`:
+
+```json
+{
+  "id": "uuid",
+  "creator_id": "uuid",
+  "Text": "string",
+  "location_id": "uuid",
+  "location_type": "string",
+  "created_at": "timestamp",
+  "orang_count": 10,
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ],
+  "comment_count": 3
+}
+```
 
 ### 6\. Usunięcie posta (Soft Delete)
 
@@ -333,8 +359,18 @@ Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`post.created`** - Published when a new post is created
 ```json
 {
+  "type": "post.created",
   "postId": "uuid",
   "creatorId": "uuid",
+  "creatorName": "string",
+  "creatorSurname": "string",
+  "creatorProfilePicture": "uuid",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ],
   "timestamp": "ISO8601"
 }
 ```
@@ -361,9 +397,15 @@ Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`comment.created`** - Published when a comment is created on a post
 ```json
 {
+  "type": "post.commented",
   "commentId": "uuid",
   "postId": "uuid",
   "creatorId": "uuid",
+  "postOwnerId": "uuid",
+  "commentText": "string",
+  "commenterName": "string",
+  "commenterSurname": "string",
+  "commenterProfilePicture": "uuid",
   "timestamp": "ISO8601"
 }
 ```
@@ -373,9 +415,14 @@ Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`reaction.created`** - Published when a user oranges a post
 ```json
 {
+  "type": "post.liked",
   "postId": "uuid",
   "userId": "uuid",
+  "postOwnerId": "uuid",
   "reactionType": "orang",
+  "reactorName": "string",
+  "reactorSurname": "string",
+  "reactorProfilePicture": "uuid",
   "timestamp": "ISO8601"
 }
 ```

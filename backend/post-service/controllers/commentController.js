@@ -71,6 +71,7 @@ export const createComment = async (req, res) => {
       eventPayload.commenterProfilePicture = commenter.profile_picture_id;
     }
 
+    eventPayload.type = "post.commented";
     publishEvent("comment.created", eventPayload);
 
     req.log.info(

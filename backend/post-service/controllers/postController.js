@@ -337,6 +337,7 @@ export const createPost = async (req, res) => {
       eventPayload.creatorProfilePicture = creator.profile_picture_id;
     }
 
+    eventPayload.type = "post.created";
     publishEvent("post.created", eventPayload);
 
     log.info(`[Post-Service] Stworzono post o id: ${newPost.id}`);
@@ -355,31 +356,122 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   const log = req.log;
   const { id } = req.params;
-  const { content } = req.body;
+  const { content, main_image_id } = req.body;
+
+  if (content === undefined && main_image_id === undefined) {
+    return res.status(400).json({ message: "Brak danych do aktualizacji." });
+  }
+
+  const client = await db.getClient();
 
   try {
-    const result = await db.query(
-      `UPDATE "Posts"
-      SET "Text" = $1
-      WHERE id = $2 AND deleted = false
-      RETURNING id, created_at, "Text", location_id, location_type, creator_id`,
-      [content, id],
+    await client.query("BEGIN");
+
+    const existsRes = await client.query(
+      `SELECT id FROM "Posts" WHERE id = $1 AND deleted = false`,
+      [id],
     );
 
-    if (result.rows.length === 0) {
+    if (existsRes.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res
         .status(404)
         .json({ message: "Nie znaleziono posta o id: " + id });
     }
 
+    if (content !== undefined) {
+      await client.query(
+        `UPDATE "Posts"
+        SET "Text" = $1
+        WHERE id = $2 AND deleted = false`,
+        [content, id],
+      );
+    }
+
+    if (main_image_id !== undefined) {
+      const imagesRes = await client.query(
+        `SELECT image_id
+         FROM "Post_Images"
+         WHERE post_id = $1
+         ORDER BY image_order`,
+        [id],
+      );
+
+      const imageIds = imagesRes.rows.map((row) => row.image_id);
+      if (!imageIds.includes(main_image_id)) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          message:
+            "Podany main_image_id nie jest powiązany z tym postem lub post nie ma takiego obrazka.",
+        });
+      }
+
+      const newOrder = [
+        main_image_id,
+        ...imageIds.filter((imageId) => imageId !== main_image_id),
+      ];
+
+      for (let order = 0; order < newOrder.length; order += 1) {
+        await client.query(
+          `UPDATE "Post_Images"
+           SET image_order = $1
+           WHERE post_id = $2 AND image_id = $3`,
+          [order, id, newOrder[order]],
+        );
+      }
+    }
+
+    const postRes = await client.query(
+      `SELECT p.id, p.creator_id, p."Text", p.location_id, p.location_type, p.created_at,
+      COALESCE(
+        (
+          SELECT COUNT(*)::int
+          FROM "Post_Reactions"
+          WHERE post_id = p.id
+        ),
+        0
+      ) as orang_count,
+      COALESCE(
+        (
+          SELECT json_agg(
+            json_build_object('image_id', pi.image_id, 'image_order', pi.image_order)
+            ORDER BY pi.image_order
+          )
+          FROM "Post_Images" pi
+          WHERE pi.post_id = p.id
+        ),
+        '[]'::json
+      ) as images,
+      COALESCE(
+        (
+          SELECT COUNT(*)::int
+          FROM "Post_Comments"
+          WHERE post_id = p.id AND deleted = false
+        ),
+        0
+      ) as comment_count
+      FROM "Posts" p
+      WHERE p.id = $1 AND p.deleted = false`,
+      [id],
+    );
+
+    await client.query("COMMIT");
+
     log.info(`[Post-Service] Zaktualizowano post o id: ${id}`);
-    res.status(200).json(result.rows[0]);
+    res.status(200).json(postRes.rows[0]);
   } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackErr) {
+      log.error(rollbackErr);
+    }
     log.error(err);
     res.status(500).json({
       error:
         err.message + " Błąd serwera podczas aktualizacji posta o id: " + id,
     });
+  } finally {
+    client.release();
   }
 };
 

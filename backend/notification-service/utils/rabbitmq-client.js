@@ -87,7 +87,7 @@ export const consumeNotifications = async (io) => {
                     if (content.requesteeId) {
                         // Friend request: notify the requestee
                         targetUserId = content.requesteeId;
-                        notificationType = "friend.request";
+                        notificationType = content.type || "friend.request";
                         
                         // Fetch requester's data to include in notification
                         try {
@@ -122,7 +122,7 @@ export const consumeNotifications = async (io) => {
                     } else if (msg.fields.routingKey === "user.friendAccepted" && content.friendId) {
                         // Friend request accepted - notify the original requester
                         targetUserId = content.friendId; // Notify the person who sent the original request
-                        notificationType = "friend.accepted";
+                        notificationType = content.type || "friend.accepted";
                         
                         // Fetch accepter's data to include in notification
                         try {
@@ -163,7 +163,7 @@ export const consumeNotifications = async (io) => {
                     } else if (content.mentionedUserId) {
                         // User mentioned
                         targetUserId = content.mentionedUserId;
-                        notificationType = "user.mentioned";
+                        notificationType = content.type || "user.mentioned";
                         
                         // Fetch mentioner's data to include in notification
                         try {
@@ -196,7 +196,7 @@ export const consumeNotifications = async (io) => {
                     } else if (msg.fields.routingKey === "reaction.created" && content.postOwnerId) {
                         // Post reaction (like) - notify the post owner
                         targetUserId = content.postOwnerId;
-                        notificationType = "post.liked";
+                        notificationType = content.type || "post.liked";
                         
                         // Use enriched data from event if available, otherwise fetch from DB
                         if (content.reactorName && content.reactorSurname) {
@@ -245,7 +245,7 @@ export const consumeNotifications = async (io) => {
                     } else if (msg.fields.routingKey === "comment.created" && content.postOwnerId) {
                         // Post comment - notify the post owner
                         targetUserId = content.postOwnerId;
-                        notificationType = "post.commented";
+                        notificationType = content.type || "post.commented";
                         
                         // Use enriched data from event if available, otherwise fetch from DB
                         if (content.commenterName && content.commenterSurname) {
@@ -296,7 +296,7 @@ export const consumeNotifications = async (io) => {
                     } else if (content.likedUserId) {
                         // Post liked
                         targetUserId = content.likedUserId;
-                        notificationType = "post.liked";
+                        notificationType = content.type || "post.liked";
                         
                         // Fetch liker's data to include in notification
                         try {
@@ -329,7 +329,7 @@ export const consumeNotifications = async (io) => {
                     } else if (content.invitedUserId) {
                         // Group invite
                         targetUserId = content.invitedUserId;
-                        notificationType = "group.invited";
+                        notificationType = content.type || "group.invited";
                         
                         // Fetch group data to include in notification
                         try {
@@ -363,7 +363,7 @@ export const consumeNotifications = async (io) => {
                     } else if (msg.fields.routingKey === "group.memberAccepted" && content.userId) {
                         // Group membership accepted - notify the accepted user
                         targetUserId = content.userId;
-                        notificationType = "group.memberAccepted";
+                        notificationType = content.type || "group.memberAccepted";
                         
                         // Fetch group data to include in notification
                         try {
@@ -394,7 +394,7 @@ export const consumeNotifications = async (io) => {
                             notificationMessage = "Twoja prośba o dołączenie do grupy została zaakceptowana";
                             notificationData = content;
                         }
-                    } else if (content.chatId && content.participants && msg.fields.routingKey === "chat.created") {
+                    } else if (content.chatId && content.participants && (msg.fields.routingKey === "chat.created" || content.type === "chat.created")) {
                         // Chat created - notify all participants except creator
                         const participants = content.participants.filter(id => id !== content.creatorId);
                         
@@ -448,7 +448,7 @@ export const consumeNotifications = async (io) => {
                                  RETURNING *`,
                                 [
                                     participantId,
-                                    "chat.created",
+                                    content.type || "chat.created",
                                     chatTitle,
                                     chatMessage,
                                     JSON.stringify(notificationData),
@@ -472,7 +472,7 @@ export const consumeNotifications = async (io) => {
                         
                         channel.ack(msg);
                         return;
-                    } else if (content.messageId && content.chatId && msg.fields.routingKey === "message.created") {
+                    } else if (content.messageId && content.chatId && (msg.fields.routingKey === "message.created" || content.type === "message.created")) {
                         // New message in chat - need to notify other participants
                         // Use enriched data from event if available, otherwise fetch from DB
                         let senderData = null;
@@ -530,7 +530,7 @@ export const consumeNotifications = async (io) => {
                                  RETURNING *`,
                                 [
                                     participantId,
-                                    "message.created",
+                                    content.type || "message.created",
                                     msgTitle,
                                     msgText,
                                     JSON.stringify(notificationData),

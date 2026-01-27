@@ -1,4 +1,4 @@
-﻿## 🚀 Istniejące Endpointy
+## 🚀 Istniejące Endpointy
 
 ### 1. Pobranie wszystkich grup
 `GET /`
@@ -377,6 +377,42 @@ LUB
  }
 ```
 
+---
+
+## 📡 RabbitMQ Events
+
+Group-Service publishes events to RabbitMQ on the `app_events` topic exchange. Subscribe to the following routing keys to handle group-related events:
+
+### Group Management Events
+
+**`group.created`** - Published when a new group is created
+```json
+{
+  "type": "group.created",
+  "groupId": "uuid",
+  "name": "string",
+  "creatorId": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+### Group Membership Events
+
+**`group.memberAccepted`** - Published when a user's membership request is accepted
+```json
+{
+  "type": "group.memberAccepted",
+  "groupId": "uuid",
+  "userId": "uuid",
+  "acceptedBy": "uuid",
+  "groupName": "string",
+  "groupProfilePicture": "uuid",
+  "timestamp": "ISO8601"
+}
+```
+
+---
+
 ## ⚠️ Obsługa Błędów
 
 | Kod | Komunikat | Opis |
@@ -384,6 +420,6 @@ LUB
 | 400 | Bad Request | Błąd walidacji lub brakujące wymagane pola. |
 | 401 | Unauthorized | Token JWT jest nieprawidłowy lub wygasł. |
 | 403 | Forbidden | Brak tokena JWT lub brak uprawnień (nie jesteś twórcą). |
-| 404 | Not Found | Wydarzenie nie istnieje. |
+| 404 | Not Found | Grupa nie istnieje. |
 | 500 | Internal Server Error | Wewnętrzny błąd serwera lub baza danych. |
 

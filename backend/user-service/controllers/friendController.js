@@ -31,6 +31,7 @@ export const toggleFollow = async (req, res) => {
         followerId: followerId,
         followeeId: followeeId,
         timestamp: new Date().toISOString(),
+        type: "user.unfollowed",
       });
       return res.status(200).json({ message: "Successfully unfollowed." });
     }
@@ -49,6 +50,7 @@ export const toggleFollow = async (req, res) => {
         followerId: followerId,
         followeeId: followeeId,
         timestamp: new Date().toISOString(),
+        type: "user.followed",
       });
       return res.status(201).json({ message: "Successfully followed." });
     }
@@ -198,7 +200,8 @@ export const requestFriend = async (req, res) => {
       eventPayload.requesterProfilePicture = requester.profile_picture_id;
     }
 
-    publishEvent("user.friendRequested", eventPayload);
+      eventPayload.type = "friend.request";
+      publishEvent("user.friendRequested", eventPayload);
 
     return res
       .status(201)
@@ -281,6 +284,7 @@ export const acceptFriendRequest = async (req, res) => {
       eventPayload.accepterProfilePicture = accepter.profile_picture_id;
     }
 
+    eventPayload.type = "friend.accepted";
     publishEvent("user.friendAccepted", eventPayload);
 
     return res.status(200).json({ message: "Friend request accepted." });
@@ -325,14 +329,16 @@ export const deleteFriendRequest = async (req, res) => {
       `User ${userId} ${action} friend request with ${otherUserId}.`
     );
 
-    publishEvent(
-      action === "cancelled" ? "user.friendRequestCancelled" : "user.friendRequestRejected",
-      {
+      const cancelEventPayload = {
         userId: userId,
         otherUserId: otherUserId,
         timestamp: new Date().toISOString(),
-      }
-    );
+        type: action === "cancelled" ? "friend.request.cancelled" : "friend.request.rejected",
+      };
+      publishEvent(
+        action === "cancelled" ? "user.friendRequestCancelled" : "user.friendRequestRejected",
+        cancelEventPayload
+      );
 
     return res
       .status(200)
@@ -376,6 +382,7 @@ export const removeFriend = async (req, res) => {
       userId: userId,
       friendId: friendId,
       timestamp: new Date().toISOString(),
+      type: "friend.removed",
     });
 
     return res.status(200).json({ message: "Friend removed successfully." });

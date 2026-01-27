@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const getAllUsers = async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT user_id, name, surname, email, bio, is_company, created_at
+      `SELECT user_id, name, surname, email, bio, is_company, created_at, profile_picture_id, profile_header
       FROM "Users"
       WHERE deleted = false`,
     );
@@ -23,6 +23,8 @@ export const getAllUsers = async (req, res) => {
       bio: row.bio,
       is_company: row.is_company,
       created_at: row.created_at,
+      profile_picture_id: row.profile_picture_id,
+      header_picture_id: row.profile_header,
       avatar: `https://i.pravatar.cc/150?u=${row.email}`,
     }));
 
@@ -43,7 +45,7 @@ export const getUserProfile = async (req, res) => {
 
   try {
     const result = await db.query(
-      `SELECT user_id, name, surname, email, bio, is_company, created_at
+      `SELECT user_id, name, surname, email, bio, is_company, created_at, profile_picture_id, profile_header
       FROM "Users"
       WHERE user_id = $1 AND deleted = false`,
       [id],
@@ -65,6 +67,8 @@ export const getUserProfile = async (req, res) => {
       bio: row.bio,
       is_company: row.is_company,
       created_at: row.created_at,
+      profile_picture_id: row.profile_picture_id,
+      header_picture_id: row.profile_header,
       avatar: `https://i.pravatar.cc/150?u=${row.email}`,
     };
 
@@ -126,6 +130,8 @@ export const register = async (req, res) => {
         surname: name,
         email: email,
         is_company: is_company,
+        profile_picture_id: null,
+        header_picture_id: null,
         avatar: `https://i.pravatar.cc/150?u=${email}`,
       },
       token: token,
@@ -144,7 +150,7 @@ export const login = async (req, res) => {
 
   try {
     const result = await db.query(
-      `SELECT user_id, name, surname, email, password, salt, is_company, deleted
+      `SELECT user_id, name, surname, email, password, salt, is_company, deleted, profile_picture_id, profile_header
       FROM "Users"
       WHERE email = $1
       ORDER BY created_at DESC
@@ -188,6 +194,8 @@ export const login = async (req, res) => {
         surname: user.surname,
         email: user.email,
         is_company: user.is_company,
+        profile_picture_id: user.profile_picture_id,
+        header_picture_id: user.profile_header,
         avatar: `https://i.pravatar.cc/150?u=${user.email}`,
       },
       token: token,
@@ -212,6 +220,7 @@ export const updateProfile = async (req, res) => {
     is_company,
     profile_picture_id,
     header_picture_id,
+    profile_header,
   } = req.body;
 
   if (Object.keys(req.body).length === 0) {
@@ -235,6 +244,8 @@ export const updateProfile = async (req, res) => {
     }
 
     const current = currentRes.rows[0];
+    const finalHeaderPictureId =
+      header_picture_id !== undefined ? header_picture_id : profile_header;
 
     const updatedData = {
       name: name || current.name,
@@ -242,8 +253,14 @@ export const updateProfile = async (req, res) => {
       email: email || current.email,
       bio: bio !== undefined ? bio : current.bio,
       is_company: is_company !== undefined ? is_company : current.is_company,
-      profile_picture_id: profile_picture_id || current.profile_picture_id,
-      profile_header: header_picture_id || current.profile_header,
+      profile_picture_id:
+        profile_picture_id !== undefined
+          ? profile_picture_id
+          : current.profile_picture_id,
+      profile_header:
+        finalHeaderPictureId !== undefined
+          ? finalHeaderPictureId
+          : current.profile_header,
     };
 
     const fields = Object.keys(updatedData);
@@ -256,15 +273,18 @@ export const updateProfile = async (req, res) => {
             UPDATE "Users"
             SET ${setString}
             WHERE user_id = $${fields.length + 1} AND deleted = false
-            RETURNING user_id
+            RETURNING user_id, profile_picture_id, profile_header
         `;
 
     const result = await db.query(updateQuery, [...values, id]);
+    const updatedUser = result.rows[0];
 
     log.info({ userId: id }, "Pomyślnie zaktualizowano profil użytkownika.");
     res.status(200).json({
       message: "Profil został zaktualizowany",
-      user_id: result.rows[0].user_id,
+      user_id: updatedUser.user_id,
+      profile_picture_id: updatedUser.profile_picture_id,
+      header_picture_id: updatedUser.profile_header,
     });
   } catch (err) {
     log.error(

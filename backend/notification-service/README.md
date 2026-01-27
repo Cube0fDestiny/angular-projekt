@@ -134,10 +134,15 @@ Serwis publikuje zdarzenie `notification.created` po utworzeniu powiadomienia (P
 ---
 
 ## 📬 Typy powiadomień i realne pola w `data`
-Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `message`, `data`, `is_read`, `created_at`. Poniżej **rzeczywiste** payloady `data` wynikające z kodu w [backend/notification-service/utils/rabbitmq-client.js](backend/notification-service/utils/rabbitmq-client.js):
+Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `message`, `data`, `is_read`, `created_at`. 
+
+**Ważne:** Wszystkie eventy publikowane przez serwisy **muszą zawierać pole `type`** w payloadzie. Notification-service używa tego pola do określenia typu powiadomienia. Jeśli pole `type` nie jest obecne, używana jest wartość domyślna na podstawie routing key.
+
+Poniżej **rzeczywiste** payloady `data` wynikające z kodu w [backend/notification-service/utils/rabbitmq-client.js](backend/notification-service/utils/rabbitmq-client.js):
 
 ### `friend.request`
-**Routing key:** dowolny z polem `requesteeId`  
+**Routing key:** `user.friendRequested`  
+**Event payload:** Musi zawierać `type: "friend.request"`  
 **Target:** `requesteeId` (osoba, która otrzymuje zaproszenie)
 
 **title:** `"Zaproszenie do znajomych"`  
@@ -161,6 +166,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `friend.accepted`
 **Routing key:** `user.friendAccepted`  
+**Event payload:** Musi zawierać `type: "friend.accepted"`  
 **Target:** `friendId` (osoba, która wysłała oryginalne zaproszenie)
 
 **title:** `"Zaproszenie zaakceptowane"`  
@@ -184,6 +190,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `user.mentioned` ⚠️ NIE ZAIMPLEMENTOWANE
 **Routing key:** `user.mentioned`  
+**Event payload:** Musi zawierać `type: "user.mentioned"`  
 **Target:** `mentionedUserId` (osoba wspomniana)
 
 > **Status:** Handler w notification-service istnieje, ale **żaden serwis nie publikuje tego eventu**. Wymaga implementacji w post-service (wykrywanie @wzmianek w treści posta/komentarza).
@@ -221,6 +228,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `post.liked`
 **Routing key:** `reaction.created` z polem `postOwnerId`  
+**Event payload:** Musi zawierać `type: "post.liked"`  
 **Target:** `postOwnerId` (właściciel posta)
 
 **title:** `"Twój post został polubiony"`  
@@ -249,6 +257,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `post.commented`
 **Routing key:** `comment.created` z polem `postOwnerId`  
+**Event payload:** Musi zawierać `type: "post.commented"`  
 **Target:** `postOwnerId` (właściciel posta)
 
 **title:** `"Nowy komentarz"`  
@@ -306,6 +315,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `group.memberAccepted`
 **Routing key:** `group.memberAccepted`  
+**Event payload:** Musi zawierać `type: "group.memberAccepted"`  
 **Target:** `userId` (osoba, której prośba o dołączenie została zaakceptowana)
 
 **title:** `"Zostałeś zaakceptowany do grupy"`  
@@ -331,6 +341,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `chat.created`
 **Routing key:** `chat.created` z polem `participants` (tablica UUID)  
+**Event payload:** Musi zawierać `type: "chat.created"`  
 **Target:** każdy uczestnik z `participants` poza `creatorId`
 
 **title:** `"{creatorName} {creatorSurname} dodał Cię do czatu"` lub `"Dodano Cię do czatu"`  
@@ -358,6 +369,7 @@ Każde powiadomienie ma pola główne: `id`, `user_id`, `type`, `title`, `messag
 
 ### `message.created`
 **Routing key:** `message.created`  
+**Event payload:** Musi zawierać `type: "message.created"`  
 **Target:** wszyscy uczestnicy czatu poza nadawcą (z tabeli `Chat_Participants`)
 
 **title:** `"{senderName} {senderSurname}"` lub `"Nowa wiadomość"`  

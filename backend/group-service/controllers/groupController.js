@@ -156,6 +156,7 @@ export const createGroup = async (req, res) => {
       name: newGroup.name,
       creatorId: req.user.id,
       timestamp: new Date().toISOString(),
+      type: "group.created",
     });
     
     res.status(200).json({message:"Grupa została dodane"})
@@ -438,6 +439,7 @@ export const requestGroupJoin= async (req, res) => {
           eventPayload.groupProfilePicture = group.profile_picture_id;
         }
         
+        eventPayload.type = "group.memberAccepted";
         // Publish member accepted event - this person is now a member
         publishEvent("group.memberAccepted", eventPayload);
         

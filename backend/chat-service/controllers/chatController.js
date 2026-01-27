@@ -140,6 +140,7 @@ export const createChat = async (req, res) => {
       eventPayload.creatorProfilePicture = creator.profile_picture_id;
     }
 
+    eventPayload.type = "chat.created";
     publishEvent("chat.created", eventPayload);
     res.status(201).json(newChat);
     res.status(201).json(newChat);
@@ -261,6 +262,7 @@ export const createMessage = async (req, res) => {
       eventPayload.senderProfilePicture = sender.profile_picture_id;
     }
 
+    eventPayload.type = "message.created";
     publishEvent("message.created", eventPayload);
     res.status(201).json(messageWithImages);
   } catch (err) {
@@ -324,6 +326,7 @@ export const deleteChat = async (req, res) => {
       chatId: chatId,
       deletedBy: userId,
       timestamp: new Date().toISOString(),
+      type: "chat.deleted",
     });
 
     res.status(200).json({ message: "Czat został usunięty" });

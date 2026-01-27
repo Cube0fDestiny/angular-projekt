@@ -131,6 +131,7 @@ export const createEvent = async (req, res) => {
       creatorId: creator_id,
       eventDate: event_date,
       timestamp: new Date().toISOString(),
+      type: "event.created",
     });
     res.status(201).json({ message: "Event stworzony!", data: newEvent });
   } catch (err) {
@@ -200,6 +201,7 @@ export const updateEvent = async (req, res) => {
       bio: updatedData.bio,
       eventDate: updatedData.event_date,
       timestamp: new Date().toISOString(),
+      type: "event.updated",
     });
     res.status(200).json(result.rows[0]);
   } catch (err) {
@@ -234,6 +236,7 @@ export const deleteEvent = async (req, res) => {
     publishEvent("event.deleted", {
       eventId: id,
       timestamp: new Date().toISOString(),
+      type: "event.deleted",
     });
     res.status(200).json({ message: "Event został usunięty" });
   } catch (err) {
@@ -265,6 +268,7 @@ export const toggleFollowEvent = async (req, res) => {
         eventId: id,
         userId: user_id,
         timestamp: new Date().toISOString(),
+        type: "event.unfollowed",
       });
       return res.status(200).json({ message: "Follow został usunięty" });
     }
@@ -279,6 +283,7 @@ export const toggleFollowEvent = async (req, res) => {
       eventId: id,
       userId: user_id,
       timestamp: new Date().toISOString(),
+      type: "event.followed",
     });
     res.status(201).json({ message: "Follow został dodany" });
   } catch (err) {

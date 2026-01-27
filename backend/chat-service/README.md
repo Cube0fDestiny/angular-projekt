@@ -246,10 +246,24 @@ Chat-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`chat.created`** - Published when a new chat is created
 ```json
 {
+  "type": "chat.created",
   "chatId": "uuid",
   "name": "string",
   "creatorId": "uuid",
+  "creatorName": "string",
+  "creatorSurname": "string",
+  "creatorProfilePicture": "uuid",
   "participants": ["uuid", "uuid"],
+  "timestamp": "ISO8601"
+}
+```
+
+**`chat.deleted`** - Published when a chat is deleted
+```json
+{
+  "type": "chat.deleted",
+  "chatId": "uuid",
+  "deletedBy": "uuid",
   "timestamp": "ISO8601"
 }
 ```
@@ -259,10 +273,20 @@ Chat-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`message.created`** - Published when a new message is sent in a chat
 ```json
 {
+  "type": "message.created",
   "messageId": "uuid",
   "chatId": "uuid",
   "creatorId": "uuid",
+  "senderName": "string",
+  "senderSurname": "string",
+  "senderProfilePicture": "uuid",
   "text": "string",
+  "images": [
+    {
+      "image_id": "uuid",
+      "image_order": 0
+    }
+  ],
   "timestamp": "ISO8601"
 }
 ```

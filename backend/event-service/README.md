@@ -363,6 +363,7 @@ Event-Service publishes events to RabbitMQ on the `app_events` topic exchange. S
 **`event.unfollowed`** - Published when a user unfollows an event
 ```json
 {
+  "type": "event.unfollowed",
   "eventId": "uuid",
   "userId": "uuid",
   "timestamp": "ISO8601"

@@ -28,6 +28,7 @@ Wymagane dla endpointów chronionych:
 }
 
 **Odpowiedź (201 Created):**
+```json
 {
   "user": {
     "id": "uuid",
@@ -35,10 +36,13 @@ Wymagane dla endpointów chronionych:
     "surname": "string",
     "email": "string",
     "is_company": boolean,
+    "profile_picture_id": null,
+    "header_picture_id": null,
     "avatar": "url"
   },
   "token": "string"
 }
+```
 
 ---
 
@@ -52,6 +56,7 @@ Wymagane dla endpointów chronionych:
 }
 
 **Odpowiedź (200 OK):**
+```json
 {
   "user": {
     "id": "uuid",
@@ -59,10 +64,13 @@ Wymagane dla endpointów chronionych:
     "surname": "string",
     "email": "string",
     "is_company": boolean,
+    "profile_picture_id": "uuid",
+    "header_picture_id": "uuid",
     "avatar": "url"
   },
   "token": "string"
 }
+```
 
 ---
 
@@ -71,6 +79,7 @@ Wymagane dla endpointów chronionych:
 - *Endpoint publiczny*
 
 **Odpowiedź (200 OK):**
+```json
 [
   {
     "id": "uuid",
@@ -80,9 +89,12 @@ Wymagane dla endpointów chronionych:
     "bio": "string",
     "is_company": boolean,
     "created_at": "date",
+    "profile_picture_id": "uuid",
+    "header_picture_id": "uuid",
     "avatar": "url"
   }
 ]
+```
 
 ---
 
@@ -91,6 +103,7 @@ Wymagane dla endpointów chronionych:
 - *Endpoint publiczny*
 
 **Odpowiedź (200 OK):**
+```json
 {
   "id": "uuid",
   "name": "string",
@@ -99,8 +112,11 @@ Wymagane dla endpointów chronionych:
   "bio": "string",
   "is_company": boolean,
   "created_at": "date",
+  "profile_picture_id": "uuid",
+  "header_picture_id": "uuid",
   "avatar": "url"
 }
+```
 
 ---
 
@@ -109,17 +125,29 @@ Wymagane dla endpointów chronionych:
 - *Wymagana autoryzacja (Właściciel lub Admin)*
 
 **Body (wszystkie pola opcjonalne):**
+```json
 {
   "name": "string",
+  "surname": "string",
+  "email": "string",
   "bio": "string",
-  "is_company": boolean
+  "is_company": boolean,
+  "profile_picture_id": "uuid",
+  "header_picture_id": "uuid"
 }
+```
+
+**Uwaga:** Ten endpoint przyjmuje tylko UUID istniejących obrazów (które muszą być wcześniej przesłane przez Image Service). Aby przesłać nowe pliki obrazów, użyj endpointu Gateway: `PUT /users/:id/profile-with-image` (patrz sekcja 6).
 
 **Odpowiedź (200 OK):**
+```json
 {
   "message": "Profil został zaktualizowany",
-  "user_id": "uuid"
+  "user_id": "uuid",
+  "profile_picture_id": "uuid",
+  "header_picture_id": "uuid"
 }
+```
 
 ---
 
@@ -412,6 +440,7 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.followed`** - Published when a user follows another user
 ```json
 {
+  "type": "user.followed",
   "followerId": "uuid",
   "followeeId": "uuid",
   "timestamp": "ISO8601"
@@ -421,6 +450,7 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.unfollowed`** - Published when a user unfollows another user
 ```json
 {
+  "type": "user.unfollowed",
   "followerId": "uuid",
   "followeeId": "uuid",
   "timestamp": "ISO8601"
@@ -432,8 +462,12 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.friendRequested`** - Published when a friend request is sent
 ```json
 {
+  "type": "friend.request",
   "requesterId": "uuid",
   "requesteeId": "uuid",
+  "requesterName": "string",
+  "requesterSurname": "string",
+  "requesterProfilePicture": "uuid",
   "timestamp": "ISO8601"
 }
 ```
@@ -441,8 +475,12 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.friendAccepted`** - Published when a friend request is accepted
 ```json
 {
+  "type": "friend.accepted",
   "userId": "uuid",
   "friendId": "uuid",
+  "accepterName": "string",
+  "accepterSurname": "string",
+  "accepterProfilePicture": "uuid",
   "timestamp": "ISO8601"
 }
 ```
@@ -450,6 +488,7 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.friendRequestCancelled`** - Published when a friend request is cancelled by the requester
 ```json
 {
+  "type": "friend.request.cancelled",
   "userId": "uuid",
   "otherUserId": "uuid",
   "timestamp": "ISO8601"
@@ -459,6 +498,7 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.friendRequestRejected`** - Published when a friend request is rejected by the requestee
 ```json
 {
+  "type": "friend.request.rejected",
   "userId": "uuid",
   "otherUserId": "uuid",
   "timestamp": "ISO8601"
@@ -468,6 +508,7 @@ User-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 **`user.friendRemoved`** - Published when a friendship is removed
 ```json
 {
+  "type": "friend.removed",
   "userId": "uuid",
   "friendId": "uuid",
   "timestamp": "ISO8601"

@@ -57,6 +57,7 @@ export const toggleReaction = async (req, res) => {
       eventPayload.reactorProfilePicture = reactor.profile_picture_id;
     }
 
+    eventPayload.type = "post.liked";
     publishEvent("reaction.created", eventPayload);
 
     req.log.info(`[Post-Service] Stworzono reakcje o id: ${id}`);

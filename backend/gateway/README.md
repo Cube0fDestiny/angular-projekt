@@ -207,14 +207,32 @@ Gateway obsługuje złożone operacje wymagające komunikacji z wieloma serwisam
 ### 1. Aktualizacja profilu z obrazami
 `PUT /users/:id/profile-with-image`
 
-**Wymagana autoryzacja**
+**Wymagana autoryzacja (Właściciel lub Admin)**
 
-Aktualizuje profil użytkownika z możliwością przesłania zdjęć.
+Aktualizuje profil użytkownika z możliwością przesłania nowych plików zdjęć.
 
 **Forma multipart:**
-- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
-- `header_picture` (file) - zdjęcie w tle (opcjonalne)
-- Pozostałe pola profilu jako form fields
+- `name` (form field, opcjonalne) - imię
+- `surname` (form field, opcjonalne) - nazwisko
+- `email` (form field, opcjonalne) - email
+- `bio` (form field, opcjonalne) - biografia
+- `is_company` (form field, opcjonalne) - czy to konto firmowe
+- `profile_picture` (file) - nowe zdjęcie profilowe (opcjonalne) - zostanie przesłane do Image Service i przypisane jako `profile_picture_id`
+- `header_picture` (file) - nowe zdjęcie w tle (opcjonalne) - zostanie przesłane do Image Service i przypisane jako `header_picture_id`
+
+**Uwaga:** 
+- Ten endpoint **przesyła nowe pliki** do Image Service i automatycznie przypisuje otrzymane UUID do profilu użytkownika.
+- Jeśli chcesz użyć istniejących obrazów (znasz już ich UUID), użyj standardowego endpointu `PUT /users/:id` z parametrami `profile_picture_id` i `header_picture_id`.
+
+**Odpowiedź (200 OK):**
+```json
+{
+  "message": "Profil został zaktualizowany",
+  "user_id": "uuid",
+  "profile_picture_id": "uuid",
+  "header_picture_id": "uuid"
+}
+```
 
 ---
 
@@ -226,8 +244,12 @@ Aktualizuje profil użytkownika z możliwością przesłania zdjęć.
 Tworzy post z możliwością przesłania wielu obrazów.
 
 **Forma multipart:**
-- `images` (files) - obrazy do posta
-- Pozostałe pola posta jako form fields
+- `content` (form field) - tekst posta
+- `location_id` (form field, opcjonalne) - UUID lokalizacji
+- `location_type` (form field, opcjonalne) - typ lokalizacji (np. "group", "event")
+- `images` (files) - obrazy do posta (można przesłać wiele plików)
+
+**Uwaga:** Aby zaktualizować główny obraz istniejącego posta, użyj standardowego endpointu `PUT /posts/:id` z parametrem `main_image_id` (UUID istniejącego obrazu powiązanego z postem).
 
 ---
 
@@ -332,5 +354,39 @@ curl -X POST http://localhost:3000/posts \
     "content": "Zawartość posta",
     "location_id": "uuid",
     "location_type": "group"
+  }'
+```
+
+### 6. Aktualizacja profilu użytkownika (tylko UUID obrazów)
+```bash
+curl -X PUT http://localhost:3000/users/USER_ID \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jan",
+    "bio": "Nowa biografia",
+    "profile_picture_id": "uuid-obrazu-profilowego",
+    "header_picture_id": "uuid-obrazu-tla"
+  }'
+```
+
+### 7. Aktualizacja profilu użytkownika z przesłaniem nowych plików
+```bash
+curl -X PUT http://localhost:3000/users/USER_ID/profile-with-image \
+  -H "Authorization: Bearer TOKEN" \
+  -F "name=Jan" \
+  -F "bio=Nowa biografia" \
+  -F "profile_picture=@/ścieżka/do/zdjęcia.jpg" \
+  -F "header_picture=@/ścieżka/do/tła.jpg"
+```
+
+### 8. Aktualizacja posta (zmiana treści i głównego obrazu)
+```bash
+curl -X PUT http://localhost:3000/posts/POST_ID \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Zaktualizowana treść posta",
+    "main_image_id": "uuid-obrazu-który-ma-być-główny"
   }'
 ```
