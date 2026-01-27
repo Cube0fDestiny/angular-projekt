@@ -1,6 +1,23 @@
-.profile-container {
-  display: flex;
-  width: 100%;
-  padding: 20px;
-  gap: 20px;
+:host {
+  display: block;
+}
+
+
+aside {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--o-beige);
+    border-radius: 3px;
+    
+    &:hover {
+      background: var(--o-dbeige);
+    }
+  }
 }

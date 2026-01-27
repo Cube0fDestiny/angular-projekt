@@ -1,18 +1,24 @@
-<div style="background-color: var(--o-bwhite);">
+<div class="min-h-screen bg-[var(--o-bwhite)]">
   <app-navbar></app-navbar>
   <app-profile-header></app-profile-header>
-  <div class="profile-container">
-      <table style="width: 80%; border-collapse: collapse;  margin: 0 auto; border: none;">
-        <tr>
-          <!-- Profile Sidebar -->
-          <td style="width:30%; vertical-align: top; border: none;">
-            <app-profile-sidebar></app-profile-sidebar> 
-          </td>
-          <!-- Profile Wall -->
-          <td style="width:50%; vertical-align: top; padding: 20px; border: none;">
-            <app-wall location_type="profile" [location_id]="userId!" [highlightedPost]="highlightedPostId!"></app-wall>
-          </td>
-        </tr>
-      </table>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
+    <div class="flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-8">
+      
+      <!-- Sidebar (No scroll, just sticks to top) -->
+      <aside class="w-full lg:w-80 xl:w-96 lg:flex-shrink-0 lg:sticky lg:top-24 lg:h-fit">
+        <app-profile-sidebar></app-profile-sidebar>
+      </aside>
+      
+      <!-- Wall -->
+      <main class="flex-1 min-w-0">
+        <app-wall 
+          location_type="profile" 
+          [location_id]="userId!" 
+          [highlightedPost]="highlightedPostId!"
+        ></app-wall>
+      </main>
+      
+    </div>
   </div>
 </div>
