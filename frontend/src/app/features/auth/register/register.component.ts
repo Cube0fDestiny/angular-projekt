@@ -17,6 +17,5 @@ import { guestGuard } from '../../../core/auth/guest.guard';
   ],
   templateUrl: './register.component.html',
   providers: [],
-  canActivate: [guestGuard]
 })
 export class RegisterComponent {}
