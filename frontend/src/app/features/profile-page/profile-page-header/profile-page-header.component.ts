@@ -5,17 +5,22 @@ import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
 import { ChatHttpService } from '../../../core/chat/chat-http.service';
+import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
+import { ImageService } from '../../../core/image/image.service';
 
 @Component({
   selector: 'app-profile-header',
   templateUrl: './profile-page-header.component.html',
-  imports: [NgIf, OrangButtonComponent],
+  imports: [NgIf, OrangButtonComponent, ImageUploadComponent],
   styleUrls: ['./profile-page-header.component.scss']
 })
 export class ProfilePageHeaderComponent implements OnInit {
   @Input() user: User | null = null;
   @Input() isOwnProfile = false;
   @Input() isFriend = false;
+
+  headerImageUrl: string = '';
+  profileImageUrl: string = '';
 
   /** Keep as string because backend uses UUIDs */
   userId: string | null = null;
@@ -27,9 +32,6 @@ export class ProfilePageHeaderComponent implements OnInit {
     posts: 0,
     photos: 0
   };
-
-  /** Default cover image */
-  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
 
   @Output() editProfile = new EventEmitter<void>();
   @Output() addStory = new EventEmitter<void>();
@@ -45,7 +47,8 @@ export class ProfilePageHeaderComponent implements OnInit {
     private route: ActivatedRoute,
     public userService: UserService,
     private router: Router,
-    private chatHttpService: ChatHttpService
+    private chatHttpService: ChatHttpService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +78,8 @@ export class ProfilePageHeaderComponent implements OnInit {
         this.loadFriendStatus();
       });
     }
+    this.getHeaderUrl();
+    this.getProfileUrl();
     console.log('Profile for user:', this.user);
   }
 
@@ -207,6 +212,69 @@ export class ProfilePageHeaderComponent implements OnInit {
         console.error('Failed to create new chat:', error);
       }
     });
+  }
+
+  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
+  profileImage = 'assets/logo_icon.png';
+
+  getHeaderUrl(): void {
+    if (!this.user?.header_picture_id) {
+      this.headerImageUrl = `url(${this.coverImage})`;
+      return;
+    }
+    
+    this.imageService.getImage(this.user.header_picture_id).subscribe({
+      next: (imageUrl) => {
+        this.headerImageUrl = `url(${imageUrl})`;
+        console.log('laoded header image');
+      },
+      error: (error) => {
+        console.log('failed to load header iamge: ', error);
+        this.headerImageUrl = `url(${this.coverImage})`;
+      }
+    });
+  }
+
+  getProfileUrl(): void {
+    if (!this.user?.avatar) {
+      this.profileImageUrl = this.profileImage;
+      return;
+    }
+    
+    this.imageService.getImage(this.user.avatar).subscribe({
+      next: (imageUrl) => {
+        this.profileImageUrl = imageUrl;
+        console.log('laoded profile image');
+      },
+      error: (error) => {
+        console.log('failed to load profile iamge: ', error);
+        this.profileImageUrl = this.profileImage;
+      }
+    });
+  }
+
+  onHeaderImageUploaded(imageId: string): void{
+    this.userService.updateProfile(this.userId!, {header_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed header picture');
+        this.getHeaderUrl();
+      },
+      error: (error) => {
+        console.error('failed to change header picture: ', error);
+      }
+    })
+  }
+
+  onProfileImageUploaded(imageId: string): void{
+    this.userService.updateProfile(this.userId!, {avatar: imageId}).subscribe({
+      next: () => {
+        console.log('changed profile picture');
+        this.getProfileUrl();
+      },
+      error: (error) => {
+        console.error('failed to change profile picture: ', error);
+      }
+    })
   }
 
 }

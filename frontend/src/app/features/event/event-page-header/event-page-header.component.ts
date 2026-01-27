@@ -6,17 +6,22 @@ import { OrangButtonComponent } from "../../../shared/components/orang-button/or
 import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
 import { OrangEvent, EventFollower } from '../../../shared/models/event.models';
 import { EventService } from '../../../core/event/event.service';
+import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
+import { ImageService } from '../../../core/image/image.service';
 
 @Component({
   selector: 'app-event-header',
   templateUrl: './event-page-header.component.html',
-  imports: [NgIf, OrangButtonComponent],
+  imports: [NgIf, OrangButtonComponent, ImageUploadComponent],
   styleUrls: ['./event-page-header.component.scss']
 })
 export class EventPageHeaderComponent implements OnInit {
   @Input() user: User | null = null;
   @Input() isOwnEvent = false;
   @Input() isFriend = false;
+
+  headerImageUrl: string = '';
+  profileImageUrl: string = '';
 
   event: OrangEvent | null = null;
   eventId: string | null = null;
@@ -25,9 +30,6 @@ export class EventPageHeaderComponent implements OnInit {
   userId: string | null = null;
   isFollowing = false;
   daysUntilEvent = 0;
-
-  /** Default cover image */
-  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
 
   @Output() editProfile = new EventEmitter<void>();
   @Output() addStory = new EventEmitter<void>();
@@ -43,11 +45,19 @@ export class EventPageHeaderComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     public userService: UserService,
-    public eventService: EventService
+    public eventService: EventService,
+    private imageService: ImageService
   ) {}
 
-  getAvatarUrl(event: OrangEvent): string {
-    return event?.profile_picture_id || 'assets/logo_icon.png';
+  onImageUploaded(imageId: string): void{
+    this.eventService.updateEvent(this.eventId!, {header_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed header picture');
+      },
+      error: (error) => {
+        console.error('failed to change header image: ', error);
+      }
+    })
   }
 
   ngOnInit(): void {
@@ -70,6 +80,8 @@ export class EventPageHeaderComponent implements OnInit {
       }
       this.daysUntilEvent = this.getDaysUntilEvent(event.event_date);
       this.loadFollowingState();
+      this.getHeaderUrl();
+      this.getProfileUrl();
     });
   }
 
@@ -100,6 +112,69 @@ export class EventPageHeaderComponent implements OnInit {
       console.log('toggled following event: ', res);
       this.isFollowing = !this.isFollowing;
     });
+  }
+
+  coverImage = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop';
+  profileImage = 'assets/logo_icon.png';
+
+  getHeaderUrl(): void {
+    if (!this.event?.header_picture_id) {
+      this.headerImageUrl = `url(${this.coverImage})`;
+      return;
+    }
+    
+    this.imageService.getImage(this.event.header_picture_id).subscribe({
+      next: (imageUrl) => {
+        this.headerImageUrl = `url(${imageUrl})`;
+        console.log('laoded header image');
+      },
+      error: (error) => {
+        console.log('failed to load header iamge: ', error);
+        this.headerImageUrl = `url(${this.coverImage})`;
+      }
+    });
+  }
+
+  getProfileUrl(): void {
+    if (!this.event?.profile_picture_id) {
+      this.profileImageUrl = this.profileImage;
+      return;
+    }
+    
+    this.imageService.getImage(this.event.profile_picture_id).subscribe({
+      next: (imageUrl) => {
+        this.profileImageUrl = imageUrl;
+        console.log('laoded profile image');
+      },
+      error: (error) => {
+        console.log('failed to load profile iamge: ', error);
+        this.profileImageUrl = this.profileImage;
+      }
+    });
+  }
+
+  onHeaderImageUploaded(imageId: string): void{
+    this.eventService.updateEvent(this.eventId!, {header_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed header picture');
+        this.getHeaderUrl();
+      },
+      error: (error) => {
+        console.error('failed to change header picture: ', error);
+      }
+    })
+  }
+
+  onProfileImageUploaded(imageId: string): void{
+    this.eventService.updateEvent(this.eventId!, {profile_picture_id: imageId}).subscribe({
+      next: () => {
+        console.log('changed profile picture');
+        this.getProfileUrl();
+      },
+      error: (error) => {
+        console.error('failed to change profile picture: ', error);
+      }
+    })
   }
 
 }

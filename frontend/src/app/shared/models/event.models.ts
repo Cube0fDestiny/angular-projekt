@@ -10,6 +10,7 @@ export interface OrangEvent {
   created_at?: string;
   updated_at?: string;
   deleted?: boolean;
+  profileImageUrl?: string;
 }
 
 export interface UserEvent extends OrangEvent {
@@ -36,6 +37,8 @@ export interface UpdateEventData {
   name?: string;
   bio?: string;
   event_date?: string; // ISO 8601 timestamp
+  header_picture_id?: string;
+  profile_picture_id?: string;
 }
 
 export interface ApiResponse {

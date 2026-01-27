@@ -7,6 +7,8 @@ export interface User {
   is_company: boolean;
   created_at?: string;
   avatar: string;
+  header_picture_id?: string;
+  avatarUrl?: string;
 }
 
 export interface IncomingFriendRequest {

@@ -9,6 +9,7 @@ import { TextDisplayComponent } from "../../shared/components/text-display/text-
 import { OrangButtonComponent } from "../../shared/components/orang-button/orang-button.component";
 import { OrangEvent, CreateEventData } from '../../shared/models/event.models';
 import { EventService } from '../../core/event/event.service';
+import { ImageService } from '../../core/image/image.service';
 
 @Component({
   selector: 'events-page',
@@ -25,12 +26,14 @@ export class EventsPageComponent implements OnInit {
   isCreatingEvent = false;
   events: OrangEvent[] | null = null;
   isLoading = false;
+  defaultImage = 'assets/logo_icon.png';
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     public userService: UserService,
-    public eventService: EventService
+    public eventService: EventService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -40,10 +43,6 @@ export class EventsPageComponent implements OnInit {
 
   toggleCreatingEvent():void {
     this.isCreatingEvent = !this.isCreatingEvent;
-  }
-
-  getAvatarUrl(event: OrangEvent): string {
-    return event?.profile_picture_id || 'assets/logo_icon.png';
   }
 
   createEvent():void {
@@ -86,6 +85,7 @@ export class EventsPageComponent implements OnInit {
         this.events = events;
         this.isLoading = false;
         console.log('succesfully loaded events');
+        this.loadProfileImages()
       },
       error: (error) => {
         this.isLoading = false;
@@ -97,6 +97,26 @@ export class EventsPageComponent implements OnInit {
   toggleFollow(eventId: string): void{
     this.eventService.toggleFollowEvent(eventId).subscribe(res => {
       console.log('toggled following event: ', res);
+    });
+  }
+
+  loadProfileImages(): void {
+  // Process each group
+    this.events!.forEach(event => {
+      if (event.profile_picture_id) {
+        // Load image for this group
+        this.imageService.getImage(event.profile_picture_id).subscribe({
+          next: (imageUrl) => {
+            event.profileImageUrl = imageUrl;
+          },
+          error: () => {
+            event.profileImageUrl = this.defaultImage;
+          }
+        });
+      } else {
+        // No profile picture id, use default
+        event.profileImageUrl = this.defaultImage;
+      }
     });
   }
 

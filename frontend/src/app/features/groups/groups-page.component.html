@@ -48,7 +48,7 @@
 
     <app-text-display variant="beige" title="All Groups" class="max-w-9/10 w-full rounded-xl">
       
-      <!-- Friends grid -->
+      <!-- Group grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" *ngIf="!isLoading">
         <div 
           *ngFor="let group of groups" 
@@ -57,7 +57,7 @@
           <!-- Custom content goes here -->
           <div class="flex flex-col items-center text-center" (click)="goToGroup(group.id)">
             <img 
-              [src]="getAvatarUrl(group)" 
+              [src]="group.profileImageUrl" 
               [alt]="group.name"
               class="w-16 h-16 rounded-full mb-3 object-cover border-2"
             >

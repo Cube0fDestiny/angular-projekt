@@ -169,7 +169,7 @@
             <div class="relative flex justify-center -mt-10 z-10">
               <div class="relative">
                 <img 
-                  [src]="getAvatarUrl(event)" 
+                  [src]="event.profileImageUrl" 
                   [alt]="event.name"
                   class="w-20 h-20 rounded-full object-cover border-4 border-[var(--o-bwhite)] shadow-lg group-hover:scale-110 group-hover:border-[var(--o-orange)]/50 transition-all duration-300"
                   (click)="goToEvent(event.id)"
