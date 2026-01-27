@@ -182,7 +182,7 @@ export const requestFriend = async (req, res) => {
 
     // Fetch requester's data to include in the event
     const requesterData = await db.query(
-      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      `SELECT user_id, name, surname, email, profile_picture_id FROM "Users" WHERE user_id = $1`,
       [userId]
     );
 
@@ -197,7 +197,9 @@ export const requestFriend = async (req, res) => {
       const requester = requesterData.rows[0];
       eventPayload.requesterName = requester.name;
       eventPayload.requesterSurname = requester.surname;
-      eventPayload.requesterProfilePicture = requester.profile_picture_id;
+      eventPayload.requesterProfilePicture =
+        requester.profile_picture_id ||
+        `https://i.pravatar.cc/150?u=${encodeURIComponent(requester.email)}`;
     }
 
       eventPayload.type = "friend.request";
@@ -266,7 +268,7 @@ export const acceptFriendRequest = async (req, res) => {
 
     // Fetch accepter's data to include in the event
     const accepterData = await db.query(
-      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      `SELECT user_id, name, surname, email, profile_picture_id FROM "Users" WHERE user_id = $1`,
       [userId]
     );
 
@@ -281,7 +283,9 @@ export const acceptFriendRequest = async (req, res) => {
       const accepter = accepterData.rows[0];
       eventPayload.accepterName = accepter.name;
       eventPayload.accepterSurname = accepter.surname;
-      eventPayload.accepterProfilePicture = accepter.profile_picture_id;
+      eventPayload.accepterProfilePicture =
+        accepter.profile_picture_id ||
+        `https://i.pravatar.cc/150?u=${encodeURIComponent(accepter.email)}`;
     }
 
     eventPayload.type = "friend.accepted";

@@ -92,19 +92,22 @@ export const consumeNotifications = async (io) => {
                         // Fetch requester's data to include in notification
                         try {
                             const requesterData = await db.query(
-                                `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+                                `SELECT user_id, name, surname, email, profile_picture_id FROM "Users" WHERE user_id = $1`,
                                 [content.requesterId]
                             );
                             
                             if (requesterData.rows.length > 0) {
                                 const requester = requesterData.rows[0];
+                                const requesterProfilePicture =
+                                    requester.profile_picture_id ||
+                                    `https://i.pravatar.cc/150?u=${encodeURIComponent(requester.email)}`;
                                 notificationTitle = "Zaproszenie do znajomych";
                                 notificationMessage = `${requester.name} ${requester.surname} zaprasza Cię do znajomych`;
                                 notificationData = {
                                     requesterId: content.requesterId,
                                     requesterName: requester.name,
                                     requesterSurname: requester.surname,
-                                    requesterProfilePicture: requester.profile_picture_id
+                                    requesterProfilePicture,
                                 };
                             } else {
                                 // Fallback if user not found
@@ -127,19 +130,22 @@ export const consumeNotifications = async (io) => {
                         // Fetch accepter's data to include in notification
                         try {
                             const accepterData = await db.query(
-                                `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+                                `SELECT user_id, name, surname, email, profile_picture_id FROM "Users" WHERE user_id = $1`,
                                 [content.userId]
                             );
                             
                             if (accepterData.rows.length > 0) {
                                 const accepter = accepterData.rows[0];
+                                const accepterProfilePicture =
+                                    accepter.profile_picture_id ||
+                                    `https://i.pravatar.cc/150?u=${encodeURIComponent(accepter.email)}`;
                                 notificationTitle = "Zaproszenie zaakceptowane";
                                 notificationMessage = `${accepter.name} ${accepter.surname} zaakceptował(a) Twoje zaproszenie do znajomych`;
                                 notificationData = {
                                     userId: content.userId,
                                     accepterName: accepter.name,
                                     accepterSurname: accepter.surname,
-                                    accepterProfilePicture: accepter.profile_picture_id
+                                    accepterProfilePicture,
                                 };
                             } else {
                                 // Fallback if user not found
