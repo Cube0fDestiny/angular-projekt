@@ -10,6 +10,7 @@ export interface Group {
     members: number;
     owner_id: string;
   }
+  profileImageUrl?: string; // This will hold the cached image URL
 }
 
 export interface GroupMember {

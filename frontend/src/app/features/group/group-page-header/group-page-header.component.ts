@@ -86,10 +86,6 @@ export class GroupPageHeaderComponent implements OnInit {
     private imageService: ImageService
   ) {}
 
-  getAvatarUrl(group: Group): string {
-    return group?.profile_picture_id || 'assets/logo_icon.png';
-  }
-
   ngOnInit(): void {
     // Subscribe to current user
     this.userService.currentUser$.subscribe(u => this.currentUser = u);

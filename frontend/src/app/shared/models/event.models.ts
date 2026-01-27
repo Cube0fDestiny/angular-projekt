@@ -10,6 +10,7 @@ export interface OrangEvent {
   created_at?: string;
   updated_at?: string;
   deleted?: boolean;
+  profileImageUrl?: string;
 }
 
 export interface UserEvent extends OrangEvent {

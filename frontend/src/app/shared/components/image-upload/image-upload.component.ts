@@ -2,11 +2,12 @@
 import { Component, Output, EventEmitter, HostListener, Input } from '@angular/core';
 import { ImageService, UploadResponse } from '../../../core/image/image.service';
 import { NgIf } from '@angular/common';
+import { OrangButtonComponent } from '../orang-button/orang-button.component';
 
 @Component({
   selector: 'app-image-upload',
   templateUrl: './image-upload.component.html',
-  imports: [NgIf],
+  imports: [NgIf, OrangButtonComponent],
   styleUrls: ['./image-upload.component.scss'],
 })
 export class ImageUploadComponent {
