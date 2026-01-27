@@ -200,6 +200,78 @@ JWT_SECRET=your-secret-key
 
 ---
 
+## 🎭 Trasy Orkiestracji
+
+Gateway obsługuje złożone operacje wymagające komunikacji z wieloma serwisami.
+
+### 1. Aktualizacja profilu z obrazami
+`PUT /users/:id/profile-with-image`
+
+**Wymagana autoryzacja**
+
+Aktualizuje profil użytkownika z możliwością przesłania zdjęć.
+
+**Forma multipart:**
+- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
+- `header_picture` (file) - zdjęcie w tle (opcjonalne)
+- Pozostałe pola profilu jako form fields
+
+---
+
+### 2. Tworzenie posta z obrazami
+`POST /posts/with-images`
+
+**Wymagana autoryzacja**
+
+Tworzy post z możliwością przesłania wielu obrazów.
+
+**Forma multipart:**
+- `images` (files) - obrazy do posta
+- Pozostałe pola posta jako form fields
+
+---
+
+### 3. Tworzenie wydarzenia z obrazami
+`POST /events/with-image`
+
+**Wymagana autoryzacja**
+
+Tworzy wydarzenie z możliwością przesłania zdjęć.
+
+**Forma multipart:**
+- `profile_picture` (file) - zdjęcie profilowe wydarzenia (opcjonalne)
+- `header_picture` (file) - zdjęcie w tle wydarzenia (opcjonalne)
+- `name`, `bio`, `event_date` jako form fields
+
+---
+
+### 4. Aktualizacja wydarzenia z obrazami
+`PUT /events/:id/with-image`
+
+**Wymagana autoryzacja (Tylko twórca)**
+
+Aktualizuje wydarzenie z możliwością przesłania nowych zdjęć.
+
+**Forma multipart:**
+- `profile_picture` (file) - nowe zdjęcie profilowe (opcjonalne)
+- `header_picture` (file) - nowe zdjęcie w tle (opcjonalne)
+- `name`, `bio`, `event_date` jako form fields (wszystkie opcjonalne)
+
+---
+
+### 5. Wysyłanie wiadomości z obrazami
+`POST /chats/:chatId/messages/with-images`
+
+**Wymagana autoryzacja**
+
+Wysyła wiadomość na czacie z możliwością dołączenia obrazów.
+
+**Forma multipart:**
+- `images` (files) - obrazy do wiadomości (max 10)
+- Pozostałe pola wiadomości jako form fields
+
+---
+
 ## 📝 Uwagi
 
 - Gateway automatycznie konwertuje ścieżkę `/chats` na `http://chat-service:3006/chats`

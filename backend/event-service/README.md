@@ -142,7 +142,9 @@ Aktualizuje szczegóły wydarzenia. Tylko twórca może edytować.
 {
   "name": "string",
   "bio": "string",
-  "event_date": "ISO 8601 timestamp"
+  "event_date": "ISO 8601 timestamp",
+  "header_picture_id": "uuid",
+  "profile_picture_id": "uuid"
 }
 ```
 
@@ -154,13 +156,53 @@ Aktualizuje szczegóły wydarzenia. Tylko twórca może edytować.
   "bio": "string",
   "event_date": "timestamp",
   "creator_id": "uuid",
-  "updated_at": "timestamp"
+  "header_picture_id": "uuid",
+  "profile_picture_id": "uuid",
+  "created_at": "timestamp"
 }
 ```
 
 ---
 
-### 6. Stworzenie wydarzenia z obrazami (Gateway)
+### 6. Aktualizacja wydarzenia z obrazami (Gateway)
+
+`PUT /events/:id/with-image`
+
+**Gateway Route:** `PUT /events/:id/with-image`
+
+**Wymagana autoryzacja (Tylko twórca)**
+
+Aktualizuje wydarzenie z możliwością przesłania nowych zdjęć profilowego i w tle.
+
+**Parametry:**
+| Parametr | Typ | Opis |
+|---|---|---|
+| :id | uuid | ID wydarzenia |
+
+**Forma multipart:**
+- `name` (form field) - nazwa wydarzenia (opcjonalne)
+- `bio` (form field) - opis (opcjonalne)
+- `event_date` (form field) - data ISO 8601 (opcjonalne)
+- `profile_picture` (file) - zdjęcie profilowe (opcjonalne)
+- `header_picture` (file) - zdjęcie w tle (opcjonalne)
+
+**Odpowiedź (200 OK):**
+```json
+{
+  "id": "uuid",
+  "name": "string",
+  "bio": "string",
+  "event_date": "timestamp",
+  "creator_id": "uuid",
+  "header_picture_id": "uuid",
+  "profile_picture_id": "uuid",
+  "created_at": "timestamp"
+}
+```
+
+---
+
+### 7. Stworzenie wydarzenia z obrazami (Gateway)
 
 `POST /events/with-image`
 
@@ -195,7 +237,7 @@ Tworzy nowe wydarzenie z możliwością przesłania zdjęć profilowego i w tle.
 
 ---
 
-### 7. Usunięcie wydarzenia (Soft Delete)
+### 8. Usunięcie wydarzenia (Soft Delete)
 `DELETE /:id`
 
 **Wymagana autoryzacja (Tylko twórca)**
@@ -216,7 +258,7 @@ Miękkie usunięcie wydarzenia (oznaczenie jako usunięte, bez usuwania z bazy).
 
 ---
 
-### 8. Toggle obserwowania wydarzenia
+### 9. Toggle obserwowania wydarzenia
 `POST /:id/follow`
 
 **Wymagana autoryzacja**
@@ -244,7 +286,7 @@ Dodaje lub usuwa obserwowanie wydarzenia przez zalogowanego użytkownika.
 
 ---
 
-### 9. Pobranie obserwujących wydarzenia
+### 10. Pobranie obserwujących wydarzenia
 `GET /:id/followers`
 
 **Endpoint publiczny**

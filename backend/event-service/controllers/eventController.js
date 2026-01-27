@@ -147,7 +147,7 @@ export const createEvent = async (req, res) => {
 export const updateEvent = async (req, res) => {
   const log = req.log;
   const { id } = req.params;
-  const { name, bio, event_date } = req.body;
+  const { name, bio, event_date, header_picture_id, profile_picture_id } = req.body;
 
   try {
     const currentEventResult = await db.query(
@@ -172,18 +172,23 @@ export const updateEvent = async (req, res) => {
         req.body.header_picture_id !== undefined
           ? req.body.header_picture_id
           : currentEvent.header_picture_id,
+      profile_picture_id:
+        req.body.profile_picture_id !== undefined
+          ? req.body.profile_picture_id
+          : currentEvent.profile_picture_id,
     };
 
     const result = await db.query(
       `UPDATE "Events"
-      SET name = $1, bio = $2, event_date = $3, header_picture_id = $4
-      WHERE id = $5 AND deleted = false
+      SET name = $1, bio = $2, event_date = $3, header_picture_id = $4, profile_picture_id = $5
+      WHERE id = $6 AND deleted = false
       RETURNING id, name, bio, event_date, creator_id, header_picture_id, profile_picture_id, created_at`,
       [
         updatedData.name,
         updatedData.bio,
         updatedData.event_date,
         updatedData.header_picture_id,
+        updatedData.profile_picture_id,
         id,
       ]
     );

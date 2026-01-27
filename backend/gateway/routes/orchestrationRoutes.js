@@ -270,6 +270,85 @@ router.post(
   },
 );
 
+router.put(
+  "/events/:id/with-image",
+  requireAuth,
+  upload.fields([
+    { name: "profile_picture", maxCount: 1 },
+    { name: "header_picture", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const log = req.log;
+    const { id } = req.params;
+    const textualData = req.body;
+
+    try {
+      const imageUploads = {};
+      log.info({ eventId: id }, "Rozpoczynanie orkiestracji: aktualizacja wydarzenia z obrazami.");
+
+      if (req.files) {
+        if (req.files.profile_picture) {
+          const imageId = await uploadFile(
+            req.files.profile_picture[0],
+            req,
+            log,
+          );
+          if (imageId) {
+            imageUploads.profile_picture_id = imageId;
+            log.info(
+              { imageId },
+              "Przesłano nowe zdjęcie profilowe wydarzenia.",
+            );
+          }
+        }
+        if (req.files.header_picture) {
+          const imageId = await uploadFile(
+            req.files.header_picture[0],
+            req,
+            log,
+          );
+          if (imageId) {
+            imageUploads.header_picture_id = imageId;
+            log.info(
+              { imageId },
+              "Przesłano nowe zdjęcie w tle wydarzenia.",
+            );
+          }
+        }
+      }
+
+      const finalPayload = { ...textualData, ...imageUploads };
+      log.info({ payload: finalPayload }, "Przygotowano dane dla event-service (aktualizacja).");
+
+      const eventResponse = await axios.put(
+        `http://event-service:3003/events/${id}`,
+        finalPayload,
+        {
+          headers: {
+            "x-user-data": req.headers["x-user-data"],
+          },
+        },
+      );
+
+      res.status(eventResponse.status).json(eventResponse.data);
+    } catch (error) {
+      const errorInfo = error.isAxiosError
+        ? {
+            message: error.message,
+            url: error.config.url,
+            status: error.response?.status,
+            data: error.response?.data,
+          }
+        : { message: error.message, stack: error.stack };
+
+      log.error({ err: errorInfo }, "Błąd podczas orkiestracji aktualizacji wydarzenia.");
+
+      const status = error.response?.status || 500;
+      res.status(status).json(errorInfo);
+    }
+  },
+);
+
 router.post(
   "/chats/:chatId/messages/with-images",
   requireAuth,

@@ -1,42 +1,67 @@
-<div class="user-dropdown-container">
-  <!-- Trigger button (user avatar/name) -->
+<div class="relative inline-block">
+  <!-- Trigger button - chevron icon -->
   <div
-    class="nav-item"
+    class="relative w-7 h-7 md:w-8 md:h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
     (click)="toggleDropdown()"> 
-      <span class="arrow">{{ isOpen ? '▲' : '▼' }}</span>
+    <svg 
+      class="w-4 h-4 md:w-5 md:h-5 text-[var(--o-beige)] transition-transform duration-200"
+      [class.rotate-180]="isOpen"
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/>
+    </svg>
   </div> 
+
   <!-- Dropdown content -->
-  <div *ngIf="isOpen" class="dropdown-menu" (click)="$event.stopPropagation()">
-    
-    <div class="dropdown-header">
-      <div class="user-info">
-        <img [src]="currentUser.avatar" alt="User" class="user-avatar">
-        <div>
-          <span class="user-name">{{currentUser.name}}</span>
+  <div 
+    *ngIf="isOpen" 
+    class="absolute top-full right-0 mt-3 min-w-[260px] bg-[var(--o-beige)] border-2 border-[var(--o-green)] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-[1000] animate-slideDown overflow-hidden"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- User header -->
+    <div class="p-4 bg-gradient-to-r from-[var(--o-orange)]/10 to-transparent border-b border-[var(--o-green)]/10">
+      <div class="flex items-center gap-3">
+        <img 
+          [src]="currentUser.avatar" 
+          alt="User" 
+          class="w-12 h-12 rounded-full object-cover ring-2 ring-[var(--o-orange)]/30"
+        >
+        <div class="flex flex-col">
+          <span class="text-[var(--o-green)] font-bold text-lg">{{currentUser.name}}</span>
+          <span class="text-[var(--o-green)]/60 text-sm">Mój profil</span>
         </div>
       </div>
     </div>
     
-    <div class="dropdown-divider"></div>
-    
-    <!-- Your 3 buttons -->
-    <div class="dropdown-item">
-      <orang-button (click)="onProfileClick()">
-        <span>👤 Profile</span>
-      </orang-button>
-    </div>
-    <div class="dropdown-item">
-      <orang-button (click)="onSettingsClick()">
-        <span>⚙️ Settings</span>
-      </orang-button>
-    </div>
-    <div class="dropdown-item">
-      <orang-button (click)="onLogoutClick()">
-        <span>🚪 Logout</span>
-      </orang-button>
+    <!-- Menu items -->
+    <div class="flex flex-col py-2">
+      <div 
+        class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+        (click)="onProfileClick()"
+      >
+        <span class="text-xl">👤</span>
+        <span class="font-medium">Profil</span>
+      </div>
+      <div 
+        class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+        (click)="onSettingsClick()"
+      >
+        <span class="text-xl">⚙️</span>
+        <span class="font-medium">Ustawienia</span>
+      </div>
+      <div class="h-px bg-[var(--o-green)]/10 mx-4 my-1"></div>
+      <div 
+        class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-red-500/10 text-red-600 transition-all duration-200"
+        (click)="onLogoutClick()"
+      >
+        <span class="text-xl">🚪</span>
+        <span class="font-medium">Wyloguj</span>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Backdrop to close when clicking outside -->
-<div *ngIf="isOpen" class="dropdown-backdrop" (click)="closeDropdown()"></div>
+<div *ngIf="isOpen" class="fixed inset-0 z-[999]" (click)="closeDropdown()"></div>
