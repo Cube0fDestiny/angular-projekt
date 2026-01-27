@@ -1,252 +1,314 @@
-<div class="min-h-screen flex flex-col bg-[var(--o-bwhite)]">
+<div class="min-h-screen bg-[var(--o-bwhite)]">
   <app-navbar location="chat"></app-navbar>
   
-  <!-- Main Container -->
-  <div class="flex-1 flex flex-col lg:flex-row p-3 sm:p-4 md:p-6 gap-3 sm:gap-4 md:gap-6 max-w-7xl w-full mx-auto mt-16 sm:mt-18 md:mt-20">
+  <!-- Main Container with navbar offset -->
+  <div 
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex flex-col lg:flex-row gap-6"
+    style="padding-top: calc(var(--navbar-height) + 2rem);"
+  >
     
     <!-- Chat List Sidebar -->
     <div 
-      class="w-full lg:w-80 lg:min-w-[300px] bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[var(--o-beige)] flex flex-col overflow-hidden
-             lg:h-[calc(100vh-140px)] lg:min-h-[500px]"
+      class="w-full lg:w-96 lg:min-w-[320px] flex flex-col"
       [ngClass]="{
-        'max-h-[200px] sm:max-h-[250px]': isShowingMessages && isMobileView,
-        'min-h-[250px] sm:min-h-[300px]': !isShowingMessages || !isMobileView,
-        'hidden': isShowingMessages && isMobileView
+        'hidden lg:flex': isShowingMessages && isMobileView
       }"
     >
-      
-      <!-- Header -->
-      <div class="p-3 sm:p-4 md:p-5 border-b border-[var(--o-beige)] bg-gradient-to-r from-[var(--o-beige)] to-transparent shrink-0">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base sm:text-lg font-bold text-[var(--o-green)] flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-              <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
-            </svg>
-            Messages
-          </h2>
-          <span *ngIf="chats.length > 0" class="bg-[var(--o-beige)] text-[var(--o-green)] text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
-            {{ chats.length }}
-          </span>
-        </div>
-      </div>
-      
-      <!-- Empty State -->
-      <div *ngIf="!isShowingChats" class="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-[var(--o-green)] opacity-60">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 sm:h-12 sm:w-12 mb-2 sm:mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        <p class="text-xs sm:text-sm font-medium">No conversations yet</p>
-        <p class="text-[10px] sm:text-xs mt-1">Start chatting with someone!</p>
-      </div>
-
-      <!-- Chat List -->
-      <div *ngIf="isShowingChats" class="flex-1 overflow-y-auto p-1.5 sm:p-2 space-y-1 scrollbar-thin">
-        <div 
-          *ngFor="let chat of chats; trackBy: trackByChatId" 
-          class="group flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl cursor-pointer transition-all duration-200 border-2"
-          [ngClass]="{
-            'bg-[var(--o-dbeige)] border-[var(--o-orange)] shadow-sm': chat.id === activeChatId,
-            'bg-[var(--o-bwhite)] border-transparent hover:bg-[var(--o-beige)] hover:border-[var(--o-beige)]': chat.id !== activeChatId
-          }"
-          (click)="selectChat(chat)"
-        >
-          <!-- Avatar -->
-          <div 
-            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shrink-0"
-            [ngClass]="chat.id === activeChatId ? 'bg-[var(--o-orange)]' : 'bg-[var(--o-green)]'"
-          >
-            {{ getInitials(formatChatName(chat.name)) }}
-          </div>
-          
-          <!-- Chat Info -->
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-[var(--o-green)] truncate text-xs sm:text-sm">
-              {{ formatChatName(chat.name) }}
-            </p>
-            <p class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-60 truncate">
-              Tap to view messages
-            </p>
-          </div>
-          
-          <!-- Delete Button -->
-          <div (click)="$event.stopPropagation()" class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-            <button 
-              (click)="deleteChat(chat)"
-              class="p-1.5 sm:p-2 rounded-lg text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors"
-              title="Delete chat"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+      <div class="bg-[var(--o-beige)] rounded-3xl shadow-lg border border-[var(--o-dbeige)] overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col h-full lg:h-[calc(100vh-160px)] lg:min-h-[500px]">
+        
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between gap-4 p-5 bg-[var(--o-dbeige)]/50 border-b border-[var(--o-dbeige)]">
+          <div class="flex items-center gap-4">
+            <!-- Icon -->
+            <div class="w-12 h-12 bg-[var(--o-orange)] rounded-2xl flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
               </svg>
-            </button>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-[var(--o-green)]">Messages</h2>
+              <p class="text-sm text-[var(--o-green)]/60">Your conversations</p>
+            </div>
+          </div>
+          
+          <!-- Chat Count Badge -->
+          <div *ngIf="chats.length > 0" class="flex items-center justify-center w-10 h-10 bg-[var(--o-orange)] text-white text-sm font-bold rounded-full shadow-md">
+            {{ chats.length }}
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div *ngIf="!isShowingChats" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div class="w-24 h-24 bg-[var(--o-dbeige)] rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-12 h-12 text-[var(--o-orange)]">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-[var(--o-green)] mb-2">No conversations yet</h3>
+          <p class="text-sm text-[var(--o-green)]/60 max-w-xs">Start chatting with someone to see your conversations here!</p>
+        </div>
+
+        <!-- Chat List -->
+        <div *ngIf="isShowingChats" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
+          <div 
+            *ngFor="let chat of chats; trackBy: trackByChatId" 
+            class="group chat-item"
+            [ngClass]="{
+              'chat-item-active': chat.id === activeChatId,
+              'chat-item-inactive': chat.id !== activeChatId
+            }"
+            (click)="selectChat(chat)"
+          >
+            <!-- Avatar -->
+            <div 
+              class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md transition-all duration-300"
+              [ngClass]="chat.id === activeChatId ? 'bg-[var(--o-orange)] scale-110' : 'bg-[var(--o-green)] group-hover:scale-105'"
+            >
+              {{ getInitials(formatChatName(chat.name)) }}
+            </div>
+            
+            <!-- Chat Info -->
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-[var(--o-green)] truncate text-sm group-hover:text-[var(--o-orange)] transition-colors duration-300">
+                {{ formatChatName(chat.name) }}
+              </p>
+              <p class="text-xs text-[var(--o-green)]/50 truncate mt-0.5">
+                <span class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                  Tap to view messages
+                </span>
+              </p>
+            </div>
+            
+            <!-- Delete Button -->
+            <div (click)="$event.stopPropagation()" class="opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <button 
+                (click)="deleteChat(chat)"
+                class="p-2.5 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-all duration-300"
+                title="Delete chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
     
     <!-- Message Section -->
-    <div 
-      class="flex-1 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[var(--o-beige)] flex flex-col overflow-hidden
-             lg:h-[calc(100vh-140px)] lg:min-h-[500px] min-h-[350px] sm:min-h-[400px]"
-    >
-      
-      <!-- Back Button (Mobile Only) -->
-      <div *ngIf="isShowingMessages && isMobileView" class="p-2 border-b border-[var(--o-beige)] lg:hidden shrink-0">
-        <button 
-          (click)="goBackToChats()"
-          class="flex items-center gap-2 text-[var(--o-green)] hover:text-[var(--o-orange)] transition-colors text-sm font-medium"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-          </svg>
-          Back to chats
-        </button>
-      </div>
-
-      <!-- Chat Header (when chat is selected) -->
-      <div *ngIf="isShowingMessages && otherUser" class="p-3 sm:p-4 border-b border-[var(--o-beige)] bg-gradient-to-r from-[var(--o-dbeige)] to-transparent shrink-0">
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--o-orange)] flex items-center justify-center text-white font-bold text-xs sm:text-sm shrink-0">
-            {{ getInitials(otherUser.name + ' ' + otherUser.surname) }}
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 
-              class="font-semibold text-[var(--o-green)] hover:text-[var(--o-orange)] cursor-pointer transition-colors text-sm sm:text-base truncate"
-              (click)="goToProfile(otherUser.id)"
-            >
-              {{ otherUser.name }} {{ otherUser.surname }}
-            </h3>
-            <p class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-60">Tap name to view profile</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div *ngIf="!isShowingMessages" class="flex-1 flex flex-col items-center justify-center p-4 sm:p-8">
-        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[var(--o-beige)] flex items-center justify-center mb-3 sm:mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-10 sm:w-10 text-[var(--o-green)] opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-        </div>
-        <h3 class="text-base sm:text-lg font-semibold text-[var(--o-green)] mb-1">Select a conversation</h3>
-        <p class="text-xs sm:text-sm text-[var(--o-green)] opacity-60 text-center max-w-xs px-4">
-          Choose a chat from the list to start messaging
-        </p>
-      </div>
-
-      <!-- Messages Container -->
-      <div 
-        *ngIf="isShowingMessages" 
-        class="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto space-y-3 sm:space-y-4 bg-gradient-to-b from-[var(--o-bwhite)] to-white scrollbar-thin"
-        #messagesContainer
-      >
-        <!-- No messages yet -->
-        <div *ngIf="messages.length === 0" class="flex flex-col items-center justify-center h-full text-[var(--o-green)] opacity-60">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 mb-2 sm:mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-          </svg>
-          <p class="text-xs sm:text-sm font-medium">No messages yet</p>
-          <p class="text-[10px] sm:text-xs mt-1">Send a message to start the conversation!</p>
-        </div>
-
-        <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
-          
-          <!-- Date Separator -->
-          <div *ngIf="shouldShowDateSeparator(message, i)" class="flex items-center gap-2 sm:gap-4 my-4 sm:my-6">
-            <div class="flex-1 h-px bg-[var(--o-beige)]"></div>
-            <span class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-60 font-medium px-2 whitespace-nowrap">{{ formatMessageDate(message.created_at) }}</span>
-            <div class="flex-1 h-px bg-[var(--o-beige)]"></div>
-          </div>
-
-          <!-- Current User's Message -->
-          <div *ngIf="message.creator_id === currentUser?.id" class="flex justify-end message-animation">
-            <div class="flex flex-col max-w-[85%] sm:max-w-[75%] md:max-w-[65%] items-end">
-              <div class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-60 mb-1 sm:mb-1.5 mr-2 font-medium">
-                You
-              </div>
-              <div class="bg-gradient-to-br from-[var(--o-orange)] to-[var(--o-dorange)] text-white rounded-2xl rounded-tr-sm px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
-                <p class="text-xs sm:text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.text }}</p>
-              </div>
-              <span *ngIf="message.created_at" class="text-[9px] sm:text-[10px] text-[var(--o-green)] opacity-50 mt-1 mr-2">
-                {{ formatTime(message.created_at) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Other User's Message -->
-          <div *ngIf="message.creator_id !== currentUser?.id" class="flex justify-start message-animation">
-            <div class="flex flex-col max-w-[85%] sm:max-w-[75%] md:max-w-[65%]">
-              <div 
-                class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-60 mb-1 sm:mb-1.5 ml-2 font-medium cursor-pointer hover:text-[var(--o-orange)] hover:opacity-100 transition-colors"
-                (click)="goToProfile(otherUser!.id)"
-              >
-                {{ otherUser?.name }} {{ otherUser?.surname }}
-              </div>
-              <div class="bg-[var(--o-beige)] text-[var(--o-green)] rounded-2xl rounded-tl-sm px-3 py-2 sm:px-4 sm:py-2.5">
-                <p class="text-xs sm:text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.text }}</p>
-              </div>
-              <span *ngIf="message.created_at" class="text-[9px] sm:text-[10px] text-[var(--o-green)] opacity-50 mt-1 ml-2">
-                {{ formatTime(message.created_at) }}
-              </span>
-            </div>
-          </div>
-        </ng-container>
-      </div>
-
-      <!-- Message Input -->
-      <div *ngIf="isShowingMessages" class="p-2 sm:p-3 md:p-4 border-t border-[var(--o-beige)] bg-[var(--o-bwhite)] shrink-0">
-        <form 
-          (ngSubmit)="createMessage()" 
-          #messageForm="ngForm"
-          class="flex items-center gap-2 sm:gap-3"
-        >
-          <!-- Emoji Button (hidden on very small screens) -->
-          <button 
-            type="button" 
-            class="hidden sm:flex p-2 rounded-full text-[var(--o-green)] opacity-60 hover:opacity-100 hover:bg-[var(--o-beige)] transition-all"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
-            </svg>
-          </button>
-
-          <!-- Input Field -->
-          <div class="flex-1 relative">
-            <input
-              type="text"
-              [(ngModel)]="newMessageText"
-              name="newMessageText"
-              placeholder="Type your message..."
-              required
-              autocomplete="off"
-              class="w-full px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-white text-[var(--o-green)] border border-[var(--o-beige)] rounded-full 
-                     focus:outline-none focus:ring-2 focus:ring-[var(--o-orange)] focus:border-transparent 
-                     placeholder:text-[var(--o-green)] placeholder:opacity-40 transition-all duration-200 text-xs sm:text-sm"
-              (keydown.enter)="createMessage()"
-            >
-          </div>
-
-          <!-- Send Button -->
-          <button 
-            type="submit" 
-            [disabled]="!messageForm.valid"
-            class="p-2 sm:p-2.5 md:p-3 rounded-full bg-gradient-to-r from-[var(--o-orange)] to-[var(--o-dorange)] text-white 
-                   shadow-md hover:shadow-lg hover:from-[var(--o-dorange)] hover:to-[var(--o-orange)]
-                   disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md
-                   transition-all duration-200 transform hover:scale-105 active:scale-95 shrink-0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
-          </button>
-        </form>
+    <div class="flex-1 flex flex-col">
+      <div class="bg-[var(--o-bwhite)] rounded-3xl shadow-lg border border-[var(--o-dbeige)] overflow-hidden flex flex-col h-full lg:h-[calc(100vh-160px)] lg:min-h-[500px] min-h-[400px]">
         
-        <!-- Typing indicator placeholder -->
-        <div class="mt-1 sm:mt-2 h-3 sm:h-4">
-          <p *ngIf="isTyping" class="text-[10px] sm:text-xs text-[var(--o-green)] opacity-50 ml-2 sm:ml-12">
-            {{ otherUser?.name }} is typing...
+        <!-- Back Button (Mobile Only) -->
+        <div *ngIf="isShowingMessages && isMobileView" class="p-3 border-b border-[var(--o-dbeige)] bg-[var(--o-beige)] lg:hidden">
+          <button 
+            (click)="goBackToChats()"
+            class="flex items-center gap-2 text-[var(--o-green)] hover:text-[var(--o-orange)] transition-colors font-medium"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Back to chats
+          </button>
+        </div>
+
+        <!-- Chat Header (when chat is selected) -->
+        <div *ngIf="isShowingMessages && otherUser" class="p-4 sm:p-5 border-b border-[var(--o-dbeige)] bg-[var(--o-beige)]">
+          <div class="flex items-center gap-4">
+            <!-- User Avatar -->
+            <div class="relative">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--o-orange)] to-[var(--o-dorange)] flex items-center justify-center text-white font-bold shadow-lg">
+                {{ getInitials(otherUser.name + ' ' + otherUser.surname) }}
+              </div>
+              <!-- Online Indicator -->
+              <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-[var(--o-beige)]"></div>
+            </div>
+            
+            <!-- User Info -->
+            <div class="flex-1 min-w-0">
+              <h3 
+                class="font-bold text-[var(--o-green)] hover:text-[var(--o-orange)] cursor-pointer transition-colors text-lg truncate"
+                (click)="goToProfile(otherUser.id)"
+              >
+                {{ otherUser.name }} {{ otherUser.surname }}
+              </h3>
+              <p class="text-xs text-[var(--o-green)]/60 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                Tap name to view profile
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2">
+              <button 
+                (click)="goToProfile(otherUser.id)"
+                class="p-2.5 rounded-xl bg-[var(--o-dbeige)] text-[var(--o-green)] hover:bg-[var(--o-orange)] hover:text-white transition-all duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State - No Chat Selected -->
+        <div *ngIf="!isShowingMessages" class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[var(--o-beige)]/30 to-transparent">
+          <div class="w-28 h-28 bg-[var(--o-beige)] rounded-full flex items-center justify-center mb-6 border-4 border-[var(--o-dbeige)]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-14 h-14 text-[var(--o-orange)]">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-[var(--o-green)] mb-2">Select a conversation</h3>
+          <p class="text-[var(--o-green)]/60 max-w-xs">
+            Choose a chat from the list to start messaging
           </p>
+        </div>
+
+        <!-- Messages Container -->
+        <div 
+          *ngIf="isShowingMessages" 
+          class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-[var(--o-beige)]/20 to-white scrollbar-thin"
+          #messagesContainer
+        >
+          <!-- No messages yet -->
+          <div *ngIf="messages.length === 0" class="flex flex-col items-center justify-center h-full text-center py-12">
+            <div class="w-20 h-20 bg-[var(--o-beige)] rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 text-[var(--o-orange)]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-[var(--o-green)] mb-1">No messages yet</h4>
+            <p class="text-sm text-[var(--o-green)]/60">Send a message to start the conversation!</p>
+          </div>
+
+          <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
+            
+            <!-- Date Separator -->
+            <div *ngIf="shouldShowDateSeparator(message, i)" class="flex items-center gap-4 my-6">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--o-dbeige)] to-transparent"></div>
+              <span class="text-xs text-[var(--o-green)]/60 font-semibold px-4 py-1.5 bg-[var(--o-beige)] rounded-full border border-[var(--o-dbeige)]">
+                {{ formatMessageDate(message.created_at) }}
+              </span>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--o-dbeige)] to-transparent"></div>
+            </div>
+
+            <!-- Current User's Message (Right Side) -->
+            <div *ngIf="message.creator_id === currentUser?.id" class="flex justify-end message-animation">
+              <div class="flex flex-col max-w-[80%] sm:max-w-[70%] md:max-w-[60%] items-end">
+                <div class="text-xs text-[var(--o-green)]/50 mb-1.5 mr-3 font-medium">
+                  You
+                </div>
+                <div class="message-bubble-sent">
+                  <p class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.text }}</p>
+                </div>
+                <span *ngIf="message.created_at" class="text-[10px] text-[var(--o-green)]/40 mt-1.5 mr-3 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ formatTime(message.created_at) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Other User's Message (Left Side) -->
+            <div *ngIf="message.creator_id !== currentUser?.id" class="flex justify-start message-animation">
+              <div class="flex flex-col max-w-[80%] sm:max-w-[70%] md:max-w-[60%]">
+                <div 
+                  class="text-xs text-[var(--o-green)]/50 mb-1.5 ml-3 font-medium cursor-pointer hover:text-[var(--o-orange)] transition-colors"
+                  (click)="goToProfile(otherUser!.id)"
+                >
+                  {{ otherUser?.name }} {{ otherUser?.surname }}
+                </div>
+                <div class="message-bubble-received">
+                  <p class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.text }}</p>
+                </div>
+                <span *ngIf="message.created_at" class="text-[10px] text-[var(--o-green)]/40 mt-1.5 ml-3 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ formatTime(message.created_at) }}
+                </span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Message Input -->
+        <div *ngIf="isShowingMessages" class="p-4 sm:p-5 border-t border-[var(--o-dbeige)] bg-[var(--o-beige)]">
+          <form 
+            (ngSubmit)="createMessage()" 
+            #messageForm="ngForm"
+            class="flex items-center gap-3"
+          >
+            <!-- Emoji Button -->
+            <button 
+              type="button" 
+              class="hidden sm:flex p-3 rounded-xl bg-[var(--o-dbeige)] text-[var(--o-green)] hover:bg-[var(--o-orange)] hover:text-white transition-all duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+              </svg>
+            </button>
+
+            <!-- Input Field -->
+            <div class="flex-1 relative">
+              <input
+                type="text"
+                [(ngModel)]="newMessageText"
+                name="newMessageText"
+                placeholder="Type your message..."
+                required
+                autocomplete="off"
+                class="w-full px-5 py-3.5 bg-[var(--o-bwhite)] text-[var(--o-green)] border-2 border-[var(--o-dbeige)] rounded-2xl 
+                       focus:outline-none focus:border-[var(--o-orange)] focus:ring-4 focus:ring-[var(--o-orange)]/20
+                       placeholder:text-[var(--o-green)]/40 transition-all duration-300 text-sm"
+                (keydown.enter)="createMessage()"
+              >
+            </div>
+
+            <!-- Attachment Button -->
+            <button 
+              type="button" 
+              class="hidden sm:flex p-3 rounded-xl bg-[var(--o-dbeige)] text-[var(--o-green)] hover:bg-[var(--o-orange)] hover:text-white transition-all duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+              </svg>
+            </button>
+
+            <!-- Send Button -->
+            <button 
+              type="submit" 
+              [disabled]="!messageForm.valid"
+              class="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--o-orange)] to-[var(--o-dorange)] text-white 
+                     shadow-lg shadow-[var(--o-orange)]/30 hover:shadow-xl hover:shadow-[var(--o-orange)]/40
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                     transition-all duration-300 transform hover:scale-105 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </form>
+          
+          <!-- Typing Indicator -->
+          <div class="mt-2 h-4 ml-3">
+            <p *ngIf="isTyping" class="text-xs text-[var(--o-green)]/50 flex items-center gap-2">
+              <span class="flex gap-1">
+                <span class="w-1.5 h-1.5 bg-[var(--o-orange)] rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                <span class="w-1.5 h-1.5 bg-[var(--o-orange)] rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                <span class="w-1.5 h-1.5 bg-[var(--o-orange)] rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+              </span>
+              {{ otherUser?.name }} is typing...
+            </p>
+          </div>
         </div>
       </div>
     </div>

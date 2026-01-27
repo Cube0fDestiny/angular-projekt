@@ -1,9 +1,9 @@
+@reference "../../../styles.css";
 /* ===================================
    CHAT COMPONENT STYLES
-   Using custom color palette variables
+   Matching Events Page Design
    =================================== */
 
-/* Ensure component takes full height */
 :host {
   display: block;
   height: 100%;
@@ -14,7 +14,7 @@
    =================================== */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: var(--o-beige) transparent;
+  scrollbar-color: var(--o-dbeige) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -26,25 +26,75 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: var(--o-beige);
+  background-color: var(--o-dbeige);
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: var(--o-dbeige);
+  background-color: var(--o-orange);
+}
+
+/* ===================================
+   CHAT LIST ITEMS
+   =================================== */
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* gap-3 */
+  padding: 0.75rem; /* p-3 */
+  border-radius: 1rem; /* rounded-2xl */
+  cursor: pointer;
+  transition: all 300ms;
+  border-width: 2px;
+}
+
+.chat-item-active {
+  background-color: var(--o-bwhite);
+  border-color: var(--o-orange);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+}
+
+.chat-item-inactive {
+  background-color: transparent;
+  border-color: transparent;
+}
+.chat-item-inactive:hover {
+  background-color: rgba(var(--o-dbeige-rgb, 218, 210, 200), 0.5);
+  border-color: var(--o-dbeige);
+}
+
+/* ===================================
+   MESSAGE BUBBLES
+   =================================== */
+.message-bubble-sent {
+  background: linear-gradient(135deg, var(--o-orange), var(--o-dorange));
+  color: white;
+  border-radius: 1rem;
+  border-top-right-radius: 0.375rem; /* approximate rounded-tr-md */
+  padding: 0.75rem 1rem; /* px-4 py-3 */
+  box-shadow: 0 4px 15px rgba(244, 153, 26, 0.3);
+}
+
+.message-bubble-received {
+  background-color: var(--o-beige);
+  color: var(--o-green);
+  border-radius: 1rem;
+  border-top-left-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--o-dbeige);
 }
 
 /* ===================================
    ANIMATIONS
    =================================== */
 .message-animation {
-  animation: slideIn 0.25s ease-out;
+  animation: slideIn 0.3s ease-out;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -52,20 +102,32 @@
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
 /* ===================================
    LAYOUT FIXES FOR DESKTOP
    =================================== */
-
-/* Ensure containers don't collapse on desktop */
 @media (min-width: 1024px) {
   .chat-sidebar {
-    height: calc(100vh - 140px) !important;
+    height: calc(100vh - 160px) !important;
     min-height: 500px !important;
-    max-height: none !important;
   }
 
   .message-section {
-    height: calc(100vh - 140px) !important;
+    height: calc(100vh - 160px) !important;
     min-height: 500px !important;
   }
 }
@@ -74,15 +136,14 @@
    MOBILE OPTIMIZATIONS
    =================================== */
 @media (max-width: 640px) {
-  /* Larger touch targets */
   button,
-  .chat-list-item {
+  .chat-item {
     min-height: 44px;
   }
 
-  /* Prevent horizontal scroll */
-  .chat-container {
-    overflow-x: hidden;
+  .message-bubble-sent,
+  .message-bubble-received {
+    padding: 0.5rem 0.75rem; /* px-3 py-2 */
   }
 }
 
@@ -119,24 +180,21 @@ input:focus-visible {
 }
 
 /* ===================================
-   HIGH CONTRAST MODE
+   HOVER EFFECTS
    =================================== */
-@media (prefers-contrast: high) {
-  .chat-list-item {
-    border-width: 2px;
-  }
+.chat-item:hover .delete-btn {
+  opacity: 1;
 }
 
 /* ===================================
-   LANDSCAPE MODE (small height)
+   TYPING INDICATOR ANIMATION
    =================================== */
-@media (max-height: 500px) and (orientation: landscape) {
-  .messages-container {
-    max-height: 45vh;
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
   }
-  
-  .chat-list {
-    max-height: 40vh;
+  30% {
+    transform: translateY(-4px);
   }
 }
 
@@ -149,11 +207,5 @@ input:focus-visible {
   button,
   app-navbar {
     display: none !important;
-  }
-  
-  .message-section {
-    box-shadow: none;
-    border: 1px solid #ccc;
-    height: auto !important;
   }
 }
