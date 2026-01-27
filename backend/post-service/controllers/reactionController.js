@@ -27,11 +27,37 @@ export const toggleReaction = async (req, res) => {
       [id, user_id, 'orang'],
     );
 
-    publishEvent("reaction.created", {
+    // Fetch post owner and reactor data for enriched notification
+    const postData = await db.query(
+      `SELECT creator_id FROM "Posts" WHERE id = $1`,
+      [id]
+    );
+    
+    const reactorData = await db.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [user_id]
+    );
+
+    const eventPayload = {
       postId: id,
       userId: user_id,
       reactionType: 'orang',
-    });
+    };
+
+    // Add post owner for notification targeting
+    if (postData.rows.length > 0) {
+      eventPayload.postOwnerId = postData.rows[0].creator_id;
+    }
+
+    // Add reactor details for notification display
+    if (reactorData.rows.length > 0) {
+      const reactor = reactorData.rows[0];
+      eventPayload.reactorName = reactor.name;
+      eventPayload.reactorSurname = reactor.surname;
+      eventPayload.reactorProfilePicture = reactor.profile_picture_id;
+    }
+
+    publishEvent("reaction.created", eventPayload);
 
     req.log.info(`[Post-Service] Stworzono reakcje o id: ${id}`);
     res.status(201).json({ message: "Reakcja została stworzona", liked: true });

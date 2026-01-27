@@ -418,13 +418,28 @@ export const requestGroupJoin= async (req, res) => {
         SET valid=true
         WHERE user_id=$1 AND group_id=$2 RETURNING *`,[target_id,groupId]);
         
-        // Publish member accepted event - this person is now a member
-        publishEvent("group.memberAccepted", {
+        // Fetch group data to include in the event
+        const groupData = await db.query(
+          `SELECT id, name, profile_picture_id FROM "Groups" WHERE id = $1`,
+          [groupId]
+        );
+        
+        const eventPayload = {
           groupId: groupId,
           userId: target_id,
           acceptedBy: user_id,
           timestamp: new Date().toISOString(),
-        });
+        };
+        
+        // Include group details if found
+        if (groupData.rows.length > 0) {
+          const group = groupData.rows[0];
+          eventPayload.groupName = group.name;
+          eventPayload.groupProfilePicture = group.profile_picture_id;
+        }
+        
+        // Publish member accepted event - this person is now a member
+        publishEvent("group.memberAccepted", eventPayload);
         
         log.info("Zaakceptowano użytkownika " + user_id + " do grupy" + groupId)
         return res.status(200).json({message: "Zaakceptowano użytkownika " + user_id + " do grupy" + groupId})

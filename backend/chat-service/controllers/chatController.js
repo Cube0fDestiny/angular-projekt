@@ -117,13 +117,30 @@ export const createChat = async (req, res) => {
       { chatId: newChat.id, creatorId, participants: allParticipantIds },
       "Utworzono nowy czat."
     );
-    publishEvent("chat.created", {
+    
+    // Fetch creator data for enriched notification
+    const creatorData = await client.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [creatorId]
+    );
+
+    const eventPayload = {
       chatId: newChat.id,
       name: name,
       creatorId: creatorId,
       participants: allParticipantIds,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    // Add creator details for notification display
+    if (creatorData.rows.length > 0) {
+      const creator = creatorData.rows[0];
+      eventPayload.creatorName = creator.name;
+      eventPayload.creatorSurname = creator.surname;
+      eventPayload.creatorProfilePicture = creator.profile_picture_id;
+    }
+
+    publishEvent("chat.created", eventPayload);
     res.status(201).json(newChat);
     res.status(201).json(newChat);
   } catch (err) {
@@ -220,14 +237,31 @@ export const createMessage = async (req, res) => {
       { messageId: newMessage.id, chatId, creatorId },
       "Stworzono i rozgłoszono nową wiadomość."
     );
-    publishEvent("message.created", {
+    
+    // Fetch sender data for enriched notification
+    const senderData = await client.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [creatorId]
+    );
+
+    const eventPayload = {
       messageId: newMessage.id,
       chatId: chatId,
       creatorId: creatorId,
       text: text,
       images: insertedImages,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    // Add sender details for notification display
+    if (senderData.rows.length > 0) {
+      const sender = senderData.rows[0];
+      eventPayload.senderName = sender.name;
+      eventPayload.senderSurname = sender.surname;
+      eventPayload.senderProfilePicture = sender.profile_picture_id;
+    }
+
+    publishEvent("message.created", eventPayload);
     res.status(201).json(messageWithImages);
   } catch (err) {
     await client.query("ROLLBACK");

@@ -317,11 +317,27 @@ export const createPost = async (req, res) => {
 
     await client.query("COMMIT");
 
-    publishEvent("post.created", {
+    // Fetch creator data for enriched event
+    const creatorData = await client.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [newPost.creator_id]
+    );
+
+    const eventPayload = {
       postId: newPost.id,
       creatorId: newPost.creator_id,
       images: insertedImages,
-    });
+    };
+
+    // Add creator details
+    if (creatorData.rows.length > 0) {
+      const creator = creatorData.rows[0];
+      eventPayload.creatorName = creator.name;
+      eventPayload.creatorSurname = creator.surname;
+      eventPayload.creatorProfilePicture = creator.profile_picture_id;
+    }
+
+    publishEvent("post.created", eventPayload);
 
     log.info(`[Post-Service] Stworzono post o id: ${newPost.id}`);
     res.status(201).json({ ...newPost, images: insertedImages });

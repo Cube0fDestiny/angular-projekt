@@ -265,22 +265,22 @@ Wymagane dla endpointów chronionych:
 }
 ```
 
-### 12\. Przełączanie reakcji (like) na poście
+### 12\. Przełączanie reakcji (orang) na poście
 
 `POST /:id/reactions`
 
 **Wymagana autoryzacja**
 
-Ten endpoint obsługuje dodawanie i usuwanie lajka. Nie wymaga body.
+Ten endpoint obsługuje dodawanie i usuwanie orangowania. Nie wymaga body.
 
 **Body:** Pusty (nie wymagany)
 
 **Odpowiedzi (200 OK / 201 Created):**
 
--   **201:** `{ "message": "Reakcja została stworzona", "liked": true }` (gdy użytkownik lajkuje po raz pierwszy)
--   **200:** `{ "message": "Reakcja została usunięta", "liked": false }` (gdy użytkownik odlajkowuje)
+-   **201:** `{ "message": "Reakcja została stworzona", "liked": true }` (gdy użytkownik oranguje po raz pierwszy)
+-   **200:** `{ "message": "Reakcja została usunięta", "liked": false }` (gdy użytkownik odanguje)
 
-### 13\. Sprawdzenie czy użytkownik lajkował post
+### 13\. Sprawdzenie czy użytkownik orangował post
 
 `GET /:id/reactions`
 
@@ -294,7 +294,7 @@ Ten endpoint obsługuje dodawanie i usuwanie lajka. Nie wymaga body.
 }
 ```
 
-Zwraca `true` jeśli użytkownik polubił post, `false` jeśli nie.
+Zwraca `true` jeśli użytkownik orangował post, `false` jeśli nie.
 
 ---
 ## ⚠️ Obsługa Błędów
@@ -370,12 +370,12 @@ Post-Service publishes events to RabbitMQ on the `app_events` topic exchange. Su
 
 ### Reaction Events
 
-**`reaction.created`** - Published when a like is added to a post
+**`reaction.created`** - Published when a user oranges a post
 ```json
 {
   "postId": "uuid",
   "userId": "uuid",
-  "reactionType": "like",
+  "reactionType": "orang",
   "timestamp": "ISO8601"
 }
 ```

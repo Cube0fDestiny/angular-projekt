@@ -178,11 +178,27 @@ export const requestFriend = async (req, res) => {
       `User ${userId} sent a friend request to ${friendId}`
     );
 
-    publishEvent("user.friendRequested", {
+    // Fetch requester's data to include in the event
+    const requesterData = await db.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [userId]
+    );
+
+    const eventPayload = {
       requesterId: userId,
       requesteeId: friendId,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    // Include requester details if found
+    if (requesterData.rows.length > 0) {
+      const requester = requesterData.rows[0];
+      eventPayload.requesterName = requester.name;
+      eventPayload.requesterSurname = requester.surname;
+      eventPayload.requesterProfilePicture = requester.profile_picture_id;
+    }
+
+    publishEvent("user.friendRequested", eventPayload);
 
     return res
       .status(201)
@@ -245,11 +261,27 @@ export const acceptFriendRequest = async (req, res) => {
       `User ${userId} accepted friend request from ${requesterId}.`
     );
 
-    publishEvent("user.friendAccepted", {
+    // Fetch accepter's data to include in the event
+    const accepterData = await db.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [userId]
+    );
+
+    const eventPayload = {
       userId: userId,
       friendId: requesterId,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    // Include accepter details if found
+    if (accepterData.rows.length > 0) {
+      const accepter = accepterData.rows[0];
+      eventPayload.accepterName = accepter.name;
+      eventPayload.accepterSurname = accepter.surname;
+      eventPayload.accepterProfilePicture = accepter.profile_picture_id;
+    }
+
+    publishEvent("user.friendAccepted", eventPayload);
 
     return res.status(200).json({ message: "Friend request accepted." });
   } catch (err) {

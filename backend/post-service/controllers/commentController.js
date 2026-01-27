@@ -39,11 +39,39 @@ export const createComment = async (req, res) => {
       [text, in_reply_to || null, image_ids || [], creator_id, postId]
     );
     const newComment = result.rows[0];
-    publishEvent("comment.created", {
+    
+    // Fetch post owner and commenter data for enriched notification
+    const postData = await db.query(
+      `SELECT creator_id FROM "Posts" WHERE id = $1`,
+      [postId]
+    );
+    
+    const commenterData = await db.query(
+      `SELECT user_id, name, surname, profile_picture_id FROM "Users" WHERE user_id = $1`,
+      [creator_id]
+    );
+
+    const eventPayload = {
       commentId: newComment.id,
       postId: newComment.post_id,
       creatorId: newComment.creator_id,
-    });
+      commentText: text ? text.substring(0, 100) : '',
+    };
+
+    // Add post owner for notification targeting
+    if (postData.rows.length > 0) {
+      eventPayload.postOwnerId = postData.rows[0].creator_id;
+    }
+
+    // Add commenter details for notification display
+    if (commenterData.rows.length > 0) {
+      const commenter = commenterData.rows[0];
+      eventPayload.commenterName = commenter.name;
+      eventPayload.commenterSurname = commenter.surname;
+      eventPayload.commenterProfilePicture = commenter.profile_picture_id;
+    }
+
+    publishEvent("comment.created", eventPayload);
 
     req.log.info(
       `[Post-Service] Utworzono komentarz o id: ${newComment.id}`
