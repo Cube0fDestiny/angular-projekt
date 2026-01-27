@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError } from 'rxjs';
 import { Chat, Message, CreateChatRequest } from '../../shared/models/chat.model';
 import { environment } from '../../../environments/environment';
+import { ApiResponse } from '../../shared/models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,15 @@ export class ChatHttpService {
     return this.http.get<Message[]>(`${this.apiUrl}/${chatId}/messages`).pipe(
       catchError(error => {
         console.error('Error fetching messages:', error);
+        throw error;
+      })
+    );
+  }
+
+  deleteChat(chatId: string): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.apiUrl}/${chatId}`).pipe(
+      catchError(error => {
+        console.error('Error deleting chat:', error);
         throw error;
       })
     );

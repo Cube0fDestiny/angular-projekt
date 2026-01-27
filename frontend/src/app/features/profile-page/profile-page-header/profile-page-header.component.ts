@@ -173,9 +173,29 @@ export class ProfilePageHeaderComponent implements OnInit {
     });
   }
 
+  checkChat():void {
+    this.chatHttpService.getChats().subscribe({
+      next: (chats) => {
+        let check = false;
+        let nameSurname = `${this.user?.name} ${this.user?.surname}`;
+        chats.forEach(chat => {
+          if (chat.name.includes(nameSurname)){
+            check = true;
+          }
+        });
+        if(check){
+          this.router.navigate(['/chats']);
+        } else{
+          this.createChat();
+        }
+      }
+    })
+  }  
+
+
   createChat():void {
     const newChat = {
-      name: `${this.user!.name} ${this.user!.surname}`,
+      name: `${this.user!.name} ${this.user!.surname} ${this.currentUser!.name} ${this.currentUser!.surname}`,
       participantIds: [this.user!.id]
     }
     this.chatHttpService.createChat(newChat).subscribe({

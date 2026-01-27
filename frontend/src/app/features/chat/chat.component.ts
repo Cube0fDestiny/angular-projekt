@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription, combineLatest } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { OrangButtonComponent } from "../../shared/components/orang-button/orang-button.component";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-chat-main',
@@ -19,6 +20,7 @@ import { OrangButtonComponent } from "../../shared/components/orang-button/orang
 export class ChatComponent implements OnInit, OnDestroy {
   
   currentUser!: User | null;
+  otherUser!: User | null;
   isShowingChats = false;
   isShowingMessages = false;
   chats: Chat[] = [];
@@ -27,12 +29,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   activeChatName: string = '';
   newMessageText = '';
 
+
   private subscriptions: Subscription[] = [];
 
   constructor(
     public userService: UserService,
     private chatSocketService: ChatSocketService,
-    private chatHttpService: ChatHttpService
+    private chatHttpService: ChatHttpService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -58,10 +62,46 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatSocketService.disconnect();
   }
 
-  selectChat(chatId: string): void {
-    this.chatSocketService.changeCurrentChat(chatId);
-    this.activeChatId = chatId;
-    this.isShowingMessages = true;
+  selectChat(chat: Chat): void {
+    console.log(chat);
+    this.chatSocketService.changeCurrentChat(chat.id);
+    this.activeChatId = chat.id;
+    let participantIds = chat.participantsIds;
+    let otherId = participantIds.filter(item => item !== this.currentUser!.id)[0];
+    this.loadUser(otherId);
+  }
+
+  goToProfile(id: string): void {
+    this.router.navigate(['/profile', id]);
+  }
+
+  formatChatName(name: string): string {
+    let toRemove = `${this.currentUser!.name} ${this.currentUser!.surname}`;
+    return name.replace(toRemove,'');
+  }
+
+  loadUser(userId: string): void {
+    this.userService.getUserById(userId).subscribe({
+      next: (user) => {
+        this.otherUser = user;
+        console.log('loaded user: ', user);
+        this.isShowingMessages = true;
+      },
+      error: (error) => {
+        console.error('Failed to load user:', error);
+      }
+    });
+  }
+  
+  deleteChat(chat: Chat): void {
+    this.chatHttpService.deleteChat(chat.id).subscribe({
+      next: () => {
+        this.chats = this.chats.filter(item => item.id !== chat.id);
+        if(chat.id===this.activeChatId){
+          this.router.navigate(['/']).then(() => { this.router.navigate(['/chats']); });
+        }
+      }
+    })
   }
 
   createMessage(): void {
@@ -83,7 +123,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       next: (chats) => {
         this.chats = chats;
         console.log('Loaded chats:', chats);
-        this.isShowingChats = true;
+        if(chats.length>0){
+          this.isShowingChats = true;
+        }
       },
       error: (error) => {
         console.error('Failed to load chats:', error);

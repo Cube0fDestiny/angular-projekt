@@ -62,9 +62,10 @@ export class EventsPageComponent implements OnInit {
       event_date: newEventDate.toISOString()
     }
     this.eventService.createEvent(newEvent).subscribe({
-      next: () => {
+      next: (res) => {
         console.log('Successfully created new event');
         this.isCreatingEvent = false;
+        this.toggleFollow(res.data.id);
         this.loadAllEvents();
       },
       error: (error) => {
@@ -90,6 +91,12 @@ export class EventsPageComponent implements OnInit {
         this.isLoading = false;
         console.error('Error loading events:', error);
       }
+    });
+  }
+
+  toggleFollow(eventId: string): void{
+    this.eventService.toggleFollowEvent(eventId).subscribe(res => {
+      console.log('toggled following event: ', res);
     });
   }
 

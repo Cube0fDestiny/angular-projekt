@@ -27,37 +27,13 @@
 .nav-item {
     position: relative;
     flex: 1;
-    max-width: 120px;
-    height: 56px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     border-radius: 8px;
-    transition: background-color 0.2s;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    &.active {
-      background-color: rgba(255, 255, 255, 0.2);
-      
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: white;
-        border-radius: 3px 3px 0 0;
-      }
-    }
-    
-    .nav-icon {
-      font-size: 24px;
-    }
     
     .nav-badge {
       position: absolute;

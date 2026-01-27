@@ -57,7 +57,7 @@
           <orang-button *ngIf="hasFriendRequest&&!isFriend" (click)="acceptFriendRequest(user!.id)" [istoggleable]="false">
             👥 Accept Invite
           </orang-button>
-          <orang-button *ngIf="isFriend" (click)="createChat()">
+          <orang-button *ngIf="isFriend" (click)="checkChat()">
             💬 Chat
           </orang-button>
           <!--<orang-button (click)="onMore()">

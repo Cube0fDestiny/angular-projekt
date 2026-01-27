@@ -23,7 +23,7 @@ export class ChatSocketService implements OnDestroy {
   initializeSocket(): void {
     const token = localStorage.getItem('token');
     
-    this.socket = io(`${environment.apiUrl}/chats/socket`, {
+    this.socket = io(`${environment.apiUrl}`, {
       path: '/chats/socket',
       auth: { token },
       extraHeaders: {
@@ -44,23 +44,29 @@ export class ChatSocketService implements OnDestroy {
     this.socket.on('disconnect', () => {
       console.log('Disconnected from chat socket');
     });
+
+    this.socket.on('connect_error', (err) => {
+      console.error('Socket connect_error:', err.message);
+    });
+
+    this.socket.on('error', (err) => {
+      console.error('Socket error:', err);
+    });
   }
 
   addMessage(message: Message): void {
-    if (message.chat_id === this.currentChatId) {
-      const currentMessages = this.messagesSubject.value;
+    const currentMessages = this.messagesSubject.value;
+    
+    // Check if message already exists (avoid duplicates)
+    if (!currentMessages.some(m => m.id === message.id)) {
+      const updatedMessages = [...currentMessages, message];
       
-      // Check if message already exists (avoid duplicates)
-      if (!currentMessages.some(m => m.id === message.id)) {
-        const updatedMessages = [...currentMessages, message];
-        
-        // Sort by created_at (newest last for better UX)
-        updatedMessages.sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-        
-        this.messagesSubject.next(updatedMessages);
-      }
+      // Sort by created_at (newest last for better UX)
+      updatedMessages.sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      
+      this.messagesSubject.next(updatedMessages);
     }
   }
 
@@ -79,6 +85,9 @@ export class ChatSocketService implements OnDestroy {
   changeCurrentChat(chatId: string):void {
     this.currentChatId = chatId;
     this.loadMessages(chatId);
+    if (this.socket?.connected) {
+      this.socket.emit('joinChatRoom', chatId);
+    }
   }
 
   // Get current messages

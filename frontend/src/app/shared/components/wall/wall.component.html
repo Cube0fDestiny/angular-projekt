@@ -1,6 +1,6 @@
 <div class="wall-container">
   <!-- Create New Post (optional) -->
-  <div class="create-post-section" *ngIf="location_type!='wall'">
+  <div class="create-post-section" *ngIf="canPost">
    <!-- <app-create-post (postCreated)="addPost($event)"></app-create-post>
   --><app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
       

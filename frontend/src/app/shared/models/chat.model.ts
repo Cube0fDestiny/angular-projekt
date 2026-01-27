@@ -3,6 +3,7 @@ export interface Chat {
   name: string;
   creator_id: string;
   created_at: string;
+  participantsIds: string[];
 }
 
 export interface Message {

@@ -29,18 +29,15 @@
     <app-text-display variant="white">{{ post.Text }}</app-text-display>
   </div>
   
-  <!-- Post Stats
-  <div class="post-stats" *ngIf="post.likes > 0 || post.comments.length > 0 || post.shares > 0">
-    <span *ngIf="post.likes > 0" class="likes-count">
-      👍 {{ post.likes }}
+  <!-- Post Stats-->
+  <div class="post-stats" *ngIf="(orang_count + comment_count) > 0">
+    <span *ngIf="orang_count > 0" class="likes-count">
+      🍊 {{ orang_count }}
     </span>
-    <span *ngIf="post.comments.length > 0" class="comments-count">
-      💬 {{ post.comments.length }}
+    <span *ngIf="comment_count > 0" class="comments-count">
+      💬 {{ comment_count }}
     </span>
-    <span *ngIf="post.shares > 0" class="shares-count">
-      🔄 {{ post.shares }}
-    </span>
-  </div>-->
+  </div>
   
   <!-- Post Actions -->
   <div class="post-actions" *ngIf="showActions">
@@ -48,16 +45,24 @@
       <span>🍊 Orang it</span>
     </orang-button> -->
 
-    <orang-button>
-      <span>🍊 Orang it</span>
+    <orang-button [isActive]="!userReacted" [istoggleable]="false" (click)="toggleUserReaction()">
+      <span>🍊 Orang</span>
     </orang-button>
     
     <orang-button (click)="toggleComments()">
       <span>💬 Comments</span>
     </orang-button>
     
-    <orang-button (click)="share.emit(post.id)">
-      <span>🔄 Squeeze</span>
+    <orang-button 
+      [istoggleable]="false" 
+      (click)="copyPostLink(post.id)"
+      [disabled]="isCopying"
+      class="relative"
+    >
+      <span *ngIf="!copied">{{ copyButtonText }}</span>
+      <span *ngIf="copied" class="flex items-center gap-1">
+        ✅ Squeezed!
+      </span>
     </orang-button>
   </div>
   

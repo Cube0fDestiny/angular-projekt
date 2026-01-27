@@ -1,44 +1,84 @@
 <div style="background-color: var(--o-bwhite);">
-  <app-navbar></app-navbar>
+  <app-navbar location="chat"></app-navbar>
   <div class="w-full flex p-5 gap-5">
     <div class="w-4/5 mx-auto flex gap-6">
       <!-- Chat List -->
       <div class="md:w-1/3">
-        <div *ngIf="!isShowingChats">
+        <div *ngIf="!isShowingChats" class="text-center p-6 text-gray-500 italic">
           No chats yet!
         </div>
-        <div *ngIf="isShowingChats">
-          <div *ngFor="let chat of chats">
-            <div class="flex flex-col items-center text-center p-4">
-              <h4 
-                class="font-bold text-[var(--o-green)]"
-                (click)="selectChat(chat.id)"
-              >{{ chat.name }}</h4>
+
+        <div *ngIf="isShowingChats" class="space-y-2">
+          <div *ngFor="let chat of chats" 
+              class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors duration-200 cursor-pointer border border-gray-100"
+              (click)="selectChat(chat)">
+            
+            <div class="font-medium text-black truncate flex-grow mr-3">
+              {{ formatChatName(chat.name) }}
+            </div>
+            
+            <div (click)="$event.stopPropagation()">
+              <orang-button size="small" [istoggleable]="false" (click)="deleteChat(chat)">
+                delete
+              </orang-button>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Message Section -->
-      <div class="flex-1 p-5">
-        <div *ngIf="isShowingMessages">
+      <div class="flex-1 flex flex-col">
+        <!-- Messages container (scrollable) -->
+        <div class="flex-1 p-5 overflow-y-auto" *ngIf="isShowingMessages">
           <div *ngFor="let message of messages">
-            <div *ngIf="message.creator_id===currentUser?.id" class="flex justify-start">
-              <div> {{ message.creator_id }} </div> <div> {{ message.text }} </div>
+            <!-- Current user's messages -->
+            <div *ngIf="message.creator_id===currentUser?.id" class="flex justify-end mb-4">
+              <div class="flex flex-col max-w-[70%] items-end">
+                <div class="text-sm text-black-600 mb-1 mr-1">
+                  {{ currentUser?.name }} {{ currentUser?.surname }}
+                </div>
+                <div class="bg-[var(--o-dbeige)] font-medium text-black rounded-2xl rounded-tr-none px-4 py-2">
+                  {{ message.text }}
+                </div>
+              </div>
             </div>
-            <div *ngIf="!(message.creator_id===currentUser?.id)" class="flex justify-end">
-              <div> {{ message.text }} </div>
+
+            <!-- Other user's messages -->
+            <div *ngIf="message.creator_id!==currentUser?.id" class="flex justify-start mb-4">
+              <div class="flex flex-col max-w-[70%]">
+                <div class="text-sm text-black mb-1 ml-1 cursor-pointer" (click)="goToProfile(otherUser!.id)">
+                  {{ otherUser?.name }} {{ otherUser?.surname }}
+                </div>
+                <div class="bg-[var(--o-orange)] font-medium text-black rounded-2xl rounded-tl-none px-4 py-2">
+                  {{ message.text }}
+                </div>
+              </div>
             </div>
           </div>
-          <form (ngSubmit)="createMessage()" #messageForm="ngForm">
+        </div>
+
+        <!-- Input form fixed at bottom -->
+        <div class="sticky bottom-0 bg-[var(--o-bwhite)] border-t border-gray-200 p-4" *ngIf="isShowingMessages">
+          <form 
+            (ngSubmit)="createMessage()" 
+            #messageForm="ngForm"
+            class="flex items-center gap-3"
+          >
             <input
               type="text"
               [(ngModel)]="newMessageText"
               name="newMessageText"
               placeholder="Write a reply..."
               required
+              class="flex-1 px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--o-orange)] focus:border-transparent transition-all duration-200"
             >
-            <orang-button size="small" [istoggleable]="false" type="submit" [disabled]="!messageForm.valid">
+            <orang-button 
+              size="small" 
+              [istoggleable]="false" 
+              type="submit" 
+              [disabled]="!messageForm.valid"
+              class="shrink-0"
+            >
               send
             </orang-button>
           </form>

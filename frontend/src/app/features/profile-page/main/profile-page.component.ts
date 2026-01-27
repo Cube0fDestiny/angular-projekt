@@ -17,6 +17,7 @@ import { User } from '../../../shared/models/user.model';
 export class ProfilePageComponent implements OnInit {
   userId: string | null = null;
   user: User | null = null;
+  highlightedPostId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,7 +27,7 @@ export class ProfilePageComponent implements OnInit {
   ngOnInit(): void {
     // Get userId from route (UUID string)
     this.userId = this.route.snapshot.paramMap.get('id');
-
+    this.highlightedPostId = this.route.snapshot.paramMap.get('postId');
     this.loadUser(this.userId);
   }
 

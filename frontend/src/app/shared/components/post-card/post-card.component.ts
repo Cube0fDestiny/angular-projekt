@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Post } from '../../models/post.model';
+import { Post, Reaction } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { OrangButtonComponent } from '../../../shared/components/orang-button/or
 import { PostService } from '../../../core/post/post.service';
 import { UserService } from '../../../core/user/user.service';
 import { User } from '../../../shared/models/user.model';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-post-card',
@@ -18,15 +19,22 @@ import { User } from '../../../shared/models/user.model';
 export class PostCardComponent {
   @Input() post!: Post;
   @Output() postDeleted = new EventEmitter<string>(); // Emit post ID when deleted
-
+  userReacted: boolean = false;
 
   user: User | null = null;
   isLoading = false;
+
+  copied = false;
+  isCopying = false;
+  copyButtonText = '🔄 Squeeze';
+  orang_count = 0;
+  comment_count = 0;
   
   constructor(
     private postService: PostService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private clipboard: Clipboard
   ) {}
 
 
@@ -69,15 +77,49 @@ export class PostCardComponent {
   }
 
   ngOnInit() {
+    console.log(this.post);
     // Get user ID from route parameters
+    this.orang_count = this.post.orang_count;
+    this.comment_count = this.post.comment_count;
     const userId = this.post.creator_id;
     this.currentUser = this.userService.currentUser;
-    
     if (userId) {
       this.loadUser(userId);
     }
+    this.getUserReaction();
   }
   
+  copyPostLink(postId: string) {
+    this.isCopying = true;
+    
+    // Generate the post URL
+    const postUrl = `${window.location.origin}/${this.post.location_type}/${this.post.location_id}/${postId}`;
+    
+    // Copy to clipboard using Angular CDK
+    const success = this.clipboard.copy(postUrl);
+    
+    if (success) {
+      // Update UI to show success
+      this.copied = true;
+      this.copyButtonText = '✅ Squeezed!';
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
+        this.copied = false;
+        this.copyButtonText = '🔄 Squeeze';
+        this.isCopying = false;
+      }, 2000);
+    } else {
+      // Handle error (optional)
+      this.copyButtonText = '❌ Failed!';
+      setTimeout(() => {
+        this.copyButtonText = '🔄 Squeeze';
+        this.isCopying = false;
+      }, 2000);
+    }
+  }
+
+
   loadUser(id: string): void {
     this.isLoading = true;
     this.userService.getUserById(id).subscribe({
@@ -90,6 +132,33 @@ export class PostCardComponent {
         this.isLoading = false;
       }
     });
+  }
+
+  getUserReaction():void {
+    this.postService.getReaction(this.post.id).subscribe({
+      next: (reaction) => {
+        this.userReacted = reaction.liked;
+      }
+    })
+  }
+
+  toggleUserReaction():void {
+    this.postService.getReaction(this.post.id).subscribe({
+      next: (reaction) => {
+        console.log(reaction);
+        if(reaction.liked){
+          this.orang_count = this.orang_count-1;
+        } else {
+          this.orang_count = this.orang_count+1;
+        }
+        this.postService.toggleReaction(this.post.id).subscribe({
+          next: () => {
+            console.log('correctly toggled reaction');
+            this.userReacted = !this.userReacted;
+          }
+        })
+      }
+    })
   }
 
   // Add these properties to your PostCardComponent class
@@ -211,6 +280,7 @@ export class PostCardComponent {
         // Reset the form
         comment.showReplyForm = false;
         this.replyText = '';
+        this.comment_count = this.comment_count + 1;
       },
       error: (error) => {
         console.error('Failed to add reply:', error);
@@ -272,6 +342,7 @@ export class PostCardComponent {
         
         // Optional: Show success message
         console.log('Comment deleted successfully:', response.message);
+        this.comment_count = this.comment_count - 1;
       },
       error: (error) => {
         console.error('Failed to delete comment:', error);
@@ -396,6 +467,7 @@ export class PostCardComponent {
         this.comments.unshift(enrichedComment);
         this.newComment = '';
         this.resetAllSubmitButtons();
+        this.comment_count = this.comment_count + 1;
       },
       error: (error) => {
         console.error('Failed to add comment:', error);
@@ -409,22 +481,5 @@ export class PostCardComponent {
     buttons.forEach(button => {
       (button as any).isActive=true;
     });
-  }
-
-  /* ============================
-     Reactions
-     ============================ */
-  toggleLike(): void {
-    this.postService.toggleReaction(this.post.id, 'like').subscribe(() => {
-      this.like.emit(this.post.id);
-    });
-  }
-
-  /* ============================
-     Post actions
-     ============================ */
-
-  sharePost(): void {
-    this.share.emit(this.post.id);
   }
 }
