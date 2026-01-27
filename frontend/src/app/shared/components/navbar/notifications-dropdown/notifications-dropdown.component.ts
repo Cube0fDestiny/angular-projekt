@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Output, Input, OnInit, inject } from '@angular/core';
 import { CommonModule, NgIf } from "@angular/common";
 import { Router, ActivatedRoute } from '@angular/router';
-import { OrangButtonComponent } from '../../../../shared/components/orang-button/orang-button.component';
 import { UserService } from '../../../../core/user/user.service';
 import { User, IncomingFriendRequest } from '../../../models/user.model';
 import { forkJoin, map, switchMap } from 'rxjs';
@@ -10,8 +9,8 @@ import { forkJoin, map, switchMap } from 'rxjs';
   selector: 'notifications-dropdown',
   templateUrl: './notifications-dropdown.component.html',
   styleUrls: ['./notifications-dropdown.component.scss'],
-  standalone: true, // Assuming standalone based on previous context
-  imports: [NgIf, CommonModule, OrangButtonComponent]
+  standalone: true,
+  imports: [NgIf, CommonModule]
 })
 export class NotificationsDropdownComponent implements OnInit {
   @Output() profileClick = new EventEmitter<void>();
@@ -28,8 +27,8 @@ export class NotificationsDropdownComponent implements OnInit {
     this.isOpen = false;
   }
 
-  getNotificationIcon(): string{
-    if(this.isOpen){
+  getNotificationIcon(): string {
+    if (this.isOpen) {
       return `assets/icons/notification_on.png`;
     }
     return `assets/icons/notification_off.png`;
@@ -49,12 +48,10 @@ export class NotificationsDropdownComponent implements OnInit {
   currentUser: User | null = null;
 
   ngOnInit(): void {
-    // Subscribe to current user
     this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
     console.log('current user: ', this.currentUser);
-    // Load friend requests with user data
     this.loadFriendRequestsWithUsers();
   }
 
@@ -67,14 +64,12 @@ export class NotificationsDropdownComponent implements OnInit {
           return [];
         }
         
-        // Create array of user fetch observables
         const userObservables = requests.map(request =>
           this.userService.getUserById(request.from_user_id).pipe(
             map(user => [request, user] as [IncomingFriendRequest, User])
           )
         );
         
-        // Fetch all users in parallel
         return forkJoin(userObservables);
       })
     ).subscribe({
@@ -94,7 +89,6 @@ export class NotificationsDropdownComponent implements OnInit {
       next: (response) => {
         console.log('Friend request accepted:', response.message);
         
-        // Remove from both arrays
         this.friendRequestsRaw = this.friendRequestsRaw.filter(
           req => req.from_user_id !== friendRequest.from_user_id
         );
@@ -110,13 +104,10 @@ export class NotificationsDropdownComponent implements OnInit {
   }
 
   rejectFriendRequest(friendRequest: IncomingFriendRequest): void {
-    // Note: Using friendRequest.from_user_id as the request ID
-    // If your API expects a different ID format, adjust accordingly
     this.userService.rejectFriendRequest(friendRequest.from_user_id).subscribe({
       next: (response) => {
         console.log('Friend request rejected:', response.message);
         
-        // Remove from both arrays
         this.friendRequestsRaw = this.friendRequestsRaw.filter(
           req => req.from_user_id !== friendRequest.from_user_id
         );
@@ -124,7 +115,6 @@ export class NotificationsDropdownComponent implements OnInit {
         this.friendRequests = this.friendRequests.filter(
           ([req, user]) => req.from_user_id !== friendRequest.from_user_id
         );
-        
       },
       error: (error) => {
         console.error('Error rejecting friend request:', error);

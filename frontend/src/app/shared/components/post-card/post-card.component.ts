@@ -8,7 +8,6 @@ import { OrangButtonComponent } from '../../../shared/components/orang-button/or
 import { PostService } from '../../../core/post/post.service';
 import { UserService } from '../../../core/user/user.service';
 import { User } from '../../../shared/models/user.model';
-import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-post-card',
@@ -33,8 +32,7 @@ export class PostCardComponent {
   constructor(
     private postService: PostService,
     private userService: UserService,
-    private router: Router,
-    private clipboard: Clipboard
+    private router: Router
   ) {}
 
 
@@ -89,35 +87,7 @@ export class PostCardComponent {
     this.getUserReaction();
   }
   
-  copyPostLink(postId: string) {
-    this.isCopying = true;
-    
-    // Generate the post URL
-    const postUrl = `${window.location.origin}/${this.post.location_type}/${this.post.location_id}/${postId}`;
-    
-    // Copy to clipboard using Angular CDK
-    const success = this.clipboard.copy(postUrl);
-    
-    if (success) {
-      // Update UI to show success
-      this.copied = true;
-      this.copyButtonText = '✅ Squeezed!';
-      
-      // Reset after 2 seconds
-      setTimeout(() => {
-        this.copied = false;
-        this.copyButtonText = '🔄 Squeeze';
-        this.isCopying = false;
-      }, 2000);
-    } else {
-      // Handle error (optional)
-      this.copyButtonText = '❌ Failed!';
-      setTimeout(() => {
-        this.copyButtonText = '🔄 Squeeze';
-        this.isCopying = false;
-      }, 2000);
-    }
-  }
+
 
 
   loadUser(id: string): void {

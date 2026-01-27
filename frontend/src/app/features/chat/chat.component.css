@@ -1,0 +1,159 @@
+/* ===================================
+   CHAT COMPONENT STYLES
+   Using custom color palette variables
+   =================================== */
+
+/* Ensure component takes full height */
+:host {
+  display: block;
+  height: 100%;
+}
+
+/* ===================================
+   SCROLLBAR STYLING
+   =================================== */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--o-beige) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--o-beige);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: var(--o-dbeige);
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+.message-animation {
+  animation: slideIn 0.25s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   LAYOUT FIXES FOR DESKTOP
+   =================================== */
+
+/* Ensure containers don't collapse on desktop */
+@media (min-width: 1024px) {
+  .chat-sidebar {
+    height: calc(100vh - 140px) !important;
+    min-height: 500px !important;
+    max-height: none !important;
+  }
+
+  .message-section {
+    height: calc(100vh - 140px) !important;
+    min-height: 500px !important;
+  }
+}
+
+/* ===================================
+   MOBILE OPTIMIZATIONS
+   =================================== */
+@media (max-width: 640px) {
+  /* Larger touch targets */
+  button,
+  .chat-list-item {
+    min-height: 44px;
+  }
+
+  /* Prevent horizontal scroll */
+  .chat-container {
+    overflow-x: hidden;
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--o-orange);
+  outline-offset: 2px;
+}
+
+/* ===================================
+   SAFE AREA (iPhone notch support)
+   =================================== */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .message-input {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ===================================
+   REDUCED MOTION
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+  .message-animation {
+    animation: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ===================================
+   HIGH CONTRAST MODE
+   =================================== */
+@media (prefers-contrast: high) {
+  .chat-list-item {
+    border-width: 2px;
+  }
+}
+
+/* ===================================
+   LANDSCAPE MODE (small height)
+   =================================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .messages-container {
+    max-height: 45vh;
+  }
+  
+  .chat-list {
+    max-height: 40vh;
+  }
+}
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+@media print {
+  .chat-list,
+  .message-input,
+  button,
+  app-navbar {
+    display: none !important;
+  }
+  
+  .message-section {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    height: auto !important;
+  }
+}
