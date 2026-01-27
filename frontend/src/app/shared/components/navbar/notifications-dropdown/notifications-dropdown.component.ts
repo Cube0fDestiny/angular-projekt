@@ -3,7 +3,12 @@ import { CommonModule, NgIf } from "@angular/common";
 import { Router } from '@angular/router';
 import { UserService } from '../../../../core/user/user.service';
 import { User, IncomingFriendRequest } from '../../../models/user.model';
-import { forkJoin, map, switchMap } from 'rxjs';
+import { forkJoin, map, Observable, Subscription, switchMap } from 'rxjs';
+import { OrangNotification } from '../../../models/notification.model';
+import { NotificationService } from '../../../../core/notification/notification.service';
+import { ImageService } from '../../../../core/image/image.service';
+import { PostService } from '../../../../core/post/post.service';
+import { Post } from '../../../models/post.model';
 
 @Component({
   selector: 'notifications-dropdown',
@@ -24,9 +29,15 @@ export class NotificationsDropdownComponent implements OnInit {
   friendRequests: Array<[IncomingFriendRequest, User]> = [];
   currentUser: User | null = null;
 
+  notifications: OrangNotification[] = [];
+  private subscriptions: Subscription[] = [];
+
   constructor(
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService,
+    private imageService: ImageService,
+    private postService: PostService
   ) {}
 
   ngOnInit(): void {
@@ -34,6 +45,13 @@ export class NotificationsDropdownComponent implements OnInit {
       this.currentUser = user;
     });
     this.loadFriendRequestsWithUsers();
+    this.notificationService.initializeSocket();
+    this.subscriptions.push(
+      this.notificationService.notifications$.subscribe(notifications => {
+        this.notifications = notifications;
+        console.log('loaded notifications: ', notifications);
+      })
+    );
   }
 
   toggleDropdown() {
@@ -42,6 +60,10 @@ export class NotificationsDropdownComponent implements OnInit {
   
   closeDropdown() {
     this.isOpen = false;
+  }
+
+  getImageUrl(imageId: string):Observable<string> {
+    return this.imageService.getImage(imageId);
   }
 
   getNotificationIcon(): string {
@@ -78,11 +100,19 @@ export class NotificationsDropdownComponent implements OnInit {
     });
   }
 
-  acceptFriendRequest(friendRequest: IncomingFriendRequest): void {
-    this.userService.acceptFriendRequest(friendRequest.from_user_id).subscribe({
+  acceptFriendRequest(notificationId: string, friendRequestId: string): void {
+    this.userService.acceptFriendRequest(friendRequestId).subscribe({
       next: (response) => {
         console.log('Friend request accepted:', response.message);
-        this.removeRequestFromList(friendRequest.from_user_id);
+        this.removeRequestFromList(friendRequestId);
+        this.notificationService.deleteNotification(notificationId).subscribe({
+          next: (message) => {
+            console.log('deleted notification: ', message);
+          },
+          error: (error) => {
+            console.error('failed to delere notification: ', error);
+          }
+        });
       },
       error: (error) => {
         console.error('Error accepting friend request:', error);
@@ -90,11 +120,20 @@ export class NotificationsDropdownComponent implements OnInit {
     });
   }
 
-  rejectFriendRequest(friendRequest: IncomingFriendRequest): void {
-    this.userService.rejectFriendRequest(friendRequest.from_user_id).subscribe({
+  rejectFriendRequest(notificationId: string, friendRequestId: string): void {
+    this.notificationService.deleteNotification(notificationId);
+    this.userService.rejectFriendRequest(friendRequestId).subscribe({
       next: (response) => {
         console.log('Friend request rejected:', response.message);
-        this.removeRequestFromList(friendRequest.from_user_id);
+        this.removeRequestFromList(friendRequestId);
+        this.notificationService.deleteNotification(notificationId).subscribe({
+          next: (message) => {
+            console.log('deleted notification: ', message);
+          },
+          error: (error) => {
+            console.error('failed to delere notification: ', error);
+          }
+        });
       },
       error: (error) => {
         console.error('Error rejecting friend request:', error);
@@ -114,5 +153,27 @@ export class NotificationsDropdownComponent implements OnInit {
   goToProfile(userId: string): void {
     this.userClick.emit(userId);
     this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
+  }
+
+  goToPost(postId: string):void {
+    this.postService.getPostById(postId).subscribe({
+      next: (post) => {
+        console.log('navigating to post...');
+        this.router.navigate(['/']).then(() => { this.router.navigate([`/${post.location_type}/${post.location_id}/${post.id}`]); });
+      },
+      error: (error) => {
+        console.error('failed to route to the post: ', error);
+      }
+    });
+  }
+  deleteNotification(notificationId: string):void{
+    this.notificationService.deleteNotification(notificationId).subscribe({
+      next: (message) => {
+        console.log('deleted notification: ', message);
+      },
+      error: (error) => {
+        console.error('failed to delere notification: ', error);
+      }
+    });
   }
 }

@@ -14,13 +14,17 @@ export class ChatSocketService implements OnDestroy {
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   private currentChatId = '';
   public messages$ = this.messagesSubject.asObservable();
-
+  private isInitialized = false;
   private apiUrl = `${environment.apiUrl}/chats`;
 
   constructor(private http: HttpClient) {}
 
   // Initialize socket connection (call this only when needed)
   initializeSocket(): void {
+    if (this.isInitialized && this.socket?.connected) {
+      console.log('Socket already initialized');
+      return;
+    }
     const token = localStorage.getItem('token');
     
     this.socket = io(`${environment.apiUrl}`, {
@@ -33,6 +37,7 @@ export class ChatSocketService implements OnDestroy {
     
     this.socket.on('connect', () => {
       console.log('Connected to chat socket');
+      this.isInitialized = true;
     });
 
     this.socket.on('newMessage', (message: Message) => {

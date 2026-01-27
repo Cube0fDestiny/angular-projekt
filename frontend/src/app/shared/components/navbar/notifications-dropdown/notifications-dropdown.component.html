@@ -23,53 +23,90 @@
     <div class="px-4 py-3 border-b border-[#344F1F]/20 flex items-center justify-between">
       <span class="text-[#344F1F] font-bold text-sm uppercase tracking-wide">Powiadomienia</span>
       <span
-        *ngIf="friendRequests.length > 0"
+        *ngIf="notifications.length > 0"
         class="bg-[#F4991A] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-        {{ friendRequests.length }} nowe
+        {{ notifications.length }} nowe
       </span>
     </div>
 
-    <!-- Friend requests list -->
-    <div *ngIf="friendRequests.length > 0" class="max-h-80 overflow-y-auto">
+    <!-- notifications list -->
+    <div *ngIf="notifications.length > 0" class="max-h-80 overflow-y-auto">
       <div
-        *ngFor="let friendRequest of friendRequests; let last = last"
+        *ngFor="let notification of notifications; let last = last"
         class="p-4 hover:bg-[#344F1F]/5 transition-all duration-200 border-b border-[#344F1F]/10"
         [class.border-b]="!last">
         
-        <div class="flex items-center gap-3">
-          <img
-            [src]="friendRequest[1].avatar"
-            alt="User avatar"
-            class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
-          <div class="flex-1 min-w-0">
-            <span class="text-[#344F1F] font-bold block truncate">
-              {{ friendRequest[1].name }}
-            </span>
-            <span class="text-[#344F1F]/70 text-sm">Chce zostać znajomym</span>
+
+        <!-- friend requests -->
+        <div *ngIf="notification.type=='post.commented'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.creatorId)">
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.commenterName }} {{ notification.data.commenterSurname }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Commented on your post</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              (click)="goToPost(notification.data.postId)">
+              Go to Post
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              (click)="deleteNotification(notification.id)">
+              Remove Notification
+            </button>
           </div>
         </div>
 
-        <div class="flex gap-2 mt-3">
-          <!-- Accept Button -->
-          <button
-            type="button"
-            class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
-            (click)="acceptFriendRequest(friendRequest[0])">
-            Akceptuj
-          </button>
-          <!-- Reject Button -->
-          <button
-            type="button"
-            class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
-            (click)="rejectFriendRequest(friendRequest[0])">
-            Odrzuć
-          </button>
+        <!-- new messages -->
+         <div *ngIf="notification.type=='friend.request'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.requesterId)">
+            <div *ngIf="notification.data.requesterProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.requesterProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.requesterName }} {{ notification.data.requesterSurname }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Sent you a friend invite</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              (click)="acceptFriendRequest(notification.id ,notification.data.requesterId)">
+              Accept
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              (click)="rejectFriendRequest(notification.id ,notification.data.requesterId)">
+              Reject
+            </button>
+          </div>
         </div>
+        
       </div>
     </div>
 
     <!-- Empty state -->
-    <div *ngIf="friendRequests.length === 0" class="py-10 px-6 text-center">
+    <div *ngIf="notifications.length === 0" class="py-10 px-6 text-center">
       <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#344F1F]/10 flex items-center justify-center">
         <!-- Icon color set to o-green -->
         <svg class="w-8 h-8 text-[#344F1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +118,6 @@
         </svg>
       </div>
       <p class="text-[#344F1F] font-bold text-lg">Brak powiadomień</p>
-      <p class="text-[#344F1F]/70 text-sm mt-1">Nie masz nowych zaproszeń</p>
     </div>
   </div>
 </div>
