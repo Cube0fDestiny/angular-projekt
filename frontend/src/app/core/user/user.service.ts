@@ -72,6 +72,8 @@ export class UserService {
     password?: string;
     bio?: string;
     is_company?: boolean;
+    header_picture_id?: string;
+    avatar?: string;
   }): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${userId}`, data);
   }

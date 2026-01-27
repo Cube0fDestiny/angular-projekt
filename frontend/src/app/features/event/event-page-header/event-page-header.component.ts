@@ -60,10 +60,6 @@ export class EventPageHeaderComponent implements OnInit {
     })
   }
 
-  getAvatarUrl(event: OrangEvent): string {
-    return event?.profile_picture_id || 'assets/logo_icon.png';
-  }
-
   ngOnInit(): void {
     // Subscribe to current user
     this.userService.currentUser$.subscribe(u => this.currentUser = u);

@@ -1,7 +1,13 @@
 <div class="profile-header">
   <!-- Cover Photo -->
-  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="'url(' + coverImage + ')'">
-    <orang-button class="absolute bottom-5 right-5 px-3 py-2" size="small" [istoggleable]="false" *ngIf="isOwnProfile">✏️ Edit Cover</orang-button>
+  <div class="h-[350px] bg-[var(--o-orange)] bg-cover bg-center relative" [style.background-image]="headerImageUrl">
+    <div class="absolute bottom-5 right-5 p-8" *ngIf="isOwnProfile">
+      <app-image-upload
+        (imageUploaded)="onHeaderImageUploaded($event)"
+        buttonText="Edit Header"
+        >
+      </app-image-upload>
+    </div>
   </div>
   
   <!-- Header Content -->
@@ -9,10 +15,16 @@
     <!-- Profile Picture -->
     <div class="profile-picture-container">
       <img 
-        [src]="user?.avatar" 
+        [src]="profileImageUrl" 
         [alt]="user?.name" 
         class="profile-picture">
-      <button class="edit-picture-btn" *ngIf="isOwnProfile">✏️</button>
+      <div class="edit-picture-btn" *ngIf="isOwnProfile">
+        <app-image-upload
+          (imageUploaded)="onProfileImageUploaded($event)"
+          buttonText="Edit"
+          >
+        </app-image-upload>
+      </div>
     </div>
     
     <!-- Profile Info -->

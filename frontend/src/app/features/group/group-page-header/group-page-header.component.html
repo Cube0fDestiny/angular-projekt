@@ -1,6 +1,6 @@
 <div class="profile-header">
   <!-- Cover Photo -->
-  <div class="h-[350px] bg-gradient-to-br from-blue-500 to-cyan-400 bg-cover bg-center relative" [style.background-image]="headerImageUrl">
+  <div class="h-[350px] bg-[var(--o-orange)] bg-cover bg-center relative" [style.background-image]="headerImageUrl">
     <div class="absolute bottom-5 right-5 p-8" *ngIf="isOwnGroup">
       <app-image-upload
         (imageUploaded)="onHeaderImageUploaded($event)"
