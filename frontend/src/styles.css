@@ -1,5 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
 
 :root {
   --o-orange: #F4991A;
@@ -9,4 +15,30 @@
   --o-beige: #F2EAD3;
   --o-dbeige: #ebe0c1;
   --o-bwhite: #F9F5F0;
+  
+  /* Navbar height - adjust based on your actual navbar */
+  --navbar-height: 64px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --navbar-height: 72px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --navbar-height: 80px;
+  }
+}
+
+/* Ensure smooth scrolling globally */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

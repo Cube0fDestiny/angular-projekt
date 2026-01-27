@@ -14,18 +14,24 @@ export class OrangButtonComponent {
   @Input() istoggleable = true;
   @Input() disabled = false;
 
+  // Base styles for the "primary" (orange) variant
   activeClasses = `
     bg-[var(--o-orange)]
     ring-8 ring-[var(--o-orange)]
     hover:bg-[var(--o-dorange)]
     hover:ring-[var(--o-dorange)]
+    active:bg-[var(--o-dorange)]
+    active:ring-[var(--o-dorange)]
   `;
 
+  // Base styles for the "secondary" (green) variant
   inactiveClasses = `
     bg-[var(--o-green)]
     ring-8 ring-[var(--o-green)]
     hover:bg-[var(--o-dgreen)]
     hover:ring-[var(--o-dgreen)]
+    active:bg-[var(--o-dgreen)]
+    active:ring-[var(--o-dgreen)]
   `;
 
   get sizeClasses() {
@@ -37,10 +43,10 @@ export class OrangButtonComponent {
     }
   }
 
+  // Do not toggle persistent colors on click; rely on hover/active
+  // CSS states for a temporary visual change instead.
   toggleActive(event: Event) {
-    if (this.istoggleable) {
-      this.isActive = !this.isActive;
-    }
+    return;
   }
 
 }

@@ -12,34 +12,26 @@ import { RightSidebarComponent } from '../right-sidebar/right-sidebar.component'
   standalone: true,
   imports: [CommonModule, NavbarComponent, WallComponent, LeftSidebarComponent, RightSidebarComponent], // Import navbar tutaj
   
-  template: ` 
-   <app-navbar></app-navbar>
-
-<table style="width: 100%; border-collapse: collapse; border: none;background: var(--o-bwhite);">
-  <tr>
-    <!-- Left Sidebar -->
-    <td 
-    [style.width.px]="leftSidebarWidth"
-    style="vertical-align: top; border: none;">
-      <app-left-sidebar></app-left-sidebar>
-    </td>
-
-    <!-- Center wall -->
-    <td 
-    [style.width.px]="wallBoxWidth"
-    style="vertical-align: top; padding: 20px; border: none;">
-      <app-wall></app-wall>
-    </td>
-
-    <!-- Right Sidebar -->
-    <td 
-    [style.width.px]="rightSidebarWidth"
-    style="vertical-align: top; border: none;">
-      <app-right-sidebar></app-right-sidebar>
-    </td>
-  </tr>
-</table>
-
+  template: `
+    <app-navbar></app-navbar>
+    <div class="w-full bg-(--o-bwhite) min-h-screen flex flex-col">
+      <div class="max-w-7xl w-full mx-auto mt-16 sm:mt-18 md:mt-20">
+        <div class="flex flex-row w-full">
+          <!-- Left Sidebar -->
+          <div [style.width.px]="leftSidebarWidth" class="hidden md:block" style="vertical-align: top;">
+            <app-left-sidebar></app-left-sidebar>
+          </div>
+          <!-- Center wall (smaller posts) -->
+          <div [style.width.px]="wallBoxWidth" class="flex-1 flex justify-center" style="vertical-align: top; padding: 10px;">
+            <app-wall class="small-wall"></app-wall>
+          </div>
+          <!-- Right Sidebar -->
+          <div [style.width.px]="rightSidebarWidth" class="hidden md:block" style="vertical-align: top;">
+            <app-right-sidebar></app-right-sidebar>
+          </div>
+        </div>
+      </div>
+    </div>
   `,
   styles: []
 })

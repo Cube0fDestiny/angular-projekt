@@ -4,6 +4,8 @@ import { NavbarSigninupComponent } from '../../../shared/components/navbar-signi
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { LoginCardComponent } from '../../../shared/components/login-card/login-card.component';
 
+import { guestGuard } from '../../../core/auth/guest.guard';
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -14,5 +16,7 @@ import { LoginCardComponent } from '../../../shared/components/login-card/login-
     LoginCardComponent
   ],
   templateUrl: './register.component.html',
+  providers: [],
+  canActivate: [guestGuard]
 })
 export class RegisterComponent {}

@@ -3,7 +3,9 @@ import { HomeComponent } from './features/home/main/home.component';
 import { ProfilePageComponent } from './features/profile-page/main/profile-page.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
-import { authGuard } from './core/auth/auth.guard'; // Import your guard
+import { LandingComponent } from './features/landing/landing.component';
+import { authGuard } from './core/auth/auth.guard';
+import { guestGuard } from './core/auth/guest.guard';
 import { SettingsComponent } from './features/settings/settings.component';
 import { FriendListComponent } from './features/friend-list/friend-list.component';
 import { EventsPageComponent } from './features/events/events-page.component';
@@ -15,8 +17,9 @@ import { GroupPageComponent } from './features/group/main/group-page.component';
 import { ChatComponent } from './features/chat/chat.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: '', component: LandingComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
   
   // Guarded Routes
   { 
@@ -90,7 +93,6 @@ export const routes: Routes = [
     canActivate: [authGuard] 
   },
   
-  // Redirects at the bottom
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  // Wildcard redirect
   { path: '**', redirectTo: '/home' }
 ];

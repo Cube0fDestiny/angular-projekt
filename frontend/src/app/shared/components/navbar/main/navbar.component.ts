@@ -55,37 +55,36 @@ export class NavbarComponent implements OnInit {
   }
 
   goToHome():void {
-    this.router.navigate(['/']);
+    if (this.currentUser) {
+      this.router.navigate(['/home']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
   goToProfile(userId: number): void {
-    // Just pass the ID - that's it!
     console.log("going to profile");
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
+    this.router.navigate(['/profile', userId]);
   }
 
   goToEvents(): void {
-    // Just pass the ID - that's it!
     console.log("going to events");
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/events']); });
+    this.router.navigate(['/events']);
   }
 
   goToMessages(): void {
-    // Just pass the ID - that's it!
     console.log("going to messages");
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/chats']); });
+    this.router.navigate(['/chats']);
   }
 
   goToGroups(): void {
-    // Just pass the ID - that's it!
     console.log("going to groups");
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/groups']); });
+    this.router.navigate(['/groups']);
   }
 
   goToCompany(): void {
-    // Just pass the ID - that's it!
     console.log("going to companies");
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/companies']); });
+    this.router.navigate(['/companies']);
   }
 
   isDropdownOpen = false;

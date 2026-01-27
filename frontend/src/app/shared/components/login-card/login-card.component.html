@@ -4,6 +4,10 @@
   </h2>
 
   <form (ngSubmit)="onHandleAuth()">
+    <div *ngIf="errorMessage" class="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 text-left">
+      {{ errorMessage }}
+    </div>
+
     <div *ngIf="isRegisterPage" class="mb-6 text-left">
       <label class="mb-2 block text-sm text-gray-800">Name</label>
       <input name="newName" [(ngModel)]="newName" type="text" placeholder="Name" 
