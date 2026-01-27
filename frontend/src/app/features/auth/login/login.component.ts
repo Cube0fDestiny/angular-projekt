@@ -17,6 +17,5 @@ import { guestGuard } from '../../../core/auth/guest.guard';
   ],
   templateUrl: './login.component.html',
   providers: [],
-  canActivate: [guestGuard]
 })
 export class LoginComponent {}

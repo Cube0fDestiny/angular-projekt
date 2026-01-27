@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Post, Reaction } from '../../models/post.model';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Post } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { TextDisplayComponent } from '../../../shared/components/text-display/text-display.component';
 import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
 import { PostService } from '../../../core/post/post.service';
@@ -12,83 +12,74 @@ import { User } from '../../../shared/models/user.model';
 @Component({
   selector: 'app-post-card',
   templateUrl: './post-card.component.html',
+  styleUrls: ['./post-card.component.scss'],
+  standalone: true,
   imports: [NgIf, FormsModule, NgFor, TextDisplayComponent, OrangButtonComponent],
-  styleUrls: ['./post-card.component.scss'], 
 })
-export class PostCardComponent {
+export class PostCardComponent implements OnInit {
   @Input() post!: Post;
+  @Input() showActions = true;
+  @Input() currentUserId?: string;
+  
+  /* Events */
   @Output() postDeleted = new EventEmitter<string>(); // Emit post ID when deleted
-  userReacted: boolean = false;
+  @Output() like = new EventEmitter<string>();
+  @Output() share = new EventEmitter<string>();
 
+  /* User & State */
+  currentUser: User | null = null;
   user: User | null = null;
+  userReacted: boolean = false;
   isLoading = false;
 
+  /* UI State: Copy/Share */
   copied = false;
   isCopying = false;
   copyButtonText = '🔄 Squeeze';
+  
+  /* Counters */
   orang_count = 0;
   comment_count = 0;
+
+  /* Comments & Forms */
+  newComment = '';
+  showComments = false;
+  comments: any[] = [];
+  loadingComments = false;
+  replyText = '';
   
+  /* Edit Post State */
+  showEditPostForm = false;
+  editPostText = '';
+
   constructor(
     private postService: PostService,
     private userService: UserService,
     private router: Router
   ) {}
 
-
-  @Input() showActions = true;
-  @Input() currentUserId?: string;
-  currentUser: User | null = null;
-
-  /* Keep outputs so parent components don't break */
-  @Output() like = new EventEmitter<string>();
-  @Output() share = new EventEmitter<string>();
-
-  newComment = '';
-  showComments = false;
-  comments: any[] = [];
-  loadingComments = false;
-  replyText = '';
-  editText = '';
-
-  /* ============================
-     Time formatting
-     ============================ */
-  get timeAgo(): string {
-    const now = new Date();
-    const postDate = new Date(this.post.created_at);
-    const diffMs = now.getTime() - postDate.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return postDate.toLocaleDateString();
-  }
-
-
-  goToProfile(id: string) {
-    this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', id]); });
-  }
-
   ngOnInit() {
     console.log(this.post);
-    // Get user ID from route parameters
+    // Initialize counters
     this.orang_count = this.post.orang_count;
     this.comment_count = this.post.comment_count;
+
+    // Load Post Creator
     const userId = this.post.creator_id;
-    this.currentUser = this.userService.currentUser;
     if (userId) {
       this.loadUser(userId);
     }
+
+    // Load Current User context
+    this.currentUser = this.userService.currentUser;
+
+    // Check reaction status
     this.getUserReaction();
   }
-  
 
-
+  /* ============================
+     User & Navigation
+     ============================ */
 
   loadUser(id: string): void {
     this.isLoading = true;
@@ -104,38 +95,91 @@ export class PostCardComponent {
     });
   }
 
-  getUserReaction():void {
+  goToProfile(id: string) {
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', id]); });
+  }
+
+  /* ============================
+     Formatting & Utilities
+     ============================ */
+
+  get timeAgo(): string {
+    const now = new Date();
+    const postDate = new Date(this.post.created_at);
+    const diffMs = now.getTime() - postDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return postDate.toLocaleDateString();
+  }
+
+  /**
+   * FIX: Added missing copyPostLink method to resolve build error
+   */
+  copyPostLink(postId: string): void {
+    if (this.isCopying) return;
+    
+    this.isCopying = true;
+    // Construct the URL (adjust '/post/' path based on your routing)
+    const url = `${window.location.origin}/post/${postId}`;
+
+    navigator.clipboard.writeText(url).then(() => {
+      this.copied = true;
+      this.copyButtonText = '✅ Copied!';
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
+        this.copied = false;
+        this.isCopying = false;
+        this.copyButtonText = '🔄 Squeeze';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      this.isCopying = false;
+      this.copyButtonText = 'Error';
+    });
+  }
+
+  /* ============================
+     Reactions (Orangs)
+     ============================ */
+
+  getUserReaction(): void {
     this.postService.getReaction(this.post.id).subscribe({
       next: (reaction) => {
         this.userReacted = reaction.liked;
       }
-    })
+    });
   }
 
-  toggleUserReaction():void {
+  toggleUserReaction(): void {
     this.postService.getReaction(this.post.id).subscribe({
       next: (reaction) => {
-        console.log(reaction);
         if(reaction.liked){
-          this.orang_count = this.orang_count-1;
+          this.orang_count = this.orang_count - 1;
         } else {
-          this.orang_count = this.orang_count+1;
+          this.orang_count = this.orang_count + 1;
         }
+        
         this.postService.toggleReaction(this.post.id).subscribe({
           next: () => {
             console.log('correctly toggled reaction');
             this.userReacted = !this.userReacted;
           }
-        })
+        });
       }
-    })
+    });
   }
 
-  // Add these properties to your PostCardComponent class
-  showEditPostForm = false;
-  editPostText = '';
+  /* ============================
+     Edit & Delete Post
+     ============================ */
 
-  // Toggle post edit form
   toggleEditPostForm(): void {
     this.showEditPostForm = !this.showEditPostForm;
     if (this.showEditPostForm) {
@@ -146,41 +190,30 @@ export class PostCardComponent {
     }
   }
 
-  // Cancel post editing
   cancelEditPost(): void {
     this.showEditPostForm = false;
     this.editPostText = '';
   }
 
-  // Edit post
   editPost(): void {
     if (!this.editPostText.trim() || this.editPostText === this.post.Text) {
-      // If unchanged or empty, just close
       this.showEditPostForm = false;
       return;
     }
     
     this.postService.updatePost(this.post.id, this.editPostText).subscribe({
       next: (updatedPost) => {
-        // Update the post content locally
-        this.post.Text= updatedPost.Text;
+        this.post.Text = updatedPost.Text;
         this.showEditPostForm = false;
         this.editPostText = '';
-        
-        // Show success message (optional)
         console.log('Post updated successfully');
-        
-        // Emit an event if parent needs to know
-        // this.postUpdated.emit(this.post);
       },
       error: (error) => {
         console.error('Failed to update post:', error);
-        // Show error message to user (optional)
       }
     });
   }
 
-  // Delete post (you already have this, but update it)
   deletePost(): void {
     if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
       return;
@@ -189,138 +222,17 @@ export class PostCardComponent {
     this.postService.deletePost(this.post.id).subscribe({
       next: (response) => {
         console.log('Post deleted:', response.message);
-        // Emit the delete event so parent can remove it from list
-        this.postDeleted.emit(this.post.id); // Notify parent
+        this.postDeleted.emit(this.post.id); 
       },
       error: (error) => {
         console.error('Failed to delete post:', error);
-        // Show error message
       }
     });
   }
 
   /* ============================
-     Comments
+     Comments Logic
      ============================ */
-
-  toggleReplyForm(comment: any): void {
-    comment.showReplyForm = !comment.showReplyForm;
-    if (!comment.showReplyForm) {
-      this.replyText = '';
-    }
-  }
-
-  addReply(comment: any): void {
-    if (!this.replyText?.trim()) return;
-    
-    this.postService.addComment(this.post.id, {
-      text: this.replyText,
-      in_reply_to: comment.id,
-    }).subscribe({
-      next: (reply) => {
-        // Create enriched reply with all needed data
-        const enrichedReply = {
-          ...reply,
-          user: this.userService.currentUser,
-          parentUser: comment.user, // Use parent comment's user data directly
-          isReply: true,
-          parentUserId: comment.creator_id,
-          showReplyForm: false,
-          showEditForm: false
-        };
-        
-        // Calculate display date for the new reply
-        const now = new Date();
-        const replyDate = new Date(reply.created_at);
-        const diffMs = now.getTime() - replyDate.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        if (diffMins < 1) enrichedReply.displayDate = 'Just now';
-        else if (diffMins < 60) enrichedReply.displayDate = `${diffMins}m ago`;
-        else if (diffHours < 24) enrichedReply.displayDate = `${diffHours}h ago`;
-        else if (diffDays < 7) enrichedReply.displayDate = `${diffDays}d ago`;
-        else enrichedReply.displayDate = replyDate.toLocaleDateString();
-        
-        // Add to beginning of comments array
-        this.comments.unshift(enrichedReply);
-        
-        this.resetAllSubmitButtons();
-        // Reset the form
-        comment.showReplyForm = false;
-        this.replyText = '';
-        this.comment_count = this.comment_count + 1;
-      },
-      error: (error) => {
-        console.error('Failed to add reply:', error);
-      }
-    });
-  }
-  
-  // In your PostCardComponent class, add these methods:
-
-  // Toggle edit form visibility
-  toggleEditForm(comment: any): void {
-    comment.showEditForm = !comment.showEditForm;
-    if (comment.showEditForm) {
-      // Initialize editText with current comment text
-      comment.editText = comment.text;
-    } else {
-      comment.editText = '';
-    }
-  }
-
-  // Edit a comment
-  editComment(comment: any): void {
-    if (!comment.editText?.trim() || comment.editText === comment.text) {
-      comment.showEditForm = false;
-      return;
-    }
-    
-    this.postService.updateComment(comment.id, comment.editText).subscribe({
-      next: (updatedComment) => {
-        // Update the comment text
-        comment.text = updatedComment.text;
-        comment.editText = '';
-        comment.showEditForm = false;
-        
-        // Update the display date to reflect "Just now" or similar
-        comment.displayDate = 'Just now';
-        
-        console.log('Comment updated successfully');
-      },
-      error: (error) => {
-        console.error('Failed to update comment:', error);
-      }
-    });
-  }
-
-  // Delete a comment
-  deleteComment(comment: any): void {
-    if (!confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
-    
-    this.postService.deleteComment(comment.id).subscribe({
-      next: (response) => {
-        // Remove the comment from the array
-        const index = this.comments.findIndex(c => c.id === comment.id);
-        if (index !== -1) {
-          this.comments.splice(index, 1);
-        }
-        
-        // Optional: Show success message
-        console.log('Comment deleted successfully:', response.message);
-        this.comment_count = this.comment_count - 1;
-      },
-      error: (error) => {
-        console.error('Failed to delete comment:', error);
-        // Optional: Show error message to user
-      }
-    });
-  }
-
 
   toggleComments(): void {
     this.showComments = !this.showComments;
@@ -346,14 +258,12 @@ export class PostCardComponent {
             const parentComment = comments.find(c => c.id === comment.in_reply_to);
             if (parentComment) {
               enrichedComment.parentUserId = parentComment.creator_id;
-              // We'll fetch the actual user when we fetch the comment author
             }
           }
-
           return enrichedComment;
         });
 
-        // Now fetch users
+        // Now fetch users and format times
         this.fetchUsersForComments();
         this.getTimeForComments();
         this.loadingComments = false;
@@ -365,7 +275,7 @@ export class PostCardComponent {
   }
 
   private getTimeForComments(): void {
-    this.comments.forEach((comment, index) => {
+    this.comments.forEach((comment) => {
       const now = new Date();
       const commentDate = new Date(comment.created_at);
       const diffMs = now.getTime() - commentDate.getTime();
@@ -379,7 +289,6 @@ export class PostCardComponent {
       else if (diffDays < 7) comment.displayDate = `${diffDays}d ago`;
       else comment.displayDate = commentDate.toLocaleDateString();
     });
-
   }
 
   private fetchUsersForComments(): void {
@@ -409,31 +318,7 @@ export class PostCardComponent {
       text: this.newComment,
     }).subscribe({
       next: (comment) => {
-        // Create enriched comment
-        const enrichedComment = {
-          ...comment,
-          user: this.userService.currentUser,
-          parentUser: null,
-          isReply: false,
-          showReplyForm: false,
-          showEditForm: false
-        };
-        
-        // Calculate display date
-        const now = new Date();
-        const commentDate = new Date(comment.created_at);
-        const diffMs = now.getTime() - commentDate.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        if (diffMins < 1) enrichedComment.displayDate = 'Just now';
-        else if (diffMins < 60) enrichedComment.displayDate = `${diffMins}m ago`;
-        else if (diffHours < 24) enrichedComment.displayDate = `${diffHours}h ago`;
-        else if (diffDays < 7) enrichedComment.displayDate = `${diffDays}d ago`;
-        else enrichedComment.displayDate = commentDate.toLocaleDateString();
-        
-        // Add to beginning of comments array
+        const enrichedComment = this.createLocalCommentObject(comment, false);
         this.comments.unshift(enrichedComment);
         this.newComment = '';
         this.resetAllSubmitButtons();
@@ -445,11 +330,112 @@ export class PostCardComponent {
     });
   }
 
+  toggleReplyForm(comment: any): void {
+    comment.showReplyForm = !comment.showReplyForm;
+    if (!comment.showReplyForm) {
+      this.replyText = '';
+    }
+  }
+
+  addReply(comment: any): void {
+    if (!this.replyText?.trim()) return;
+    
+    this.postService.addComment(this.post.id, {
+      text: this.replyText,
+      in_reply_to: comment.id,
+    }).subscribe({
+      next: (reply) => {
+        const enrichedReply = this.createLocalCommentObject(reply, true, comment);
+        
+        // Add to beginning of comments array
+        this.comments.unshift(enrichedReply);
+        
+        this.resetAllSubmitButtons();
+        comment.showReplyForm = false;
+        this.replyText = '';
+        this.comment_count = this.comment_count + 1;
+      },
+      error: (error) => {
+        console.error('Failed to add reply:', error);
+      }
+    });
+  }
+
+  // Helper to standardise comment object creation after posting
+  private createLocalCommentObject(apiResponse: any, isReply: boolean, parentComment: any = null): any {
+    const enriched: any = {
+      ...apiResponse,
+      user: this.userService.currentUser,
+      isReply: isReply,
+      showReplyForm: false,
+      showEditForm: false,
+      displayDate: 'Just now'
+    };
+
+    if (isReply && parentComment) {
+      enriched.parentUser = parentComment.user;
+      enriched.parentUserId = parentComment.creator_id;
+    } else {
+      enriched.parentUser = null;
+    }
+    return enriched;
+  }
+
+  toggleEditForm(comment: any): void {
+    comment.showEditForm = !comment.showEditForm;
+    if (comment.showEditForm) {
+      comment.editText = comment.text;
+    } else {
+      comment.editText = '';
+    }
+  }
+
+  editComment(comment: any): void {
+    if (!comment.editText?.trim() || comment.editText === comment.text) {
+      comment.showEditForm = false;
+      return;
+    }
+    
+    this.postService.updateComment(comment.id, comment.editText).subscribe({
+      next: (updatedComment) => {
+        comment.text = updatedComment.text;
+        comment.editText = '';
+        comment.showEditForm = false;
+        comment.displayDate = 'Just now'; // Update time indicator
+        console.log('Comment updated successfully');
+      },
+      error: (error) => {
+        console.error('Failed to update comment:', error);
+      }
+    });
+  }
+
+  deleteComment(comment: any): void {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+    
+    this.postService.deleteComment(comment.id).subscribe({
+      next: (response) => {
+        const index = this.comments.findIndex(c => c.id === comment.id);
+        if (index !== -1) {
+          this.comments.splice(index, 1);
+        }
+        console.log('Comment deleted successfully:', response.message);
+        this.comment_count = this.comment_count - 1;
+      },
+      error: (error) => {
+        console.error('Failed to delete comment:', error);
+      }
+    });
+  }
+
   resetAllSubmitButtons(): void {
+    // Note: accessing DOM directly in Angular is generally discouraged, 
+    // but preserving your existing logic here.
     const buttons = document.querySelectorAll('orang-button[type="submit"]');
-    console.log(buttons)
     buttons.forEach(button => {
-      (button as any).isActive=true;
+      (button as any).isActive = true;
     });
   }
 }
