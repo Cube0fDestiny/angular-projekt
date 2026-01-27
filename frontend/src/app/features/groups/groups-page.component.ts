@@ -1,24 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
+import { Router } from '@angular/router';
 import { UserService } from '../../core/user/user.service';
 import { NavbarComponent } from '../../shared/components/navbar/main/navbar.component';
 import { User } from '../../shared/models/user.model';
 import { FormsModule } from '@angular/forms';
-import { TextDisplayComponent } from "../../shared/components/text-display/text-display.component";
 import { OrangButtonComponent } from "../../shared/components/orang-button/orang-button.component";
-import { Group, CreateGroupData } from '../../shared/models/group.model';
+import { Group } from '../../shared/models/group.model';
 import { GroupService } from '../../core/group/group.service';
 import { ImageService } from '../../core/image/image.service';
 
 @Component({
   selector: 'groups-page',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, TextDisplayComponent, OrangButtonComponent, CommonModule, NgIf],
-  templateUrl: './groups-page.component.html'
+  imports: [
+    FormsModule, 
+    NavbarComponent, 
+    OrangButtonComponent, 
+    CommonModule, 
+    NgIf,
+    NgFor
+  ],
+  templateUrl: './groups-page.component.html',
+  styleUrls: ['./groups-page.component.css']
 })
 export class GroupsPageComponent implements OnInit {
-
   user: User | null = null;
   groupBio = '';
   groupName = '';
@@ -26,10 +32,10 @@ export class GroupsPageComponent implements OnInit {
   groups: Group[] | null = null;
   isLoading = false;
   defaultImage = 'assets/logo_icon.png';
+  searchQuery = '';
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     public userService: UserService,
     public groupService: GroupService,
     private imageService: ImageService
@@ -40,52 +46,62 @@ export class GroupsPageComponent implements OnInit {
     this.loadAllGroups();
   }
 
-  toggleCreatingGroup():void {
+  get filteredGroups(): Group[] {
+    if (!this.groups) return [];
+    if (!this.searchQuery.trim()) return this.groups;
+    
+    const query = this.searchQuery.toLowerCase();
+    return this.groups.filter(group => 
+      group.name.toLowerCase().includes(query) ||
+      (group.bio && group.bio.toLowerCase().includes(query))
+    );
+  }
+
+  toggleCreatingGroup(): void {
     this.isCreatingGroup = !this.isCreatingGroup;
-  }
-
-  getAvatarUrl(group: Group): string {
-    return group?.profile_picture_id || 'assets/logo_icon.png';
-  }
-
-  createGroup():void {
-    if (!this.groupName?.trim()) {
-      this.isCreatingGroup = false;
-      return;
+    if (!this.isCreatingGroup) {
+      this.groupName = '';
+      this.groupBio = '';
     }
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.defaultImage;
+  }
+
+  createGroup(): void {
+    if (!this.groupName?.trim()) return;
 
     const newGroup = {
-      name: this.groupName,
-      bio: this.groupBio,
-      //header_picture_id: '',
-      //profile_picture_id: '',
+      name: this.groupName.trim(),
+      bio: this.groupBio.trim(),
       free_join: false
-    }
-    
+    };
+
     this.groupService.createGroup(newGroup).subscribe({
       next: () => {
-        console.log('Successfully created new group');
         this.isCreatingGroup = false;
+        this.groupName = '';
+        this.groupBio = '';
         this.loadAllGroups();
       },
       error: (error) => {
         console.error('Failed to create new group:', error);
-        this.isCreatingGroup = false;
       }
     });
   }
 
-  goToGroup(groupId: string):void {
+  goToGroup(groupId: string): void {
     this.router.navigate(['/group', groupId]);
   }
 
-  loadAllGroups():void{
+  loadAllGroups(): void {
     this.isLoading = true;
     this.groupService.getAllGroups().subscribe({
       next: (groups) => {
         this.groups = groups;
         this.isLoading = false;
-        console.log('succesfully loaded groups');
         this.loadProfileImages();
       },
       error: (error) => {
@@ -96,10 +112,10 @@ export class GroupsPageComponent implements OnInit {
   }
 
   loadProfileImages(): void {
-  // Process each group
-    this.groups!.forEach(group => {
+    if (!this.groups) return;
+    
+    this.groups.forEach(group => {
       if (group.profile_picture_id) {
-        // Load image for this group
         this.imageService.getImage(group.profile_picture_id).subscribe({
           next: (imageUrl) => {
             group.profileImageUrl = imageUrl;
@@ -109,10 +125,8 @@ export class GroupsPageComponent implements OnInit {
           }
         });
       } else {
-        // No profile picture id, use default
         group.profileImageUrl = this.defaultImage;
       }
     });
   }
-
 }

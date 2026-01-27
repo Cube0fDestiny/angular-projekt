@@ -1,73 +1,255 @@
-<div style="background-color: var(--o-bwhite);">
+<div class="min-h-screen bg-[var(--o-bwhite)]">
   <app-navbar location="group"></app-navbar>
 
-  <div class="profile-container">
-    <app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
-      <div class="mb-6 text-center">
-        <div class="flex items-center justify-center gap-3 mb-2">
+  <div 
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex flex-col gap-8"
+    style="padding-top: calc(var(--navbar-height) + 2rem);"
+  >
+    
+    <!-- Create Group Section -->
+    <section class="w-full">
+      <div class="bg-[var(--o-beige)] rounded-3xl shadow-lg border border-[var(--o-dbeige)] overflow-hidden transition-all duration-300 hover:shadow-xl">
+        
+        <!-- Card Header -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-[var(--o-dbeige)]/50 border-b border-[var(--o-dbeige)]">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-[var(--o-orange)] rounded-2xl flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              </svg>
+            </div>
+            <div class="text-center sm:text-left">
+              <h2 class="text-xl sm:text-2xl font-bold text-[var(--o-green)]">Create a Group</h2>
+              <p class="text-sm text-[var(--o-green)]/60">Build your community and grow together</p>
+            </div>
+          </div>
           
-          <!-- Edit/Cancel Button -->
           <orang-button 
             (click)="toggleCreatingGroup()"
+            [istoggleable]="false"
           >
-            {{ isCreatingGroup ? 'Cancel' : 'Create New Group' }}
+            <span class="flex items-center gap-2">
+              <svg *ngIf="!isCreatingGroup" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <svg *ngIf="isCreatingGroup" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              {{ isCreatingGroup ? 'Cancel' : 'New Group' }}
+            </span>
           </orang-button>
-          
-          <!-- Content Area -->
-          <div class="flex-1" *ngIf="isCreatingGroup" >
-            <!-- Edit Mode -->
-            <form 
-              (ngSubmit)="createGroup()" 
-              class="flex items-center gap-3"
-            >
-              <input
-                [(ngModel)]="groupName"
-                type="text"
-                name="groupName"
-                placeholder="Group Name"
-                class="border border-none bg-white rounded-md p-3 outline-none focus:ring-2 focus:ring-orange-400"
-              >
-              <textarea
-                [(ngModel)]="groupBio"
-                name="groupBio"
-                placeholder="Write something Orang!"
-                rows="1"
-                class="w-full border border-none bg-white rounded-md p-3 outline-none focus:ring-2 focus:ring-orange-400"
-              ></textarea>
-              <orang-button 
-                type="submit" 
-                [istoggleable]="false"
-              >
-                Confirm
-              </orang-button>
+        </div>
+
+        <!-- Expandable Form -->
+        <div 
+          class="grid transition-all duration-500 ease-in-out"
+          [ngClass]="isCreatingGroup ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'"
+        >
+          <div class="overflow-hidden">
+            <form (ngSubmit)="createGroup()" class="p-6 space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="space-y-2">
+                  <label class="flex items-center gap-2 text-sm font-semibold text-[var(--o-green)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-[var(--o-orange)]">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                    Group Name
+                  </label>
+                  <input
+                    [(ngModel)]="groupName"
+                    type="text"
+                    name="groupName"
+                    placeholder="Give your group a name..."
+                    class="w-full px-4 py-3 bg-[var(--o-bwhite)] border-2 border-[var(--o-dbeige)] rounded-xl text-[var(--o-green)] placeholder-[var(--o-green)]/40 focus:outline-none focus:border-[var(--o-orange)] focus:ring-4 focus:ring-[var(--o-orange)]/20 transition-all duration-300"
+                    required
+                  >
+                </div>
+
+                <div class="space-y-2">
+                  <label class="flex items-center gap-2 text-sm font-semibold text-[var(--o-green)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-[var(--o-orange)]">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                    </svg>
+                    Description
+                  </label>
+                  <input
+                    [(ngModel)]="groupBio"
+                    type="text"
+                    name="groupBio"
+                    placeholder="What's your group about?"
+                    class="w-full px-4 py-3 bg-[var(--o-bwhite)] border-2 border-[var(--o-dbeige)] rounded-xl text-[var(--o-green)] placeholder-[var(--o-green)]/40 focus:outline-none focus:border-[var(--o-orange)] focus:ring-4 focus:ring-[var(--o-orange)]/20 transition-all duration-300"
+                  >
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-4 border-t border-[var(--o-dbeige)]">
+                <orang-button 
+                  type="submit"
+                  [istoggleable]="false"
+                  [isActive]="false"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Create Group
+                  </span>
+                </orang-button>
+              </div>
             </form>
           </div>
         </div>
       </div>
-    </app-text-display>
+    </section>
 
-    <app-text-display variant="beige" title="All Groups" class="max-w-9/10 w-full rounded-xl">
-      
-      <!-- Group grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" *ngIf="!isLoading">
+    <!-- Groups List Section -->
+    <section class="w-full">
+      <div class="text-center mb-8">
+        <h2 class="flex items-center justify-center gap-3 text-2xl sm:text-3xl font-bold text-[var(--o-green)] mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-[var(--o-orange)]">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+          </svg>
+          Discover Groups
+        </h2>
+        <p class="text-[var(--o-green)]/60 text-lg">Find and join communities that interest you</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex justify-center mb-8">
+        <div class="relative w-full max-w-md">
+          <svg 
+            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--o-green)]/50" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              stroke-width="2" 
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search groups..."
+            [(ngModel)]="searchQuery"
+            class="w-full pl-12 pr-4 py-3 bg-[var(--o-beige)] border-2 border-[var(--o-dbeige)] rounded-xl text-[var(--o-green)] placeholder-[var(--o-green)]/40 focus:outline-none focus:border-[var(--o-orange)] focus:ring-4 focus:ring-[var(--o-orange)]/20 transition-all duration-300"
+          >
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-16 gap-4">
+        <div class="w-12 h-12 border-4 border-[var(--o-beige)] border-t-[var(--o-orange)] rounded-full animate-spin"></div>
+        <p class="text-[var(--o-green)]/60 animate-pulse">Loading amazing groups...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && (!groups || groups.length === 0)" class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-32 h-32 bg-[var(--o-beige)] rounded-full flex items-center justify-center mb-6 border-4 border-[var(--o-dbeige)]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 text-[var(--o-orange)]">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-[var(--o-green)] mb-2">No groups yet</h3>
+        <p class="text-[var(--o-green)]/60 max-w-xs">Be the first to create a group and build your community!</p>
+      </div>
+
+      <!-- No Search Results -->
+      <div 
+        *ngIf="!isLoading && groups && groups.length > 0 && filteredGroups.length === 0"
+        class="flex flex-col items-center justify-center py-16 text-center"
+      >
+        <div class="w-32 h-32 bg-[var(--o-beige)] rounded-full flex items-center justify-center mb-6 border-4 border-[var(--o-dbeige)]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 text-[var(--o-orange)]">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-[var(--o-green)] mb-2">No matches found</h3>
+        <p class="text-[var(--o-green)]/60 max-w-xs">Try a different search term</p>
+      </div>
+
+      <!-- Groups Grid -->
+      <div *ngIf="!isLoading && filteredGroups && filteredGroups.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        
         <div 
-          *ngFor="let group of groups" 
-          class="friend-card bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors duration-200 cursor-pointer"
+          *ngFor="let group of filteredGroups; let i = index" 
+          class="group cursor-pointer animate-fade-in-up"
+          [style.animation-delay]="i * 100 + 'ms'"
         >
-          <!-- Custom content goes here -->
-          <div class="flex flex-col items-center text-center" (click)="goToGroup(group.id)">
-            <img 
-              [src]="group.profileImageUrl" 
-              [alt]="group.name"
-              class="w-16 h-16 rounded-full mb-3 object-cover border-2"
-            >
-            <h4 
-              class="font-bold text-[var(--o-green)]"
-              (click)="goToGroup(group.id)"
-            >{{ group.name }}</h4>
+          <div class="relative bg-[var(--o-bwhite)] rounded-2xl overflow-hidden shadow-md border border-[var(--o-dbeige)] hover:shadow-xl hover:border-[var(--o-orange)]/30 transform hover:-translate-y-2 transition-all duration-400 h-full flex flex-col">
+            
+            <!-- Decorative Header -->
+            <div class="relative h-24 bg-gradient-to-br from-[var(--o-orange)] to-[var(--o-dorange)] overflow-hidden">
+              <div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full"></div>
+              <div class="absolute -bottom-4 -left-4 w-16 h-16 bg-white/10 rounded-full"></div>
+              <div class="absolute top-3 right-3 w-6 h-6 bg-white/20 rounded-full"></div>
+              <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-2 left-4 w-2 h-2 bg-white rounded-full"></div>
+                <div class="absolute top-6 left-12 w-1 h-1 bg-white rounded-full"></div>
+                <div class="absolute bottom-4 right-8 w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
+
+            <!-- Avatar -->
+            <div class="relative flex justify-center -mt-10 z-10">
+              <div class="relative">
+                <img 
+                  [src]="group.profileImageUrl || defaultImage" 
+                  [alt]="group.name"
+                  (error)="onImageError($event)"
+                  class="w-20 h-20 rounded-full object-cover border-4 border-[var(--o-bwhite)] shadow-lg group-hover:scale-110 group-hover:border-[var(--o-orange)]/50 transition-all duration-300"
+                  (click)="goToGroup(group.id)"
+                >
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-[var(--o-green)] rounded-full border-2 border-[var(--o-bwhite)] flex items-center justify-center shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3 text-white">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 p-5 pt-3 text-center" (click)="goToGroup(group.id)">
+              <h3 class="text-lg font-bold text-[var(--o-green)] mb-3 group-hover:text-[var(--o-orange)] transition-colors duration-300 line-clamp-2">
+                {{ group.name }}
+              </h3>
+              
+              <!-- Member Count Badge -->
+              <div class="flex flex-wrap justify-center gap-2 mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--o-beige)] text-[var(--o-green)] text-xs font-medium rounded-full border border-[var(--o-dbeige)]">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-[var(--o-orange)]">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                  </svg>
+                  {{ group.member_data?.members || 0 }} {{ group.member_data?.members === 1 ? 'member' : 'members' }}
+                </span>
+              </div>
+
+              <p *ngIf="group.bio" class="text-sm text-[var(--o-green)]/60 line-clamp-2 leading-relaxed">
+                {{ group.bio }}
+              </p>
+              <p *ngIf="!group.bio" class="text-sm text-[var(--o-green)]/60 line-clamp-2 leading-relaxed">
+                Join us! 🍊
+              </p>
+            </div>
+
+            <!-- Action Button -->
+            <div class="p-4 pt-0">
+              <button 
+                (click)="goToGroup(group.id)"
+                class="w-full flex items-center justify-center gap-2 py-3 bg-[var(--o-green)] hover:bg-[var(--o-dgreen)] text-white text-sm font-semibold rounded-xl shadow-md transition-all duration-300 group-hover:shadow-lg"
+              >
+                <span>View Group</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </app-text-display>
+    </section>
   </div>
 </div>
