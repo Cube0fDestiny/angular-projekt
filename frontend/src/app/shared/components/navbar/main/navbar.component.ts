@@ -89,7 +89,27 @@ export class NavbarComponent implements OnInit {
   }
 
   isDropdownOpen = false;
+  isMobileMenuOpen = false;
+  isMobileSearchOpen = false;
   activeItem = 'home';
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    this.isMobileSearchOpen = false;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
+  toggleMobileSearch(): void {
+    this.isMobileSearchOpen = !this.isMobileSearchOpen;
+    this.isMobileMenuOpen = false;
+  }
+
+  closeMobileSearch(): void {
+    this.isMobileSearchOpen = false;
+  }
 
   setActive(itemId: string): void {
     this.activeItem = itemId;

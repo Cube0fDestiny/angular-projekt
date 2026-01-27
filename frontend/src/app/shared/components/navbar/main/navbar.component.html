@@ -1,54 +1,161 @@
-<nav class="navbar">
-  <div class="navbar-container">
+<nav class="bg-[var(--o-orange)] text-white h-14 fixed top-0 left-0 right-0 z-[1000] shadow-md overflow-visible">
+  <div class="relative flex justify-between items-center h-full px-2 md:px-4 mx-auto overflow-visible">
     <!-- Logo -->
-    <div class="navbar-logo" (click)="setActive('home')">
-      <img class="logo-icon" src="assets/logo.png" alt="Orang" (click)="goToHome()">
+    <div class="flex items-center cursor-pointer font-bold shrink-0 z-10" (click)="setActive('home')">
+      <img class="h-10 md:h-12 w-auto" src="assets/logo.png" alt="Orang" (click)="goToHome()">
     </div>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-      <input 
-        type="text"
-        class="search-input"
-        placeholder="Wyszukaj"
-      >
-      <span class="search-icon">?</span>
+    <!-- Search Bar (desktop - absolutely centered, hidden below lg breakpoint) -->
+    <div class="hidden lg:block absolute left-1/2 -translate-x-1/2 w-full max-w-xs xl:max-w-sm 2xl:max-w-md px-2 transition-all duration-300 ease-in-out">
+      <div class="relative">
+        <input 
+          type="text"
+          class="w-full py-2.5 pl-4 pr-10 rounded-full border-none text-[var(--o-green)] bg-[var(--o-beige)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--o-green)]/30 transition-all duration-200"
+          placeholder="Wyszukaj"
+        >
+        <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--o-green)]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
     </div>
 
-    <!-- Main Navigation (tylko wizualnie) -->
-    <div class="nav-items">
-      <div class="nav-item"
-        (click)="goToMessages()"
+    <!-- Main Navigation -->
+    <div class="flex gap-2 md:gap-4 justify-end items-center shrink-0 z-10">
+      <!-- Search Icon (visible below lg breakpoint) -->
+      <div 
+        class="lg:hidden relative w-7 h-7 md:w-8 md:h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+        (click)="toggleMobileSearch()"
       >
-        <img [src]="getMessageIcon()">
+        <svg class="w-5 h-5 md:w-6 md:h-6 text-[var(--o-beige)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
       </div>
-      <div class="nav-item"
-        (click)="goToEvents()"
-      >
-        <img [src]="getEventsIcon()">
-      </div>
-      <div class="nav-item"
-        (click)="goToGroups()"
-      >
-        <img [src]="getGroupsIcon()">
-      </div>
-      <div class="nav-item"
-        (click)="goToCompany()"
-      >
-        <img [src]="getCompanyIcon()">
-      </div>
-      <div class="user-menu">
-        <notifications-dropdown> </notifications-dropdown>
-      </div>
-      <!-- User Menu -->
-      <div class="user-menu">
-        <div class="nav-item" (click)="setActive('profile')">
-          <img [src]="currentUser.avatar" alt="Avatar" class="user-avatar"> 
+
+      <!-- Desktop Navigation Icons (visible on md and up) -->
+      <div class="hidden md:flex gap-3 lg:gap-4 items-center">
+        <div 
+          class="relative w-8 h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+          (click)="goToMessages()"
+        >
+          <img class="w-7 h-7 object-contain" [src]="getMessageIcon()">
+        </div>
+        <div 
+          class="relative w-8 h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+          (click)="goToEvents()"
+        >
+          <img class="w-7 h-7 object-contain" [src]="getEventsIcon()">
+        </div>
+        <div 
+          class="relative w-8 h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+          (click)="goToGroups()"
+        >
+          <img class="w-7 h-7 object-contain" [src]="getGroupsIcon()">
+        </div>
+        <div 
+          class="relative w-8 h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+          (click)="goToCompany()"
+        >
+          <img class="w-7 h-7 object-contain" [src]="getCompanyIcon()">
         </div>
       </div>
-      <div class="user-menu">
-        <profile-dropdown> </profile-dropdown>
+
+      <!-- Mobile Menu Button (visible below md) -->
+      <div class="relative md:hidden">
+        <button 
+          class="w-8 h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors"
+          (click)="toggleMobileMenu()"
+        >
+          <svg class="w-6 h-6 text-[var(--o-beige)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h16"/>
+            <path *ngIf="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- Mobile Dropdown -->
+        <div 
+          *ngIf="isMobileMenuOpen" 
+          class="absolute top-full right-0 mt-3 bg-[var(--o-beige)] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-2 border-[var(--o-green)] z-50 min-w-[200px] animate-slideDown overflow-hidden"
+        >
+          <!-- Header -->
+          <div class="px-4 py-3 bg-[var(--o-green)]/5 border-b border-[var(--o-green)]/10">
+            <span class="text-[var(--o-green)] font-semibold text-sm uppercase tracking-wide">Menu</span>
+          </div>
+          <div class="flex flex-col py-1">
+            <div 
+              class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+              (click)="goToMessages(); closeMobileMenu()"
+            >
+              <img class="w-6 h-6 object-contain" [src]="getMessageIcon()">
+              <span class="font-medium">Wiadomości</span>
+            </div>
+            <div 
+              class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+              (click)="goToEvents(); closeMobileMenu()"
+            >
+              <img class="w-6 h-6 object-contain" [src]="getEventsIcon()">
+              <span class="font-medium">Wydarzenia</span>
+            </div>
+            <div 
+              class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+              (click)="goToGroups(); closeMobileMenu()"
+            >
+              <img class="w-6 h-6 object-contain" [src]="getGroupsIcon()">
+              <span class="font-medium">Grupy</span>
+            </div>
+            <div 
+              class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-[var(--o-orange)]/10 text-[var(--o-green)] transition-all duration-200"
+              (click)="goToCompany(); closeMobileMenu()"
+            >
+              <img class="w-6 h-6 object-contain" [src]="getCompanyIcon()">
+              <span class="font-medium">Firmy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="flex items-center overflow-visible" (click)="closeMobileMenu()">
+        <notifications-dropdown></notifications-dropdown>
+      </div>
+
+      <!-- User Avatar -->
+      <div class="flex items-center overflow-visible" (click)="closeMobileMenu()">
+        <div 
+          class="relative w-7 h-7 md:w-8 md:h-8 flex items-center justify-center cursor-pointer rounded-lg hover:bg-white/10 transition-colors" 
+          (click)="setActive('profile')"
+        >
+          <img [src]="currentUser.avatar" alt="Avatar" class="rounded-full w-6 h-6 md:w-7 md:h-7 object-cover"> 
+        </div>
+      </div>
+
+      <!-- Profile Dropdown -->
+      <div class="flex items-center overflow-visible" (click)="closeMobileMenu()">
+        <profile-dropdown></profile-dropdown>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Search Overlay (visible below lg breakpoint when search is open) -->
+<div 
+  *ngIf="isMobileSearchOpen" 
+  class="lg:hidden fixed top-14 left-0 right-0 bg-[var(--o-orange)] p-3 z-[1000] shadow-md animate-slideDown"
+>
+  <div class="relative max-w-md mx-auto">
+    <input 
+      type="text"
+      class="w-full py-2.5 pl-4 pr-10 rounded-full border-none text-[var(--o-green)] bg-[var(--o-beige)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--o-green)]/30 transition-all duration-200"
+      placeholder="Wyszukaj"
+      autofocus
+    >
+    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--o-green)]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Search backdrop -->
+<div *ngIf="isMobileSearchOpen" class="fixed inset-0 z-[999] bg-black/20" (click)="closeMobileSearch()"></div>
+
+<!-- Mobile menu backdrop -->
+<div *ngIf="isMobileMenuOpen" class="fixed inset-0 z-[999]" (click)="closeMobileMenu()"></div>
