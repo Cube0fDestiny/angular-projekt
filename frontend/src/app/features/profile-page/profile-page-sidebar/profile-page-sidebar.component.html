@@ -58,7 +58,7 @@
         (click)="goToFriendProfile(follower.follower)">
         
         <img 
-          [src]="follower.avatarUrl" 
+          [src]="follower.profile_picture_url" 
           [alt]="follower.username"
           class="friend-avatar">
         
@@ -97,7 +97,7 @@
         (click)="goToFriendProfile(friend.id)">
         
         <img 
-          [src]="friend.avatarUrl" 
+          [src]="friend.profile_picture_url" 
           [alt]="friend.name"
           class="friend-avatar">
         
@@ -149,7 +149,7 @@
       </div>
       
       <!-- Empty State -->
-      <div *ngIf="friends.length === 0" class="empty-state">
+      <div *ngIf="groups.length === 0" class="empty-state">
         <div class="empty-icon">👨‍👩‍👧‍👦</div>
         <p>No Groups yet</p>
       </div>

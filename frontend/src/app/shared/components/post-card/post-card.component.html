@@ -10,7 +10,7 @@
   <!-- Post Header -->
   <div class="post-header">
     <div *ngIf="isLoading">Loading...</div>
-    <img *ngIf="user && !isLoading" (click)="goToProfile(user.id)" [src]="user.avatar" [alt]="user.name" class="author-avatar">
+    <img *ngIf="user && !isLoading" (click)="goToProfile(user.id)" [src]="userProfilePicture" [alt]="user.name" class="author-avatar">
     
     <div *ngIf="user && !isLoading" class="author-info">
       <div class="author-name" (click)="goToProfile(user.id)">{{ user.name }}</div>
@@ -82,9 +82,9 @@
     </form>
   </div>
   <!-- Comments Section -->
-  <div class="comments-section" *ngIf="showComments && comments.length > 0">
+  <div class="comments-section" *ngIf="showComments && !loadingComments && comments.length > 0">
     <div class="comment" *ngFor="let comment of comments">
-      <img [src]="comment.user?.avatar||'assets/logo.png'" [alt]="comment.user?.name||'User'" class="comment-avatar">
+      <img [src]="comment.user?.profile_picture_url" [alt]="comment.user?.name||'User'" class="comment-avatar" (click)="goToProfile(comment!.user!.id)">
       
       <div class="comment-content">
         <div class="comment-header">
@@ -98,7 +98,7 @@
         
         <!-- Reply comment -->
         <div *ngIf="!!comment.in_reply_to" class="comment-text">
-          <button (click)="goToProfile(comment.parentUser.id)" class="reply-button">
+          <button (click)="goToProfile(comment.parentUser!.id)" class="reply-button">
             Repling to {{ comment.parentUser?.name }}
           </button>
           {{ comment?.text }}
@@ -129,7 +129,7 @@
               size="small" 
               type="submit"
               untoggleable="true"
-              [disabled]="!comment.replyText?.trim()"
+
             >
               Post
             </orang-button>

@@ -53,7 +53,7 @@ export class FriendListComponent implements OnInit {
   loadUser(): void {
     this.userService.getUserById(this.userId!).subscribe(user => {
       this.user = user;
-      this.sectionTitle = `Users Following "${user.name} ${user.surname}"`;
+      this.sectionTitle = `Friends of "${user.name} ${user.surname}"`;
       if(user.is_company){
         console.log('not a personal profile');
         this.router.navigate(['/']);
@@ -102,14 +102,14 @@ export class FriendListComponent implements OnInit {
             
             // Load avatars for each user
             const avatarObservables = validUsers.map(user => 
-              this.imageService.getImage(user.avatar).pipe(
-                map(avatarUrl => ({
+              this.imageService.getImage(user.profile_picture_id!).pipe(
+                map(profile_picture_url => ({
                   ...user,
-                  avatarUrl: avatarUrl || 'assets/logo_icon.png'
+                  profile_picture_url: profile_picture_url || 'assets/logo_icon.png'
                 })),
                 catchError(() => of({
                   ...user,
-                  avatarUrl: 'assets/logo_icon.png'
+                  profile_picture_url: 'assets/logo_icon.png'
                 }))
               )
             );

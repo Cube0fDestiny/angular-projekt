@@ -6,16 +6,17 @@ export interface User {
   bio?: string | null;
   is_company: boolean;
   created_at?: string;
-  avatar: string;
   header_picture_id?: string;
-  avatarUrl?: string;
+  profile_picture_id?: string;
+  profile_picture_url?: string;
+  header_picture_url?: string;
 }
 
 export interface UserFollower {
   follower: string;
   username: string;
   avatar: string;
-  avatarUrl?: string;
+  profile_picture_url?: string;
 }
 
 export interface IncomingFriendRequest {

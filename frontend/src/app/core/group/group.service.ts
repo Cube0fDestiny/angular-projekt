@@ -23,8 +23,8 @@ export class GroupService {
   }
 
   // 3. Get user's groups (created and followed)
-  getUserGroups(): Observable<Group[]> {
-    return this.http.get<Group[]>(`${this.apiUrl}/user-groups`);
+  getUserGroups(userId: string): Observable<Group[]> {
+    return this.http.get<Group[]>(`${this.apiUrl}/user-groups?id=${userId}`);
   }
 
   // 4. Create new groups
