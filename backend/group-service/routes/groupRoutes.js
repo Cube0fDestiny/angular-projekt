@@ -1,10 +1,10 @@
+
 import express from "express";
-import
-{
+import {
   createGroup,
   getAllGroups,
- getGroupById,
- updateGroup,
+  getGroupById,
+  updateGroup,
   deleteGroup,
   getUserGroups,
   requestGroupJoin,
@@ -12,18 +12,17 @@ import
   getGroupMembers,
   leaveGroup,
   getGroupJoinRequests,
-  GetGroupMemberStatus
-}
-from "../controllers/groupController.js";
-//isQualified = mods and above can delete posts/comments, admins can make mods, owner can make everyone
-import {attachUserFromHeaders,  isQualified, isSuperior, requireAuth} from "../middleware/auth.js";  
+  GetGroupMemberStatus,
+  inviteUserToGroup
+} from "../controllers/groupController.js";
+import { attachUserFromHeaders, isQualified, isSuperior, requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
-router.use(attachUserFromHeaders); 
+router.use(attachUserFromHeaders);
 
 router.get("/", getAllGroups); 
-router.get("/:g_id",getGroupById)
 router.get("/user-groups", getUserGroups);
+router.get("/:g_id",getGroupById)
 router.get("/:id/get_members",getGroupMembers) 
 
 router.get("/:id/get_membership",GetGroupMemberStatus);
@@ -34,6 +33,17 @@ router.put("/:id", requireAuth, isQualified('admin','owner'),updateGroup);
 router.delete("/:id",requireAuth,isQualified('owner'),deleteGroup);
 
 router.post("/",requireAuth, createGroup); 
+
+// Invite user to group (after router is initialized)
+router.post('/:id/invite', requireAuth, isQualified('admin','owner'),
+  (req, res, next) => {
+    if (!req.body.invitedUserId) {
+      return res.status(400).json({ message: 'Brak wymaganych danych: invitedUserId' });
+    }
+    next();
+  },
+  inviteUserToGroup
+);
 
 
 router.post("/:id/leave",requireAuth,leaveGroup) 

@@ -1,3 +1,40 @@
+// Invite a user to a group and publish group.invited event
+export const inviteUserToGroup = async (req, res) => {
+  const log = req.log;
+  const groupId = req.params.id;
+  const inviterId = req.user.id;
+  const { invitedUserId } = req.body;
+  try {
+    // Check if group exists
+    const groupRes = await db.query('SELECT id, name, profile_picture_id FROM "Groups" WHERE id = $1', [groupId]);
+    let groupName = null;
+    let groupProfilePicture = null;
+    if (groupRes.rows.length > 0) {
+      groupName = groupRes.rows[0].name;
+      groupProfilePicture = groupRes.rows[0].profile_picture_id;
+    }
+
+    // Optionally: Add invite record to DB (not implemented here)
+
+    // Build event payload
+    let eventPayload = {
+      groupId,
+      invitedUserId,
+      inviterId
+    };
+    if (groupName) {
+      eventPayload.groupName = groupName;
+      eventPayload.groupProfilePicture = groupProfilePicture;
+    }
+    // Publish event
+    publishEvent('group.invited', eventPayload);
+    log.info({ groupId, invitedUserId, inviterId }, 'Wysłano zaproszenie do grupy');
+    res.status(200).json({ message: 'Zaproszenie wysłane', event: eventPayload });
+  } catch (err) {
+    log.error({ err, groupId, inviterId, invitedUserId }, 'Błąd podczas zapraszania do grupy');
+    res.status(500).json({ error: err.message + ' Błąd podczas zapraszania do grupy' });
+  }
+};
 import * as db from "../db/index.js";
 import { publishEvent } from "../utils/rabbitmq-client.js";
 
@@ -257,45 +294,49 @@ export const deleteGroup= async (req, res) => {
 export const getUserGroups= async (req, res) => {
  
   const log = req.log;
-  const u_id = req.query.id || req.user.id;
-  try
-  {
-    const result = await db.query(
-      `SELECT g.*, 
-      (
-        SELECT user_id
-        FROM "Group_Memberships"
-        WHERE group_id = gm.group_id
-        AND member_type = 'owner'
-        LIMIT 1
-      ) as owner_id
-      FROM "Group_Memberships" as gm
-      JOIN "Groups" AS g ON gm.group_id = g.id
-      WHERE gm.user_id = $1 AND g.deleted = false AND gm.deleted=false AND gm.valid=true
-      `,[u_id] 
-      ,
-    );
-    
-    if (result.rows.length === 0) {
-      log.warn(
-        { eventId: u_id },
-        "Błąd przy znajdowaniu grup użytkownika"
+  const u_id = req.query.id || req.user?.id;
+  try {
+    let result;
+    if (u_id) {
+      // Return groups for a specific user
+      result = await db.query(
+        `SELECT g.*, 
+        (
+          SELECT user_id
+          FROM "Group_Memberships"
+          WHERE group_id = gm.group_id
+          AND member_type = 'owner'
+          LIMIT 1
+        ) as owner_id
+        FROM "Group_Memberships" as gm
+        JOIN "Groups" AS g ON gm.group_id = g.id
+        WHERE gm.user_id = $1 AND g.deleted = false AND gm.deleted=false AND gm.valid=true
+        `, [u_id]
       );
-      return res
-        .status(404)
-        .json({ message: "Błąd przy znajdowaniu grup użytkownika: " + u_id });
+      log.info({ groupId: u_id }, `Pobrano grupy użytkownika:` + u_id);
+    } else {
+      // Return all user-group memberships
+      result = await db.query(
+        `SELECT g.*, 
+        (
+          SELECT user_id
+          FROM "Group_Memberships"
+          WHERE group_id = gm.group_id
+          AND member_type = 'owner'
+          LIMIT 1
+        ) as owner_id,
+        gm.user_id as member_user_id
+        FROM "Group_Memberships" as gm
+        JOIN "Groups" AS g ON gm.group_id = g.id
+        WHERE g.deleted = false AND gm.deleted=false AND gm.valid=true`
+      );
+      log.info(`Pobrano wszystkie grupy użytkowników`);
     }
-
-    log.info({groupId:u_id},
-      `Pobrano grupy użytkownika:`+u_id
-    );
     res.status(200).json(result.rows);
-  }
-  catch (err) {
-    log.error({ err, groupId:u_id }, 
-      "Błąd serwera podczas pobierania grup użytkownika.");
+  } catch (err) {
+    log.error({ err, groupId: u_id }, "Błąd serwera podczas pobierania grup użytkownika.");
     res.status(500).json({
-      error: err.message + " Błąd serwera podczas pobierania grup użytkownika"+ u_id,
+      error: err.message + " Błąd serwera podczas pobierania grup użytkownika" + u_id,
     });
   }
 }
@@ -347,10 +388,21 @@ export const requestGroupJoin= async (req, res) => {
       if(targetGroup.rows[0].free_join===true)
       {
         await db.query(`UPDATE "Group_Memberships" SET deleted =false, valid=true WHERE user_id=$1 AND group_id=$2 `,[user_id,group_id])
-      
+        // Publish group.joined event to group owner
+        const groupData = await db.query('SELECT name, profile_picture_id FROM "Groups" WHERE id = $1', [group_id]);
+        const ownerRes = await db.query('SELECT user_id FROM "Group_Memberships" WHERE group_id = $1 AND member_type = $2 LIMIT 1', [group_id, 'owner']);
+        if (ownerRes.rows.length > 0) {
+          const eventPayload = {
+            groupId: group_id,
+            groupName: groupData.rows[0]?.name || null,
+            groupProfilePicture: groupData.rows[0]?.profile_picture_id || null,
+            joinedUserId: user_id,
+            ownerId: ownerRes.rows[0].user_id
+          };
+          publishEvent('group.joined', eventPayload);
+        }
         log.info("Użytkownik dołączył do grupy " + user_id)
         return res.status(200).json({message: "Użytkownik dołączył do grupy"})
-  
       }
       else
       {
@@ -368,7 +420,19 @@ export const requestGroupJoin= async (req, res) => {
       {
         await db.query(`INSERT INTO "Group_Memberships"(user_id,group_id,valid,member_type)
         VALUES($1,$2,true,'normal_member') RETURNING *`,[user_id,group_id])
-
+        // Publish group.joined event to group owner
+        const groupData = await db.query('SELECT name, profile_picture_id FROM "Groups" WHERE id = $1', [group_id]);
+        const ownerRes = await db.query('SELECT user_id FROM "Group_Memberships" WHERE group_id = $1 AND member_type = $2 LIMIT 1', [group_id, 'owner']);
+        if (ownerRes.rows.length > 0) {
+          const eventPayload = {
+            groupId: group_id,
+            groupName: groupData.rows[0]?.name || null,
+            groupProfilePicture: groupData.rows[0]?.profile_picture_id || null,
+            joinedUserId: user_id,
+            ownerId: ownerRes.rows[0].user_id
+          };
+          publishEvent('group.joined', eventPayload);
+        }
         log.info("Użytkownik dołączył do grupy " + user_id)
         return res.status(200).json({message: "Użytkownik dołączył do grupy"})
       }
