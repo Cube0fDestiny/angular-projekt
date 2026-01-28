@@ -388,10 +388,21 @@ export const requestGroupJoin= async (req, res) => {
       if(targetGroup.rows[0].free_join===true)
       {
         await db.query(`UPDATE "Group_Memberships" SET deleted =false, valid=true WHERE user_id=$1 AND group_id=$2 `,[user_id,group_id])
-      
+        // Publish group.joined event to group owner
+        const groupData = await db.query('SELECT name, profile_picture_id FROM "Groups" WHERE id = $1', [group_id]);
+        const ownerRes = await db.query('SELECT user_id FROM "Group_Memberships" WHERE group_id = $1 AND member_type = $2 LIMIT 1', [group_id, 'owner']);
+        if (ownerRes.rows.length > 0) {
+          const eventPayload = {
+            groupId: group_id,
+            groupName: groupData.rows[0]?.name || null,
+            groupProfilePicture: groupData.rows[0]?.profile_picture_id || null,
+            joinedUserId: user_id,
+            ownerId: ownerRes.rows[0].user_id
+          };
+          publishEvent('group.joined', eventPayload);
+        }
         log.info("Użytkownik dołączył do grupy " + user_id)
         return res.status(200).json({message: "Użytkownik dołączył do grupy"})
-  
       }
       else
       {
@@ -409,7 +420,19 @@ export const requestGroupJoin= async (req, res) => {
       {
         await db.query(`INSERT INTO "Group_Memberships"(user_id,group_id,valid,member_type)
         VALUES($1,$2,true,'normal_member') RETURNING *`,[user_id,group_id])
-
+        // Publish group.joined event to group owner
+        const groupData = await db.query('SELECT name, profile_picture_id FROM "Groups" WHERE id = $1', [group_id]);
+        const ownerRes = await db.query('SELECT user_id FROM "Group_Memberships" WHERE group_id = $1 AND member_type = $2 LIMIT 1', [group_id, 'owner']);
+        if (ownerRes.rows.length > 0) {
+          const eventPayload = {
+            groupId: group_id,
+            groupName: groupData.rows[0]?.name || null,
+            groupProfilePicture: groupData.rows[0]?.profile_picture_id || null,
+            joinedUserId: user_id,
+            ownerId: ownerRes.rows[0].user_id
+          };
+          publishEvent('group.joined', eventPayload);
+        }
         log.info("Użytkownik dołączył do grupy " + user_id)
         return res.status(200).json({message: "Użytkownik dołączył do grupy"})
       }

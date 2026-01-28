@@ -1,3 +1,18 @@
+### Event: `group.joined`
+Publikowany, gdy użytkownik dołącza do grupy (free join lub rejoin). Wysyłany do właściciela grupy.
+
+**Routing key:** `group.joined`
+
+**Payload:**
+```json
+{
+    "groupId": "uuid-group",
+    "groupName": "JavaScript",
+    "groupProfilePicture": "uuid-of-group-image",
+    "joinedUserId": "uuid-joined-user",
+    "ownerId": "uuid-owner"
+}
+```
 ### Zaproszenie użytkownika do grupy
 `POST /:id/invite`
 
