@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem, ApiResponse } from '../../shared/models/user.model';
+import { User, IncomingFriendRequest, OutgoingFriendRequest, FriendListItem, ApiResponse, UserFollower } from '../../shared/models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -29,6 +29,10 @@ export class UserService {
 
   getAllFriends(): Observable<FriendListItem[]> {
     return this.http.get<FriendListItem[]>(`${this.apiUrl}/friends/list`);
+  }
+
+  getAllFollowers(userId: string): Observable<UserFollower[]> {
+    return this.http.get<UserFollower[]>(`${this.apiUrl}/${userId}/followers`);
   }
 
   removeFriend(userId: string): Observable<{message: string}> {

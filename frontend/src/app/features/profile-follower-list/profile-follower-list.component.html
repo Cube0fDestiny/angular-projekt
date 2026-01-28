@@ -1,0 +1,40 @@
+<app-navbar></app-navbar>
+
+<div
+  class="min-h-screen pt-14 flex flex-col bg-cover bg-center [image-rendering:auto]"
+  style="background-image: url('assets/images/orange-grove.png')"
+>
+  <main class="grow flex justify-center items-center p-4 backdrop-blur-[2px]">
+    <app-text-display variant="beige" [title]="sectionTitle" class="max-w-9/10 w-full rounded-xl">
+      <div class="flex justify-center">
+        <orang-button (click)="goToProfile()" [istoggleable]="false">
+          Go Back to Profile
+        </orang-button>
+      </div>
+      <!-- Follower grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" *ngIf="loadedFollowers">
+        <div 
+          *ngFor="let follower of followers" 
+          class="friend-card bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition-colors duration-200 cursor-pointer"
+        >
+          <!-- Custom content goes here -->
+          <div class="flex flex-col items-center text-center">
+            <img 
+              [src]="follower.avatarUrl" 
+              [alt]="follower.username"
+              class="w-16 h-16 rounded-full mb-3 object-cover border-2"
+              (click)="goToFriendProfile(follower.follower)"
+            >
+            <h4 
+              class="font-bold text-[var(--o-green)]"
+              (click)="goToFriendProfile(follower.follower)"
+            >{{ follower.username }}</h4>
+          </div>
+        </div>
+      </div>
+
+    </app-text-display>
+  </main>
+
+  <app-footer></app-footer>
+</div>

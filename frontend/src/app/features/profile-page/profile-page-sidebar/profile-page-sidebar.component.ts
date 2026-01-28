@@ -3,7 +3,7 @@ import { TextDisplayComponent } from '../../../shared/components/text-display/te
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { User, FriendListItem } from '../../../shared/models/user.model';
+import { User, FriendListItem, UserFollower } from '../../../shared/models/user.model';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -37,6 +37,8 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   /** Current logged-in user */
   currentUser!: User | null;
+  followers: UserFollower[] = [];
+  loadedFollowers = false;
 
   isEditingBio = false;
   editedBio = '';
@@ -100,8 +102,13 @@ export class ProfilePageSidebarComponent implements OnInit {
     }
 
     // Load friends
-    this.loadFriends();
+    
     this.loadAllGroups();
+    if(this.user?.is_company){
+      this.loadFollowers();
+    }else{
+      this.loadFriends();
+    }
   }
 
   loadFriends(): void {
@@ -167,6 +174,11 @@ export class ProfilePageSidebarComponent implements OnInit {
     this.router.navigate(['/friends', this.user!.id]);
   }
 
+  goToFollowerList(): void {
+    console.log('navigating to follower list...');
+    this.router.navigate(['/followerlist', this.user!.id]);
+  }
+
   /** Navigate to another user's profile */
   goToFriendProfile(userId: string): void {
     this.userClick.emit(userId);
@@ -215,6 +227,27 @@ export class ProfilePageSidebarComponent implements OnInit {
   /** Open photo (mock) */
   openPhoto(photo: any): void {
     this.photoClick.emit(photo);
+  }
+
+  loadFollowers():void {
+    this.userService.getAllFollowers(this.user!.id).subscribe(followers => {
+      this.followers = followers;
+      console.log('loaded followers');
+      followers.forEach(follower => {
+        if(!follower.avatar){
+          follower.avatarUrl = 'assets/logo_icon.png';
+        }else{
+          this.imageService.getImage(follower.avatar).subscribe({
+            next: (url) => {
+              follower.avatarUrl = url;
+            }
+          });
+        }
+      });
+      this.followers = followers;
+      console.log('loaded follower profiles');
+      this.loadedFollowers = true;
+    })
   }
 }
 

@@ -11,6 +11,13 @@ export interface User {
   avatarUrl?: string;
 }
 
+export interface UserFollower {
+  follower: string;
+  username: string;
+  avatar: string;
+  avatarUrl?: string;
+}
+
 export interface IncomingFriendRequest {
   from_user_id: string;
   created_at: Date;

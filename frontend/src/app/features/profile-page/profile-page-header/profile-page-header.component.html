@@ -56,7 +56,7 @@
         
         
         <!-- STRANGER'S/FRIEND'S PROFILE -->
-        <ng-container *ngIf="!isOwnProfile">
+        <ng-container *ngIf="!isOwnProfile&&!user?.is_company">
           <orang-button *ngIf="!hasFriendRequest&&!didSentFriendRequest&&!isFriend" (click)="onAddFriend(user!.id)" [istoggleable]="false">
             👥 Add Friend
           </orang-button>
@@ -75,6 +75,15 @@
           <!--<orang-button (click)="onMore()">
             ⋮ More
           </orang-button>-->
+        </ng-container>
+
+        <ng-container *ngIf="!isOwnProfile&&user?.is_company">
+          <orang-button *ngIf="!isFollowing" (click)="toggleFollow()" [istoggleable]="false">
+            👥 Follow
+          </orang-button>
+          <orang-button *ngIf="isFollowing" (click)="toggleFollow()" [istoggleable]="false">
+            👥 Unfollow
+          </orang-button>
         </ng-container>
         
       </div>
