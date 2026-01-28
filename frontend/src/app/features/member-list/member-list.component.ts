@@ -11,6 +11,7 @@ import { User } from '../../shared/models/user.model';
 import { forkJoin } from 'rxjs';
 import { Group, GroupMember } from '../../shared/models/group.model';
 import { GroupService } from '../../core/group/group.service';
+import { ImageService } from '../../core/image/image.service';
 
 @Component({
   selector: 'app-member-list',
@@ -31,6 +32,7 @@ export class MemberListComponent implements OnInit {
   user!: User;
   currentUser!: User | null;
   @Output() userClick = new EventEmitter<string>();
+  loadedMembers = false;
 
   sectionTitle = 'Group Members';
   groupId: string | null = null;
@@ -39,7 +41,8 @@ export class MemberListComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -65,6 +68,20 @@ export class MemberListComponent implements OnInit {
     this.groupService.getGroupMembers(this.groupId!).subscribe(members => {
       this.members = members;
       console.log('loaded followers');
+      members.forEach(member => {
+        if(!member.profile_picture_id){
+          member.profile_picture_url = 'assets/logo_icon.png';
+        }else{
+          this.imageService.getImage(member.profile_picture_id).subscribe({
+            next: (url) => {
+              member.profile_picture_url = url;
+            }
+          });
+        }
+      });
+      this.members = members;
+      console.log('loaded member profiles');
+      this.loadedMembers = true;
     })
   }
 
