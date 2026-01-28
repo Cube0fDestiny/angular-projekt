@@ -25,12 +25,14 @@ export interface Post {
   location_type: string;
   created_at: Date;
   deleted?: boolean;
-  images?: {
-    image_id: string;
-    image_order: number;
-  }
+  images?: PostImage[]; 
   orang_count: number;
   comment_count: number;
+}
+
+export interface PostImage {
+  image_id: string;
+  image_order: number;
 }
 
 // Types for creating/updating posts

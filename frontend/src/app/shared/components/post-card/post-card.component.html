@@ -6,7 +6,7 @@
       [src]="post.imageUrl" 
       [alt]="'Image in post by ' + post.author.name"
       class="post-image" >-->
-    <img src="assets/images/orange-grove.png" alt="Orang">
+    <img [src]="mainImage" alt="Orang" *ngIf="loadedMainImage">
   <!-- Post Header -->
   <div class="post-header">
     <div *ngIf="isLoading">Loading...</div>
@@ -195,6 +195,12 @@
       >
         Delete Post
       </orang-button>
+
+      <app-image-upload
+        (imageUploaded)="changeMainImage($event)"
+        buttonText="Change Image"
+        >
+      </app-image-upload>
 
       <orang-button 
         size="small" 

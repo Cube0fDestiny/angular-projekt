@@ -11,6 +11,9 @@ import { User } from '../../../shared/models/user.model';
 import { ImageService } from '../../../core/image/image.service';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { PortalModule } from '@angular/cdk/portal';
 
 interface EnrichedComment {
   id: string;
@@ -32,7 +35,7 @@ interface EnrichedComment {
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.scss'],
   standalone: true,
-  imports: [NgIf, FormsModule, NgFor, TextDisplayComponent, OrangButtonComponent],
+  imports: [NgIf, FormsModule, NgFor, TextDisplayComponent, OrangButtonComponent, ImageUploadComponent, OverlayModule, PortalModule],
 })
 export class PostCardComponent implements OnInit, OnDestroy {
   @Input() post!: Post;
@@ -71,6 +74,9 @@ export class PostCardComponent implements OnInit, OnDestroy {
   showEditPostForm = false;
   editPostText = '';
 
+  mainImage = 'assets/images/orange-grove.png';
+  loadedMainImage = false;
+
   private subscriptions = new Subscription();
 
   constructor(
@@ -79,6 +85,18 @@ export class PostCardComponent implements OnInit, OnDestroy {
     private router: Router,
     private imageService: ImageService
   ) {}
+
+  changeMainImage(imageId: string):void {
+    this.postService.updatePost(this.post.id, {main_image_id: imageId}).subscribe({
+      next: (res) => {
+        console.log('succesfully updated main iamge: ', res);
+        this.loadMainImage();
+      },
+      error: (error) => {
+        console.error('failed to update main image: ', error);
+      }
+    });
+  }
 
   ngOnInit() {
     console.log(this.post);
@@ -96,10 +114,32 @@ export class PostCardComponent implements OnInit, OnDestroy {
 
     // Check reaction status
     this.getUserReaction();
+    this.loadMainImage()
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  loadMainImage() {
+    if(!this.post.images?.[0]?.image_id){
+      this.mainImage = 'assets/images/orange-grove.png';
+      this.loadedMainImage = true;
+    } else {
+      this.imageService.getImage(this.post.images?.[0]?.image_id).subscribe({
+        next: (url) => {
+          this.mainImage = url;
+          this.loadedMainImage = true;
+          console.log('laoded main image: ', url);
+        },
+        error: (error) => {
+          console.error('failed to load main image: ', error);
+          this.mainImage = 'assets/images/orange-grove.png';
+          this.loadedMainImage = true;
+        }
+      });
+    }
+    
   }
 
   /* ============================
@@ -281,7 +321,7 @@ export class PostCardComponent implements OnInit, OnDestroy {
       return;
     }
     
-    this.postService.updatePost(this.post.id, this.editPostText).subscribe({
+    this.postService.updatePost(this.post.id, {content: this.editPostText}).subscribe({
       next: (updatedPost) => {
         this.post.Text = updatedPost.Text;
         this.showEditPostForm = false;
