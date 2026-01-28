@@ -1,4 +1,6 @@
-// Invite a user to a group and publish group.invited event
+import * as db from "../db/index.js";
+import { publishEvent } from "../utils/rabbitmq-client.js";
+
 export const inviteUserToGroup = async (req, res) => {
   const log = req.log;
   const groupId = req.params.id;
@@ -35,8 +37,6 @@ export const inviteUserToGroup = async (req, res) => {
     res.status(500).json({ error: err.message + ' Błąd podczas zapraszania do grupy' });
   }
 };
-import * as db from "../db/index.js";
-import { publishEvent } from "../utils/rabbitmq-client.js";
 
 export const getAllGroups= async (req, res) => {
   const log = req.log;

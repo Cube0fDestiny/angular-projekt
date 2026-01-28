@@ -134,7 +134,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   chat-service:
     image: noka993/chat-service
