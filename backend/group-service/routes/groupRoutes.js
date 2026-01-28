@@ -1,4 +1,3 @@
-
 import express from "express";
 import {
   createGroup,
@@ -13,28 +12,34 @@ import {
   leaveGroup,
   getGroupJoinRequests,
   GetGroupMemberStatus,
-  inviteUserToGroup
+  inviteUserToGroup,
+  getFriendsByUserId  // <-- Add this import
 } from "../controllers/groupController.js";
 import { attachUserFromHeaders, isQualified, isSuperior, requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(attachUserFromHeaders);
 
+// ===== STATIC ROUTES FIRST =====
 router.get("/", getAllGroups); 
 router.get("/user-groups", getUserGroups);
-router.get("/:g_id",getGroupById)
-router.get("/:id/get_members",getGroupMembers) 
 
-router.get("/:id/get_membership",GetGroupMemberStatus);
-router.get("/:id/applications",requireAuth,isQualified('admin','owner'),getGroupJoinRequests)
+// Friends routes (MUST be before /:g_id to avoid conflict)
+router.get("/user/:user_id/friends", getFriendsByUserId);
+router.get("/me/friends", requireAuth, getFriendsByUserId);
 
-router.put("/:id", requireAuth, isQualified('admin','owner'),updateGroup); 
+// ===== DYNAMIC :id ROUTES =====
+router.get("/:g_id", getGroupById);
+router.get("/:id/get_members", getGroupMembers);
+router.get("/:id/get_membership", GetGroupMemberStatus);
+router.get("/:id/applications", requireAuth, isQualified('admin','owner'), getGroupJoinRequests);
 
-router.delete("/:id",requireAuth,isQualified('owner'),deleteGroup);
+router.put("/:id", requireAuth, isQualified('admin','owner'), updateGroup);
 
-router.post("/",requireAuth, createGroup); 
+router.delete("/:id", requireAuth, isQualified('owner'), deleteGroup);
 
-// Invite user to group (after router is initialized)
+router.post("/", requireAuth, createGroup);
+
 router.post('/:id/invite', requireAuth, isQualified('admin','owner'),
   (req, res, next) => {
     if (!req.body.invitedUserId) {
@@ -45,15 +50,8 @@ router.post('/:id/invite', requireAuth, isQualified('admin','owner'),
   inviteUserToGroup
 );
 
-
-router.post("/:id/leave",requireAuth,leaveGroup) 
-
-router.post("/:id/alter_member",requireAuth,isSuperior,changeUserMemberStatus); 
-
-
-
-
-router.post("/:group_id/join",requireAuth,requestGroupJoin)
+router.post("/:id/leave", requireAuth, leaveGroup);
+router.post("/:id/alter_member", requireAuth, isSuperior, changeUserMemberStatus);
+router.post("/:group_id/join", requireAuth, requestGroupJoin);
 
 export default router;
-//router.

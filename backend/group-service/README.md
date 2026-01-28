@@ -63,7 +63,40 @@ Publikowany, gdy użytkownik zostaje zaproszony do grupy.
     "inviterId": "uuid-inviter"
 }
 ```
+
 ## 🚀 Istniejące Endpointy
+
+### Nowy endpoint: Pobranie znajomych użytkownika
+`GET /user/:user_id/friends`
+
+**Endpoint publiczny**
+Zwraca listę zaakceptowanych znajomych użytkownika o podanym `user_id`.
+
+**Parametry:**
+| Parametr | Typ | Opis |
+|---|---|---|
+| :user_id | uuid | ID użytkownika |
+
+**Odpowiedź (200 OK):**
+```json
+[
+    {
+        "user_id": "uuid",
+        "name": "string",
+        "surname": "string",
+        "profile_picture_id": "uuid",
+        "profile_header": "uuid",
+        "friends_since": "timestamp",
+        "status": "accepted"
+    }
+]
+```
+
+**Możliwe błędy:**
+- 400: Brak wymaganego parametru user_id
+- 500: Błąd serwera podczas pobierania znajomych użytkownika
+
+---
 
 ### 1. Pobranie wszystkich grup
 `GET /`

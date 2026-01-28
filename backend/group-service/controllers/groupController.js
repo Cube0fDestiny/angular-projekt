@@ -711,3 +711,66 @@ export const leaveGroup = async(req,res)=>
     });
   }
 }
+
+export const getFriendsByUserId = async (req, res) => {
+  const log = req.log;
+  const userId = req.params.user_id || req.query.user_id || req.user?.id;
+
+  if (!userId) {
+    return res.status(400).json({ message: "Brak wymaganego parametru user_id" });
+  }
+
+  try {
+    const result = await db.query(
+      `
+      SELECT 
+        u.user_id,
+        u.name,
+        u.surname,
+        u.profile_picture_id,
+        u.profile_header,
+        f.created_at as friends_since
+      FROM "Friendships" f
+      INNER JOIN "Users" u ON u.user_id = f.requestee
+      WHERE f.requester = $1
+        AND f.active = true
+        AND f.deleted = false
+        AND u.deleted = false
+      
+      UNION
+      
+      SELECT 
+        u.user_id,
+        u.name,
+        u.surname,
+        u.profile_picture_id,
+        u.profile_header,
+        f.created_at as friends_since
+      FROM "Friendships" f
+      INNER JOIN "Users" u ON u.user_id = f.requester
+      WHERE f.requestee = $1
+        AND f.active = true
+        AND f.deleted = false
+        AND u.deleted = false
+      
+      ORDER BY friends_since DESC
+      `,
+      [userId]
+    );
+
+    log.info(
+      { userId, friendCount: result.rowCount },
+      "Pobrano listę znajomych użytkownika."
+    );
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    log.error(
+      { err, userId },
+      "Błąd serwera podczas pobierania znajomych użytkownika."
+    );
+    res.status(500).json({
+      error: err.message + " Błąd serwera podczas pobierania znajomych użytkownika: " + userId,
+    });
+  }
+};
