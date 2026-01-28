@@ -131,14 +131,14 @@
             <button
               type="button"
               class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
-              >
+              (click)="acceptGroupJoinRequest(notification.id, notification.data.groupId, notification.data.invitedUserId)">
               Accept
             </button>
             <!-- Reject Button -->
             <button
               type="button"
               class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
-              >
+              (click)="rejectGroupJoinRequest(notification.id, notification.data.groupId, notification.data.invitedUserId)">
               Reject
             </button>
           </div>

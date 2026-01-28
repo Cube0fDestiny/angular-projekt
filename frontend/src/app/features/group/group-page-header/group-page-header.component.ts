@@ -19,7 +19,6 @@ import { Observable, of } from 'rxjs';
 export class GroupPageHeaderComponent implements OnInit {
   @Input() user: User | null = null;
   @Input() isOwnGroup = false;
-  @Input() isFriend = false;
   headerImageUrl: string = '';
   profileImageUrl: string = '';
 
@@ -97,6 +96,29 @@ export class GroupPageHeaderComponent implements OnInit {
     this.loadGroup();
   }
 
+  joinGroup():void{
+    this.groupService.sendJoinGroupRequest(this.groupId!).subscribe({
+      next: (res) => {
+        console.log('succesfully send group join innvite: ', res);
+      },
+      error: (error) => {
+        console.error('failed to send group join request: ', error);
+      }
+    });
+  }
+
+  leaveGroup():void{
+    this.groupService.leaveGroup(this.groupId!).subscribe({
+      next: (res) => {
+        console.log('succesfully left group: ', res);
+        this.isFollowing = !this.isFollowing;
+      },
+      error: (error) => {
+        console.error('failed to leave group: ', error);
+      }
+    });
+  }
+
   onHeaderImageUploaded(imageId: string): void{
     this.groupService.updateGroup(this.groupId!, {header_picture_id: imageId}).subscribe({
       next: () => {
@@ -135,18 +157,17 @@ export class GroupPageHeaderComponent implements OnInit {
   }
 
   loadFollowingState():void {
-    this.groupService.getGroupMembers(this.groupId!).subscribe(members => {
-      this.members = members;
-      members.forEach(member => {
-        if(member.user_id==this.currentUser!.id){
-          this.isFollowing = true;
-        }
-        else {
-          this.isFollowing = false;
-        }
-        console.log('loaded member status');
-      });
-    })
+    this.groupService.getGroupMembers(this.groupId!).subscribe({
+      next: (members) => {
+        this.members = members;
+        members.forEach(member => {
+          if(member.user_id==this.currentUser!.id){
+            this.isFollowing = true;
+          }
+          console.log('loaded member status');
+        });
+      }
+    });
   }
 
 }

@@ -32,6 +32,7 @@ export class ProfilePageHeaderComponent implements OnInit {
     posts: 0,
     photos: 0
   };
+  showImage = false;
 
   @Output() editProfile = new EventEmitter<void>();
   @Output() addStory = new EventEmitter<void>();
@@ -59,28 +60,27 @@ export class ProfilePageHeaderComponent implements OnInit {
     this.userId = this.route.snapshot.paramMap.get('id');
 
     // Load profile data
-    this.loadUser(this.userId);
+    this.loadUser();
   }
 
-  loadUser(userId: string | null): void {
-    if (!userId || userId === this.currentUser?.id) {
-      // Show current user's profile
-      this.user = this.currentUser;
-      this.isOwnProfile = true;
-      this.isFriend = false;
-    } else {
-      // Fetch another user's profile
-      this.userService.getUserById(userId).subscribe(u => {
-        this.user = u;
-        this.isOwnProfile = false;
+  loadUser():void{
+    this.userService.getUserById(this.userId!).subscribe({
+      next: (user) => {
+        if(this.userId === this.currentUser?.id){
+          this.isOwnProfile = true;
+          this.isFriend = false;
+        } else {
+          this.isOwnProfile = false;
+        }
+        this.user = user;
         this.loadFriendRequestsOutgoing();
         this.loadFriendRequestsIncoming();
         this.loadFriendStatus();
-      });
-    }
-    this.getHeaderUrl();
-    this.getProfileUrl();
-    console.log('Profile for user:', this.user);
+        this.getHeaderUrl();
+        this.getProfileUrl();
+        console.log('Profile for user:', this.user);
+      }
+    });
   }
 
   removeFriend(userId: string): void {
@@ -238,12 +238,14 @@ export class ProfilePageHeaderComponent implements OnInit {
   getProfileUrl(): void {
     if (!this.user?.profile_picture_id) {
       this.profileImageUrl = this.profileImage;
+      this.showImage = true;
       return;
     }
     
     this.imageService.getImage(this.user.profile_picture_id).subscribe({
       next: (imageUrl) => {
         this.profileImageUrl = imageUrl;
+        this.showImage = true;
         console.log('laoded profile image');
       },
       error: (error) => {
@@ -255,8 +257,8 @@ export class ProfilePageHeaderComponent implements OnInit {
 
   onHeaderImageUploaded(imageId: string): void{
     this.userService.updateProfile(this.userId!, {header_picture_id: imageId}).subscribe({
-      next: () => {
-        console.log('changed header picture');
+      next: (message) => {
+        console.log('changed header picture: ', message);
         this.getHeaderUrl();
       },
       error: (error) => {
@@ -266,9 +268,10 @@ export class ProfilePageHeaderComponent implements OnInit {
   }
 
   onProfileImageUploaded(imageId: string): void{
+    console.log('trying to upload profile image: ', imageId);
     this.userService.updateProfile(this.userId!, {profile_picture_id: imageId}).subscribe({
-      next: () => {
-        console.log('changed profile picture');
+      next: (message) => {
+        console.log('changed profile picture: ', message);
         this.getProfileUrl();
       },
       error: (error) => {

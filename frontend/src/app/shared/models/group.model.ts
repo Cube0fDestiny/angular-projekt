@@ -6,6 +6,7 @@ export interface Group {
   header_picture_id?: string;
   profile_picture_id?: string;
   created_at?: string;
+  free_join?: boolean;
   member_data: {
     members: number;
     owner_id: string;

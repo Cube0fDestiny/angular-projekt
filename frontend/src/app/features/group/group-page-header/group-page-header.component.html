@@ -42,12 +42,15 @@
       <!-- 3 BUTTONS (Dynamic based on relationship) -->
       <div class="profile-actions">
         <ng-container *ngIf="!isOwnGroup">
-          <orang-button *ngIf="!isFollowing"  [istoggleable]="false">
+          <orang-button *ngIf="!isFollowing" (click)="joinGroup()" [istoggleable]="false">
             👥 Join
           </orang-button>
-          <orang-button *ngIf="isFollowing" [istoggleable]="false">
+          <orang-button *ngIf="isFollowing" (click)="leaveGroup()" [istoggleable]="false">
             👥 Leave
           </orang-button>
+          <!--<orang-button *ngIf="hasJoinRequest&&!isFollowing" [istoggleable]="false">
+            👥 Pending Responce
+          </orang-button> -->
         </ng-container>
         
       </div>

@@ -9,6 +9,7 @@ import { NotificationService } from '../../../../core/notification/notification.
 import { ImageService } from '../../../../core/image/image.service';
 import { PostService } from '../../../../core/post/post.service';
 import { Post } from '../../../models/post.model';
+import { GroupService } from '../../../../core/group/group.service';
 
 @Component({
   selector: 'notifications-dropdown',
@@ -35,7 +36,8 @@ export class NotificationsDropdownComponent implements OnInit {
     private userService: UserService,
     private notificationService: NotificationService,
     private imageService: ImageService,
-    private postService: PostService
+    private postService: PostService,
+    private groupService: GroupService
   ) {}
 
   ngOnInit(): void {
@@ -85,6 +87,44 @@ export class NotificationsDropdownComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error accepting friend request:', error);
+      }
+    });
+  }
+
+  acceptGroupJoinRequest(notificationId: string, groupId: string, userId: string):void {
+    this.groupService.alterGourpMember(groupId, {action: 'accept', target_user: userId}).subscribe({
+      next: (response) => {
+        console.log('Grouup join request accepted:', response.message);
+        this.notificationService.deleteNotification(notificationId).subscribe({
+          next: (message) => {
+            console.log('deleted notification: ', message);
+          },
+          error: (error) => {
+            console.error('failed to delere notification: ', error);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error accepting group join request:', error);
+      }
+    });
+  }
+
+  rejectGroupJoinRequest(notificationId: string, groupId: string, userId: string):void {
+    this.groupService.alterGourpMember(groupId, {action: 'kick', target_user: userId}).subscribe({
+      next: (response) => {
+        console.log('Grouup join request accepted:', response.message);
+        this.notificationService.deleteNotification(notificationId).subscribe({
+          next: (message) => {
+            console.log('deleted notification: ', message);
+          },
+          error: (error) => {
+            console.error('failed to delere notification: ', error);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error accepting group join request:', error);
       }
     });
   }
