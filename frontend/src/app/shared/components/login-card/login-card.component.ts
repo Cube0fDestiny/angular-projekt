@@ -22,6 +22,7 @@ export class LoginCardComponent {
   password = '';
   newName = '';
   newSurname = '';
+  isCompany = false;
   errorMessage: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -47,7 +48,7 @@ export class LoginCardComponent {
         surname: this.newSurname,
         email: this.email,
         password: this.password,
-        is_company: false
+        is_company: this.isCompany
       }).subscribe({
         next: res => {
           console.log('Registered:', res);

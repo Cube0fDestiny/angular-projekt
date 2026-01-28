@@ -25,10 +25,16 @@
              class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 outline-none focus:ring-2 focus:ring-orange-400" />
     </div>
 
+
     <div class="mb-12 text-left">
       <label class="mb-2 block text-sm text-gray-800">Password</label>
       <input name="password" [(ngModel)]="password" type="password" placeholder="Password" 
              class="w-full rounded-md border border-gray-200 bg-gray-50 p-3 outline-none focus:ring-2 focus:ring-orange-400" />
+    </div>
+
+    <div *ngIf="isRegisterPage" class="mb-6 text-left flex items-center gap-2">
+      <input type="checkbox" id="isCompany" name="isCompany" [(ngModel)]="isCompany" class="accent-[var(--o-orange)] w-4 h-4" />
+      <label for="isCompany" class="text-sm text-gray-800 select-none cursor-pointer">Register as a company</label>
     </div>
 
     <orang-button type="submit">
