@@ -1,9 +1,11 @@
 <div class="left-sidebar">
   
   <!-- User Profile Shortcut -->
-  <div class="user-shortcut" *ngIf="currentUser" routerLink="/profile">
-    <img [src]="currentUser.avatar" alt="Profile" class="user-avatar">
-    <span class="user-name">{{ currentUser.name }}</span>
+  <div class="user-shortcut" *ngIf="currentUser">
+    <span style="display: flex; align-items: center; cursor: pointer;" (click)="goToProfile(currentUser.id)">
+      <img [src]="currentUser.avatar" alt="Profile" class="user-avatar">
+      <span class="user-name" style="margin-left: 8px;">{{ currentUser.name }}</span>
+    </span>
   </div>
   
   <!-- Quick Actions -->
@@ -24,36 +26,47 @@
   <div class="section groups-section">
     <div class="section-header">
       <h3 class="section-title">Your Groups</h3>
-      <orang-button size="small">See All</orang-button>
+      <orang-button size="small" (click)="goToGroups()">See All</orang-button>
     </div>
-    
     <div class="groups-list">
-      <div 
-        *ngFor="let group of groups"
-        class="group-item"
-        [class.joined]="group.isJoined"
-        (click)="onGroupClick(group)">
-        
-        <div class="group-icon">{{ group.icon }}</div>
-        
-        <div class="group-info">
-          <h4 class="group-name">{{ group.name }}</h4>
-          <div class="group-meta">
-            <span class="group-type">{{ group.type }}</span>
-           <!-- <span class="group-members">👥 {{ group.members | number }}</span>-->
+      <div *ngIf="groups.length === 0" class="empty-message" style="padding: 12px; color: var(--o-green); opacity: 0.7;">You are not a member of any groups yet.</div>
+        <div 
+          *ngFor="let group of groups"
+          class="group-item"
+          (click)="onGroupClick(group)">
+          <img [src]="group.profileImageUrl || defaultImage" alt="Group" class="group-avatar" style="width:32px;height:32px;object-fit:cover;border-radius:6px;margin-right:10px;">
+          <div class="group-info">
+            <h4 class="group-name">{{ group.name }}</h4>
+            <div class="group-meta">
+              <span class="group-members">{{ group.member_data?.members || 0 }} {{ group.member_data?.members === 1 ? 'member' : 'members' }}</span>
+            </div>
           </div>
+          <orang-button size="small">View</orang-button>
         </div>
-        
-        <orang-button 
-          [isActive]="!group.isJoined"
-          size="small"
-          (click)="joinGroup(group.id); $event.stopPropagation()">
-          {{ group.isJoined ? 'Joined' : 'Join' }}
-        </orang-button>
-      </div>
     </div>
   </div>
   
+    <!-- Proposed Groups (now below Your Groups) -->
+    <div class="section proposed-groups-section" *ngIf="proposedGroups.length > 0">
+      <div class="section-header">
+        <h3 class="section-title">Proposed Groups</h3>
+      </div>
+      <div class="groups-list">
+        <div 
+          *ngFor="let group of proposedGroups"
+          class="group-item"
+          (click)="onGroupClick(group)">
+          <img [src]="group.profileImageUrl || defaultImage" alt="Group" class="group-avatar" style="width:32px;height:32px;object-fit:cover;border-radius:6px;margin-right:10px;">
+          <div class="group-info">
+            <h4 class="group-name">{{ group.name }}</h4>
+            <div class="group-meta">
+              <span class="group-members">{{ group.member_data?.members || 0 }} {{ group.member_data?.members === 1 ? 'member' : 'members' }}</span>
+            </div>
+          </div>
+          <orang-button size="small">View</orang-button>
+        </div>
+      </div>
+    </div>
   <!-- Organizations -->
   <div class="section orgs-section" *ngIf="organizations.length > 0">
     <div class="section-header">

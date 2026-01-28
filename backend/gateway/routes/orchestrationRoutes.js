@@ -1,33 +1,4 @@
-// Proxy group invite to group-service
-router.post('/groups/:id/invite', requireAuth, async (req, res) => {
-  const log = req.log;
-  const { id } = req.params;
-  try {
-    const response = await axios.post(
-      `http://group-service:3005/groups/${id}/invite`,
-      req.body,
-      {
-        headers: {
-          'x-user-data': req.headers['x-user-data'],
-          'content-type': 'application/json',
-        },
-      }
-    );
-    res.status(response.status).json(response.data);
-  } catch (error) {
-    const errorInfo = error.isAxiosError
-      ? {
-          message: error.message,
-          url: error.config?.url,
-          status: error.response?.status,
-          data: error.response?.data,
-        }
-      : { message: error.message, stack: error.stack };
-    log.error({ err: errorInfo }, 'Błąd proxy zaproszenia do grupy');
-    const status = error.response?.status || 500;
-    res.status(status).json(errorInfo);
-  }
-});
+// ...existing code...
 import express from "express";
 import multer from "multer";
 import axios from "axios";

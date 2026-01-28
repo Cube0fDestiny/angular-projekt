@@ -1,70 +1,117 @@
+// ...existing imports...
+import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { UserService } from '../../../core/user/user.service';
+import { GroupService } from '../../../core/group/group.service';
+import { ImageService } from '../../../core/image/image.service';
 import { NgFor, NgIf } from '@angular/common';
-import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
+import { RouterModule } from '@angular/router';
+import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
 @Component({
   selector: 'app-left-sidebar',
   templateUrl: './left-sidebar.component.html',
-  imports: [NgFor, NgIf, OrangButtonComponent],
-  styleUrls: ['./left-sidebar.component.scss']
+  imports: [NgFor, NgIf, OrangButtonComponent, RouterModule],
+  styleUrls: ['./left-sidebar.component.scss'],
 })
 export class LeftSidebarComponent {
-
   currentUser: any;
-    
-    constructor(private userService: UserService) {}
-    
-    ngOnInit() {
-      console.log("FSDJFDSHDS")
-      // Subscribe to global user changes
-      this.userService.currentUser$.subscribe(user => {
-        this.currentUser = user;  // Updates automatically!
-      });
-    }
-  // Groups data
-  groups = [
-    {
-      id: 1,
-      name: 'Angular Developers',
-      icon: '🅰️',
-      members: 2450,
-      type: 'public',
-      isJoined: true
-    },
-    {
-      id: 2,
-      name: 'Web Designers',
-      icon: '🎨',
-      members: 1890,
-      type: 'private',
-      isJoined: true
-    },
-    {
-      id: 3,
-      name: 'JavaScript Enthusiasts',
-      icon: '📜',
-      members: 5670,
-      type: 'public',
-      isJoined: false
-    },
-    {
-      id: 4,
-      name: 'DEV 2 Team',
-      icon: '🚀',
-      members: 12,
-      type: 'private',
-      isJoined: true
-    },
-    {
-      id: 5,
-      name: 'Open Source',
-      icon: '🔓',
-      members: 3200,
-      type: 'public',
-      isJoined: true
-    }
-  ];
-  
+  groups: any[] = [];
+  proposedGroups: any[] = [];
+
+  defaultImage = 'assets/logo_icon.png';
+
+  constructor(
+    private userService: UserService,
+    private groupService: GroupService,
+    private imageService: ImageService,
+    private router: Router,
+  ) {}
+  goToGroups(): void {
+    this.router.navigate(['/groups']);
+  }
+
+  goToProfile(userId: string): void {
+    this.router.navigate(['/']).then(() => {
+      this.router.navigate(['/profile', userId]);
+    });
+  }
+  ngOnInit() {
+    this.userService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+    });
+    this.groupService.getUserGroups().subscribe({
+      next: (groups) => {
+        if (!groups || groups.length === 0) {
+          this.groups = [];
+          this.loadProposedGroups();
+          return;
+        }
+        // For each group, fetch member_data from getGroupById
+        const groupFetches = groups.map((group) =>
+          this.groupService
+            .getGroupById(group.id)
+            .toPromise()
+            .then((fullGroup) =>
+              fullGroup && fullGroup.member_data
+                ? { ...group, member_data: fullGroup.member_data }
+                : group,
+            ),
+        );
+        Promise.all(groupFetches)
+          .then((fullGroups) => {
+            this.groups = fullGroups;
+            this.loadGroupImages(this.groups);
+            this.loadProposedGroups();
+          })
+          .catch((err) => {
+            this.groups = groups; // fallback to basic data
+            this.loadGroupImages(this.groups);
+            this.loadProposedGroups();
+            console.error('Failed to fetch full group data:', err);
+          });
+      },
+      error: (err) => {
+        this.groups = [];
+        this.loadProposedGroups();
+        console.error('Failed to load user groups:', err);
+      },
+    });
+  }
+
+  loadProposedGroups(): void {
+    this.groupService.getAllGroups().subscribe({
+      next: (allGroups: any[]) => {
+        const userGroupIds = new Set(this.groups.map((g: any) => g.id));
+        this.proposedGroups = allGroups
+          .filter((g: any) => !userGroupIds.has(g.id))
+          .slice(0, 5);
+        this.loadGroupImages(this.proposedGroups);
+      },
+      error: (err: any) => {
+        this.proposedGroups = [];
+        console.error('Failed to load proposed groups:', err);
+      },
+    });
+  }
+
+  loadGroupImages(groups: any[]): void {
+    if (!groups) return;
+    groups.forEach((group) => {
+      if (group.profile_picture_id) {
+        this.imageService.getImage(group.profile_picture_id).subscribe({
+          next: (imageUrl: string) => {
+            group.profileImageUrl = imageUrl;
+          },
+          error: () => {
+            group.profileImageUrl = this.defaultImage;
+          },
+        });
+      } else {
+        group.profileImageUrl = this.defaultImage;
+      }
+    });
+  }
+
   // Organizations
   organizations = [
     {
@@ -72,47 +119,47 @@ export class LeftSidebarComponent {
       name: 'Tech Corp',
       icon: '🏢',
       category: 'Technology',
-      members: 540
+      members: 540,
     },
     {
       id: 2,
       name: 'Design Hub',
       icon: '✨',
       category: 'Design',
-      members: 320
+      members: 320,
     },
     {
       id: 3,
       name: 'Startup Inc',
       icon: '💡',
       category: 'Startup',
-      members: 89
-    }
+      members: 89,
+    },
   ];
-  
+
   // Quick actions
   quickActions = [
     { label: 'Create Group', icon: '➕', action: 'createGroup' },
     { label: 'Discover', icon: '🔍', action: 'discover' },
     { label: 'Events', icon: '📅', action: 'events' },
-    { label: 'Memories', icon: '📸', action: 'memories' }
+    { label: 'Memories', icon: '📸', action: 'memories' },
   ];
-  
+
   onGroupClick(group: any): void {
     console.log('Group clicked:', group.name);
     // Navigate to group page or show details
   }
-  
+
   onOrgClick(org: any): void {
     console.log('Organization clicked:', org.name);
   }
-  
+
   onQuickAction(action: string): void {
     console.log('Quick action:', action);
   }
-  
+
   joinGroup(groupId: number): void {
-    const group = this.groups.find(g => g.id === groupId);
+    const group = this.groups.find((g) => g.id === groupId);
     if (group) {
       group.isJoined = !group.isJoined;
       console.log(group.isJoined ? 'Joined' : 'Left', group.name);
