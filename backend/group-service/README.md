@@ -61,28 +61,41 @@ Pobiera konkretną grupę o id g_id.
 
 
 ### 3. Pobranie konkretnej grupy
-`GET /user-groups` (ewentualnie ?id={id wyszukiwanego użytkwnika})
+`GET /user-groups?id={user_id}`
 
 **Endpoint publiczny**
-Pobiera listę wszystkich grup których członkiem jest użytkwonik
-  
+Pobiera listę wszystkich grup, których członkiem jest użytkownik o podanym `user_id`.
+- Jeśli nie podano `id`, zwraca grupy aktualnie zalogowanego użytkownika (na podstawie tokena).
+- Jeśli nie podano `id` i nie ma zalogowanego użytkownika, zwraca wszystkie powiązania użytkowników z grupami (wszystkie członkostwa).
 
-**Odpowiedź (200 OK):**
-
-```json 
+**Odpowiedź (200 OK) dla zapytania z `id`:**
+```json
 [
-   {
-    "id": uuid,
-    "bio": string,
-    "header_picture_id": uuid,
-    "profile_picture_id": uuid,
-    "name": string,
-    "created_at": timestamp,
-    "member_data": {
-        "members": int,
-        "owner_id": uuid
+    {
+        "id": "...",
+        "bio": "...",
+        "header_picture_id": "...",
+        "profile_picture_id": "...",
+        "name": "...",
+        "created_at": "...",
+        "owner_id": "..."
     }
-  }
+]
+```
+
+**Odpowiedź (200 OK) dla zapytania bez `id` (wszystkie członkostwa):**
+```json
+[
+    {
+        "id": "...",
+        "bio": "...",
+        "header_picture_id": "...",
+        "profile_picture_id": "...",
+        "name": "...",
+        "created_at": "...",
+        "owner_id": "...",
+        "member_user_id": "..."
+    }
 ]
 ```
 ### 4. Pobranie listy członków grupy

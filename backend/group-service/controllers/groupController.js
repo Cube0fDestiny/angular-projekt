@@ -257,45 +257,49 @@ export const deleteGroup= async (req, res) => {
 export const getUserGroups= async (req, res) => {
  
   const log = req.log;
-  const u_id = req.query.id || req.user.id;
-  try
-  {
-    const result = await db.query(
-      `SELECT g.*, 
-      (
-        SELECT user_id
-        FROM "Group_Memberships"
-        WHERE group_id = gm.group_id
-        AND member_type = 'owner'
-        LIMIT 1
-      ) as owner_id
-      FROM "Group_Memberships" as gm
-      JOIN "Groups" AS g ON gm.group_id = g.id
-      WHERE gm.user_id = $1 AND g.deleted = false AND gm.deleted=false AND gm.valid=true
-      `,[u_id] 
-      ,
-    );
-    
-    if (result.rows.length === 0) {
-      log.warn(
-        { eventId: u_id },
-        "Błąd przy znajdowaniu grup użytkownika"
+  const u_id = req.query.id || req.user?.id;
+  try {
+    let result;
+    if (u_id) {
+      // Return groups for a specific user
+      result = await db.query(
+        `SELECT g.*, 
+        (
+          SELECT user_id
+          FROM "Group_Memberships"
+          WHERE group_id = gm.group_id
+          AND member_type = 'owner'
+          LIMIT 1
+        ) as owner_id
+        FROM "Group_Memberships" as gm
+        JOIN "Groups" AS g ON gm.group_id = g.id
+        WHERE gm.user_id = $1 AND g.deleted = false AND gm.deleted=false AND gm.valid=true
+        `, [u_id]
       );
-      return res
-        .status(404)
-        .json({ message: "Błąd przy znajdowaniu grup użytkownika: " + u_id });
+      log.info({ groupId: u_id }, `Pobrano grupy użytkownika:` + u_id);
+    } else {
+      // Return all user-group memberships
+      result = await db.query(
+        `SELECT g.*, 
+        (
+          SELECT user_id
+          FROM "Group_Memberships"
+          WHERE group_id = gm.group_id
+          AND member_type = 'owner'
+          LIMIT 1
+        ) as owner_id,
+        gm.user_id as member_user_id
+        FROM "Group_Memberships" as gm
+        JOIN "Groups" AS g ON gm.group_id = g.id
+        WHERE g.deleted = false AND gm.deleted=false AND gm.valid=true`
+      );
+      log.info(`Pobrano wszystkie grupy użytkowników`);
     }
-
-    log.info({groupId:u_id},
-      `Pobrano grupy użytkownika:`+u_id
-    );
     res.status(200).json(result.rows);
-  }
-  catch (err) {
-    log.error({ err, groupId:u_id }, 
-      "Błąd serwera podczas pobierania grup użytkownika.");
+  } catch (err) {
+    log.error({ err, groupId: u_id }, "Błąd serwera podczas pobierania grup użytkownika.");
     res.status(500).json({
-      error: err.message + " Błąd serwera podczas pobierania grup użytkownika"+ u_id,
+      error: err.message + " Błąd serwera podczas pobierania grup użytkownika" + u_id,
     });
   }
 }

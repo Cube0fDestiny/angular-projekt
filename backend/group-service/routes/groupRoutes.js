@@ -22,8 +22,8 @@ const router = express.Router();
 router.use(attachUserFromHeaders); 
 
 router.get("/", getAllGroups); 
-router.get("/:g_id",getGroupById)
 router.get("/user-groups", getUserGroups);
+router.get("/:g_id",getGroupById)
 router.get("/:id/get_members",getGroupMembers) 
 
 router.get("/:id/get_membership",GetGroupMemberStatus);
