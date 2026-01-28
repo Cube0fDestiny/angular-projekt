@@ -110,6 +110,9 @@ export class WallComponent implements OnInit {
     if(this.allowedUsers.includes(this.currentUser!.id)&&(this.location_type!='wall')){
       this.canPost = true;
     }
+    if(this.location_type='profile'){
+      this.canPost = true;
+    }
     this.loadAllPosts();
   }
   
