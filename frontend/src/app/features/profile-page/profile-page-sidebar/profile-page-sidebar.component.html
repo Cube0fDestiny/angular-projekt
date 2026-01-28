@@ -40,8 +40,46 @@
     </app-text-display>
   </div>
 
+  <!-- Followers Section -->
+  <div class="sidebar-section" *ngIf="user?.is_company">
+    <div class="section-header">
+      <h3 class="section-title">
+        <span class="section-icon">👥</span>
+        Followers
+      </h3>
+      <orang-button (click)="goToFollowerList()" size="small">
+        See all
+      </orang-button>
+    </div>
+    <div class="friends-grid" *ngIf="loadedFollowers">
+      <div 
+        *ngFor="let follower of followers.slice(0, 9)"
+        class="friend-card"
+        (click)="goToFriendProfile(follower.follower)">
+        
+        <img 
+          [src]="follower.avatarUrl" 
+          [alt]="follower.username"
+          class="friend-avatar">
+        
+        <div class="friend-info">
+          <span class="friend-name">{{ follower.username }}</span>
+            <!-- <span class="friend-mutual" *ngIf="friend.mutualFriends">
+            {{ friend.mutualFriends }} mutual friends
+          </span> -->
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div *ngIf="followers.length === 0" class="empty-state">
+        <div class="empty-icon">👤</div>
+        <p>No followers yet</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Friends Section -->
-  <div class="sidebar-section">
+  <div class="sidebar-section" *ngIf="!user?.is_company">
     <div class="section-header">
       <h3 class="section-title">
         <span class="section-icon">👥</span>

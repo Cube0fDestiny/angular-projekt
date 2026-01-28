@@ -28,6 +28,7 @@ export class FriendListComponent implements OnInit {
   friends: User[] = [];
   user!: User;
   currentUser!: User | null;
+  userId: string | null = null;
   sectionTitle = 'All Friends';
   @Output() userClick = new EventEmitter<string>();
 
@@ -41,20 +42,25 @@ export class FriendListComponent implements OnInit {
   ngOnInit(): void {
     // Subscribe to current user
     
-    const userId = this.route.snapshot.paramMap.get('id');
+    this.userId = this.route.snapshot.paramMap.get('id');
     
     // Subscribe to current user
     this.userService.currentUser$.subscribe(user => this.currentUser = user);
 
-    // Load main profile (either from route or current user)
-    if (userId) {
-      this.userService.getUserById(userId).subscribe(u => this.user = u);
-    } else {
-      this.user = this.currentUser!;
-    }
-    
-    // Load all users as "friends" for temporary display
-    this.loadFriends();
+    this.loadUser();
+  }
+
+  loadUser(): void {
+    this.userService.getUserById(this.userId!).subscribe(user => {
+      this.user = user;
+      this.sectionTitle = `Users Following "${user.name} ${user.surname}"`;
+      if(user.is_company){
+        console.log('not a personal profile');
+        this.router.navigate(['/']);
+      } else {
+        this.loadFriends();
+      }
+    });
   }
 
   goToFriendProfile(userId: string): void {
