@@ -64,27 +64,27 @@ export class NavbarComponent implements OnInit {
 
   goToProfile(userId: number): void {
     console.log("going to profile");
-    this.router.navigate(['/profile', userId]);
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
   }
 
   goToEvents(): void {
     console.log("going to events");
-    this.router.navigate(['/events']);
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/events']); });
   }
 
   goToMessages(): void {
     console.log("going to messages");
-    this.router.navigate(['/chats']);
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/chats']); });
   }
 
   goToGroups(): void {
     console.log("going to groups");
-    this.router.navigate(['/groups']);
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/groups']); });
   }
 
   goToCompany(): void {
     console.log("going to companies");
-    this.router.navigate(['/companies']);
+    this.router.navigate(['/']).then(() => { this.router.navigate(['/companies']); });
   }
 
   isDropdownOpen = false;

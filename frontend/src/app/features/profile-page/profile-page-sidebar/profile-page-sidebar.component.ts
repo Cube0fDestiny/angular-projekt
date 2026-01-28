@@ -6,7 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { User, FriendListItem } from '../../../shared/models/user.model';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, map, of } from 'rxjs';
+import { ImageService } from '../../../core/image/image.service';
+import { GroupService } from '../../../core/group/group.service';
+import { Group } from '../../../shared/models/group.model';
 
 @Component({
   selector: 'app-profile-sidebar',
@@ -20,7 +23,7 @@ export class ProfilePageSidebarComponent implements OnInit {
   @Input() user!: User | null;
 
   /** Placeholder for groups and photos (mock) */
-  @Input() groups: any[] = [];
+  @Input() groups: Group[] = [];
   @Input() photos: any[] = [];
 
   /** Events for interactions */
@@ -30,17 +33,21 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   /** All users used to display as "friends" temporarily */
   friends: User[] = [];
+  isLoading = true;
 
   /** Current logged-in user */
   currentUser!: User | null;
 
   isEditingBio = false;
   editedBio = '';
+  defaultImage = 'assets/logo_icon.png';
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private userService: UserService
+    private userService: UserService,
+    private imageService: ImageService,
+    private groupService: GroupService
   ) {}
 
   toggleEditingBio():void {
@@ -94,6 +101,7 @@ export class ProfilePageSidebarComponent implements OnInit {
 
     // Load friends
     this.loadFriends();
+    this.loadAllGroups();
   }
 
   loadFriends(): void {
@@ -105,19 +113,41 @@ export class ProfilePageSidebarComponent implements OnInit {
           return;
         }
         
-        // Extract friend IDs from the response objects
         const friendIds = friendItems.map(item => item.friend_id);
-        
-        // Create an array of observables
         const friendObservables = friendIds.map(id => 
           this.userService.getUserById(id)
         );
         
-        // Wait for all requests to complete
         forkJoin(friendObservables).subscribe({
           next: (users) => {
-            this.friends = users.filter(user => user !== null) as User[];
-            console.log('Loaded all friends successfully:', this.friends.length);
+            // Filter out null users first
+            const validUsers = users.filter(user => user !== null) as User[];
+            
+            // Load avatars for each user
+            const avatarObservables = validUsers.map(user => 
+              this.imageService.getImage(user.avatar).pipe(
+                map(avatarUrl => ({
+                  ...user,
+                  avatarUrl: avatarUrl || 'assets/logo_icon.png'
+                })),
+                catchError(() => of({
+                  ...user,
+                  avatarUrl: 'assets/logo_icon.png'
+                }))
+              )
+            );
+            
+            // Wait for all avatar requests
+            forkJoin(avatarObservables).subscribe({
+              next: (usersWithAvatars) => {
+                this.friends = usersWithAvatars;
+                console.log('Loaded all friends with avatars:', this.friends.length);
+              },
+              error: (error) => {
+                console.error('Error loading avatars:', error);
+                this.friends = validUsers; // Use users without avatars
+              }
+            });
           },
           error: (error) => {
             console.error('Error loading friends:', error);
@@ -143,10 +173,43 @@ export class ProfilePageSidebarComponent implements OnInit {
     this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
   }
 
-  /** Navigate to group (mock) */
-  goToGroup(groupId: number): void {
-    this.groupClick.emit(groupId);
-    // this.router.navigate(['/group', groupId]); // still mock
+
+  goToGroup(groupId: string): void {
+    this.router.navigate(['/group', groupId]);
+  }
+
+  loadAllGroups(): void {
+    this.isLoading = true;
+    this.groupService.getAllGroups().subscribe({
+      next: (groups) => {
+        this.groups = groups;
+        this.isLoading = false;
+        this.loadProfileImages();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Error loading groups:', error);
+      }
+    });
+  }
+
+  loadProfileImages(): void {
+    if (!this.groups) return;
+    
+    this.groups.forEach(group => {
+      if (group.profile_picture_id) {
+        this.imageService.getImage(group.profile_picture_id).subscribe({
+          next: (imageUrl) => {
+            group.profileImageUrl = imageUrl;
+          },
+          error: () => {
+            group.profileImageUrl = this.defaultImage;
+          }
+        });
+      } else {
+        group.profileImageUrl = this.defaultImage;
+      }
+    });
   }
 
   /** Open photo (mock) */

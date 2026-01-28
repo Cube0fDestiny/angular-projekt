@@ -9,6 +9,7 @@ import { OrangButtonComponent } from "../../../shared/components/orang-button/or
 import { OrangEvent, EventFollower } from '../../../shared/models/event.models';
 import { forkJoin } from 'rxjs';
 import { EventService } from '../../../core/event/event.service';
+import { ImageService } from '../../../core/image/image.service';
 
 @Component({
   selector: 'app-event-sidebar',
@@ -39,11 +40,14 @@ export class EventPageSidebarComponent implements OnInit {
   isEditingBio = false;
   editedBio = '';
 
+  loadedFollowers = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private eventService: EventService
+    private eventService: EventService,
+    private imageService: ImageService
   ) {}
 
   toggleEditingBio():void {
@@ -109,6 +113,20 @@ export class EventPageSidebarComponent implements OnInit {
     this.eventService.getEventFollowers(this.eventId!).subscribe(followers => {
       this.followers = followers;
       console.log('loaded followers');
+      followers.forEach(follower => {
+        if(!follower.profile_picture_id){
+          follower.profile_picture_url = 'assets/logo_icon.png';
+        }else{
+          this.imageService.getImage(follower.profile_picture_id).subscribe({
+            next: (url) => {
+              follower.profile_picture_url = url;
+            }
+          });
+        }
+      });
+      this.followers = followers;
+      console.log('loaded follower profiles');
+      this.loadedFollowers = true;
     })
   }
 

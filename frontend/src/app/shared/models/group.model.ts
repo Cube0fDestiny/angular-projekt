@@ -18,6 +18,7 @@ export interface GroupMember {
   name: string;
   surname: string;
   profile_picture_id?: string;
+  profile_picture_url?: string;
   profile_header?: string;
   member_type: string;
 }

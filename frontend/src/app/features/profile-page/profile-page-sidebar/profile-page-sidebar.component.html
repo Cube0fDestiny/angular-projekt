@@ -59,7 +59,7 @@
         (click)="goToFriendProfile(friend.id)">
         
         <img 
-          [src]="friend.avatar" 
+          [src]="friend.avatarUrl" 
           [alt]="friend.name"
           class="friend-avatar">
         
@@ -80,7 +80,7 @@
   </div>
   
   <!-- Groups Section -->
-  <div class="sidebar-section">
+  <div class="sidebar-section" *ngIf="!isLoading">
     <div class="section-header">
       <h3 class="section-title">
         <span class="section-icon">👨‍👩‍👧‍👦</span>
@@ -90,43 +90,44 @@
         See all
       </a>-->
     </div>
-    
-    <div class="groups-list">
+
+    <div class="friends-grid">
       <div 
-        *ngFor="let group of groups"
-        class="group-card"
+        *ngFor="let group of groups.slice(0, 9)"
+        class="friend-card"
         (click)="goToGroup(group.id)">
         
-        <div class="group-icon">{{ group.icon }}</div>
+        <img 
+          [src]="group.profileImageUrl" 
+          [alt]="group.name"
+          class="friend-avatar">
         
-        <div class="group-info">
-          <span class="group-name">{{ group.name }}</span>
-          <span class="group-members">{{ group.members }} members</span>
-        </div>
-        
-        <div class="group-status" *ngIf="group.isMember">
-          <span class="member-badge">Member</span>
+        <div class="friend-info">
+          <span class="friend-name">{{ group.name }}</span>
+           <!-- <span class="friend-mutual" *ngIf="friend.mutualFriends">
+            {{ friend.mutualFriends }} mutual friends
+          </span> -->
         </div>
       </div>
       
       <!-- Empty State -->
-      <div *ngIf="groups.length === 0" class="empty-state">
+      <div *ngIf="friends.length === 0" class="empty-state">
         <div class="empty-icon">👨‍👩‍👧‍👦</div>
-        <p>No groups yet</p>
+        <p>No Groups yet</p>
       </div>
     </div>
   </div>
   
-  <!-- Photos Section -->
+  <!-- Photos Section 
   <div class="sidebar-section">
     <div class="section-header">
       <h3 class="section-title">
         <span class="section-icon">📸</span>
         Photos
       </h3>
-     <!-- <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
+    <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
         See all 
-      </a>-->
+      </a>
     </div>
     
     <div class="photos-grid">
@@ -144,13 +145,12 @@
           {{ photo.caption }}
         </div>
       </div>
-      
-      <!-- Empty State -->
+
       <div *ngIf="photos.length === 0" class="empty-state">
         <div class="empty-icon">📸</div>
         <p>No photos yet</p>
       </div>
     </div>
-  </div>
+  </div>-->
   
 </div>

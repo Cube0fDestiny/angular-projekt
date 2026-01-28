@@ -52,14 +52,14 @@
       </orang-button>
     </div>
     
-    <div class="friends-grid">
+    <div class="friends-grid" *ngIf="loadedFollowers">
       <div 
         *ngFor="let follower of followers.slice(0, 9)"
         class="friend-card"
         (click)="goToProfile(follower.user_id)">
         
         <img 
-          [src]="getAvatarUrl(follower)" 
+          [src]="follower.profile_picture_url" 
           [alt]="follower.name"
           class="friend-avatar">
         
@@ -75,43 +75,6 @@
       <div *ngIf="followers.length === 0" class="empty-state">
         <div class="empty-icon">👤</div>
         <p>No followers yet</p>
-      </div>
-    </div>
-  </div>
-  
-  
-  
-  <!-- Photos Section -->
-  <div class="sidebar-section">
-    <div class="section-header">
-      <h3 class="section-title">
-        <span class="section-icon">📸</span>
-        Photos
-      </h3>
-     <!-- <a [routerLink]="['/profile', userId, 'photos']" class="see-all">
-        See all 
-      </a>-->
-    </div>
-    
-    <div class="photos-grid">
-      <div 
-        *ngFor="let photo of photos.slice(0, 9)"
-        class="photo-card">
-        
-        <img 
-          [src]="photo.url" 
-          [alt]="photo.caption || 'Photo'"
-          class="photo-image">
-        
-        <div class="photo-overlay" *ngIf="photo.caption">
-          {{ photo.caption }}
-        </div>
-      </div>
-      
-      <!-- Empty State -->
-      <div *ngIf="photos.length === 0" class="empty-state">
-        <div class="empty-icon">📸</div>
-        <p>No photos yet</p>
       </div>
     </div>
   </div>
