@@ -1,24 +1,28 @@
-// ...existing imports...
 import { Router } from '@angular/router';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { UserService } from '../../../core/user/user.service';
 import { GroupService } from '../../../core/group/group.service';
 import { ImageService } from '../../../core/image/image.service';
 import { NgFor, NgIf } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { OrangButtonComponent } from '../../../shared/components/orang-button/orang-button.component';
+import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-left-sidebar',
   templateUrl: './left-sidebar.component.html',
   imports: [NgFor, NgIf, OrangButtonComponent, RouterModule],
   styleUrls: ['./left-sidebar.component.scss'],
 })
-export class LeftSidebarComponent {
+export class LeftSidebarComponent implements OnInit, OnDestroy {
   currentUser: any;
+  currentUserAvatar: string = 'assets/logo_icon.png';
   groups: any[] = [];
   proposedGroups: any[] = [];
 
   defaultImage = 'assets/logo_icon.png';
+
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private userService: UserService,
@@ -26,55 +30,82 @@ export class LeftSidebarComponent {
     private imageService: ImageService,
     private router: Router,
   ) {}
+
   goToGroups(): void {
     this.router.navigate(['/groups']);
   }
 
   goToProfile(userId: string): void {
-    this.router.navigate(['/']).then(() => {
-      this.router.navigate(['/profile', userId]);
-    });
+    this.router.navigate(['/profile', userId]);
   }
+
   ngOnInit() {
-    this.userService.currentUser$.subscribe((user) => {
+    const userSub = this.userService.currentUser$.subscribe((user) => {
       this.currentUser = user;
-      this.groupService.getUserGroups(this.currentUser.id).subscribe({
-        next: (groups) => {
-          if (!groups || groups.length === 0) {
-            this.groups = [];
-            this.loadProposedGroups();
-            return;
-          }
-          // For each group, fetch member_data from getGroupById
-          const groupFetches = groups.map((group) =>
-            this.groupService
-              .getGroupById(group.id)
-              .toPromise()
-              .then((fullGroup) =>
-                fullGroup && fullGroup.member_data
-                  ? { ...group, member_data: fullGroup.member_data }
-                  : group,
-              ),
-          );
-          Promise.all(groupFetches)
-            .then((fullGroups) => {
-              this.groups = fullGroups;
-              this.loadGroupImages(this.groups);
-              this.loadProposedGroups();
-            })
-            .catch((err) => {
-              this.groups = groups; // fallback to basic data
-              this.loadGroupImages(this.groups);
-              this.loadProposedGroups();
-              console.error('Failed to fetch full group data:', err);
-            });
+      if (user) {
+        this.loadCurrentUserAvatar();
+        this.loadUserGroups();
+      }
+    });
+    this.subscriptions.push(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private loadCurrentUserAvatar(): void {
+    if (this.currentUser?.profile_picture_id) {
+      this.imageService.getImage(this.currentUser.profile_picture_id).subscribe({
+        next: (imageUrl: string) => {
+          this.currentUserAvatar = imageUrl;
         },
-        error: (err) => {
-          this.groups = [];
-          this.loadProposedGroups();
-          console.error('Failed to load user groups:', err);
+        error: () => {
+          this.currentUserAvatar = this.defaultImage;
         },
       });
+    } else {
+      this.currentUserAvatar = this.defaultImage;
+    }
+  }
+
+  private loadUserGroups(): void {
+    this.groupService.getUserGroups(this.currentUser.id).subscribe({
+      next: (groups) => {
+        if (!groups || groups.length === 0) {
+          this.groups = [];
+          this.loadProposedGroups();
+          return;
+        }
+        // For each group, fetch member_data from getGroupById
+        const groupFetches = groups.map((group) =>
+          this.groupService
+            .getGroupById(group.id)
+            .toPromise()
+            .then((fullGroup) =>
+              fullGroup && fullGroup.member_data
+                ? { ...group, member_data: fullGroup.member_data }
+                : group,
+            ),
+        );
+        Promise.all(groupFetches)
+          .then((fullGroups) => {
+            this.groups = fullGroups;
+            this.loadGroupImages(this.groups);
+            this.loadProposedGroups();
+          })
+          .catch((err) => {
+            this.groups = groups;
+            this.loadGroupImages(this.groups);
+            this.loadProposedGroups();
+            console.error('Failed to fetch full group data:', err);
+          });
+      },
+      error: (err) => {
+        this.groups = [];
+        this.loadProposedGroups();
+        console.error('Failed to load user groups:', err);
+      },
     });
   }
 

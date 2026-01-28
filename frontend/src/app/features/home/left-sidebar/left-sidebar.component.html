@@ -3,7 +3,7 @@
   <!-- User Profile Shortcut -->
   <div class="user-shortcut" *ngIf="currentUser">
     <span style="display: flex; align-items: center; cursor: pointer;" (click)="goToProfile(currentUser.id)">
-      <img [src]="currentUser.avatar" alt="Profile" class="user-avatar">
+      <img [src]="currentUserAvatar" alt="Profile" class="user-avatar">
       <span class="user-name" style="margin-left: 8px;">{{ currentUser.name }}</span>
     </span>
   </div>
