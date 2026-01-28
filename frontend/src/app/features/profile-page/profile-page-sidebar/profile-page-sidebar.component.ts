@@ -129,9 +129,18 @@ export class ProfilePageSidebarComponent implements OnInit {
             // Filter out null users first
             const validUsers = users.filter(user => user !== null) as User[];
             
-            // Load avatars for each user
-            const avatarObservables = validUsers.map(user => 
-              this.imageService.getImage(user.profile_picture_id!).pipe(
+            // Process users - ONLY load avatars for those with profile_picture_id
+            const processedUsers$ = validUsers.map(user => {
+              if (!user.profile_picture_id) {
+                // No profile picture ID, use default immediately
+                return of({
+                  ...user,
+                  profile_picture_url: 'assets/logo_icon.png'
+                });
+              }
+              
+              // Has profile picture ID, load it
+              return this.imageService.getImage(user.profile_picture_id).pipe(
                 map(profile_picture_url => ({
                   ...user,
                   profile_picture_url: profile_picture_url || 'assets/logo_icon.png'
@@ -140,18 +149,21 @@ export class ProfilePageSidebarComponent implements OnInit {
                   ...user,
                   profile_picture_url: 'assets/logo_icon.png'
                 }))
-              )
-            );
+              );
+            });
             
-            // Wait for all avatar requests
-            forkJoin(avatarObservables).subscribe({
+            // Wait for all processing (mix of immediate values and HTTP requests)
+            forkJoin(processedUsers$).subscribe({
               next: (usersWithAvatars) => {
                 this.friends = usersWithAvatars;
                 console.log('Loaded all friends with avatars:', this.friends.length);
               },
               error: (error) => {
-                console.error('Error loading avatars:', error);
-                this.friends = validUsers; // Use users without avatars
+                console.error('Error processing friends:', error);
+                this.friends = validUsers.map(user => ({
+                  ...user,
+                  profile_picture_url: 'assets/logo_icon.png'
+                }));
               }
             });
           },
@@ -230,6 +242,7 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   loadFollowers():void {
     this.userService.getAllFollowers(this.user!.id).subscribe(followers => {
+      console.log('followers: ', followers);
       if(followers.length==0){
         this.loadedFollowers = true;
         this.followers = [];

@@ -15,6 +15,7 @@
     <!-- Profile Picture -->
     <div class="profile-picture-container">
       <img 
+        *ngIf="showImage"
         [src]="profileImageUrl" 
         [alt]="user?.name" 
         class="profile-picture">
@@ -72,9 +73,6 @@
           <orang-button *ngIf="isFriend" (click)="checkChat()">
             💬 Chat
           </orang-button>
-          <!--<orang-button (click)="onMore()">
-            ⋮ More
-          </orang-button>-->
         </ng-container>
 
         <ng-container *ngIf="!isOwnProfile&&user?.is_company">

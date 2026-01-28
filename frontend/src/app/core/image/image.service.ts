@@ -24,7 +24,7 @@ export class ImageService {
   }
 
   getImage(id: string, options?: { w: number; h: number }): Observable<string> {
-    return this.http.get(`${this.apiUrl}/${id}`, {  // ← Use this.apiUrl
+    return this.http.get(`${this.apiUrl}/${id}`, {
       responseType: 'blob',
       params: options || {}
     }).pipe(
