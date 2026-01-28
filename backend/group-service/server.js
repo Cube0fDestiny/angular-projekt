@@ -15,7 +15,15 @@ export const logger = pino({
 });
 
 const startServer = async () => {
-  await connectRabbitMQ();
+  // Try to connect to RabbitMQ, but don't block server startup if it fails.
+  try {
+    await connectRabbitMQ();
+  } catch (err) {
+    logger.error(
+      { message: err?.message, stack: err?.stack },
+      "[Group-Service] RabbitMQ connection failed – starting HTTP server without MQ",
+    );
+  }
 
   const app = express();
   const PORT = process.env.PORT || 3005;
@@ -34,6 +42,9 @@ const startServer = async () => {
 };
 
 startServer().catch((err) => {
-  logger.error({ error: err }, "Failed to start server");
+  logger.error(
+    { message: err?.message, stack: err?.stack },
+    "Failed to start server",
+  );
   process.exit(1);
 });

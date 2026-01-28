@@ -14,6 +14,11 @@ export const connectRabbitMQ = async (retries = 10, delay = 5000) => {
 
   const url = process.env.RABBITMQ_URL;
   if (!url) {
+    // Log konkretny problem, ale nie wysadzaj całej aplikacji tutaj –
+    // startServer zdecyduje, czy to krytyczne.
+    logger.error(
+      "[Group-Service] RABBITMQ_URL environment variable is not set",
+    );
     throw new Error("RABBITMQ_URL environment variable is not set");
   }
 
@@ -26,7 +31,10 @@ export const connectRabbitMQ = async (retries = 10, delay = 5000) => {
       await channel.assertExchange(exchange, "topic", { durable: true });
 
       connection.on("error", (err) => {
-        logger.error({ error: err.message }, "RabbitMQ connection error");
+        logger.error(
+          { message: err?.message, stack: err?.stack },
+          "RabbitMQ connection error",
+        );
       });
 
       connection.on("close", () => {
@@ -38,12 +46,15 @@ export const connectRabbitMQ = async (retries = 10, delay = 5000) => {
       return;
     } catch (err) {
       logger.warn(
-        { attempt, maxRetries: retries, error: err.message },
+        { attempt, maxRetries: retries, message: err?.message, stack: err?.stack },
         `RabbitMQ connection attempt ${attempt}/${retries} failed`,
       );
 
       if (attempt === retries) {
-        logger.error("❌ All RabbitMQ connection attempts failed");
+        logger.error(
+          { message: err?.message, stack: err?.stack },
+          "❌ All RabbitMQ connection attempts failed",
+        );
         throw err;
       }
 
