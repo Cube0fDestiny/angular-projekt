@@ -1,133 +1,165 @@
-<div class="right-sidebar">
+<div class="w-[280px] h-[calc(100vh-60px)] fixed right-0 top-[60px] bg-[var(--o-bwhite)] overflow-y-auto p-5 px-4 z-[100]">
   
-  <!-- Online Friends -->
-  <div class="section online-friends" *ngIf="onlineFriends.length > 0">
-    <div class="section-header">
-      <h3 class="section-title">Online Friends</h3>
-      <span class="online-count">{{ onlineFriends.length }} online</span>
+  <!-- Friends Section -->
+  <div class="mb-6" *ngIf="friends.length > 0">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-xl text-[var(--o-green)] m-0 font-bold">Friends</h3>
+      <span class="text-sm text-[var(--o-green)] font-medium bg-[var(--o-beige)] px-2 py-0.5 rounded-full">
+        {{ friends.length }}
+      </span>
     </div>
     
-    <div class="friends-list">
+    <div class="flex flex-col gap-1">
       <div 
-        *ngFor="let friend of onlineFriends"
-        class="friend-item"
-        (click)="onFriendClick(friend)">
+        *ngFor="let friend of friends"
+        class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--o-beige)] cursor-pointer transition-colors duration-200"
+        (click)="goToProfile(friend.id)">
         
-        <div class="friend-avatar">
-          <img [src]="friend.avatar" [alt]="friend.name">
-          <span class="online-status"></span>
+        <img 
+          [src]="friend.profileImageUrl || defaultAvatar" 
+          [alt]="friend.name"
+          class="w-12 h-12 rounded-full object-cover border-none">
+        
+        <div class="flex-1 min-w-0">
+          <h4 class="text-lg text-[var(--o-green)] m-0 truncate max-w-[100px]">
+            {{ friend.name }} {{ friend.surname }}
+          </h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Friend Requests Section -->
+  <div class="mb-6" *ngIf="friendRequests.length > 0">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-xl text-[var(--o-green)] m-0 font-bold">Friend Requests</h3>
+      <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+        {{ friendRequests.length }} new
+      </span>
+    </div>
+    
+    <div class="flex flex-col gap-1">
+      <div 
+        *ngFor="let item of friendRequests" 
+        class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--o-beige)] cursor-pointer transition-colors duration-200">
+        
+        <img 
+          [src]="item.user.profileImageUrl || defaultAvatar" 
+          [alt]="item.user.name" 
+          class="w-12 h-12 rounded-full object-cover border-none cursor-pointer"
+          (click)="goToProfile(item.user.id)">
+        
+        <div class="flex-1 min-w-0">
+          <h4 
+            class="text-lg text-[var(--o-green)] m-0 mb-1 truncate max-w-[100px] cursor-pointer hover:underline"
+            (click)="goToProfile(item.user.id)">
+            {{ item.user.name }} {{ item.user.surname }}
+          </h4>
         </div>
         
-        <div class="friend-info">
-          <h4 class="friend-name">{{ friend.name }}</h4>
-          <span class="friend-status">{{ friend.lastActive }}</span>
+        <div class="flex gap-2">
+          <orang-button 
+            size="small"
+            (click)="acceptRequest(item); $event.stopPropagation()">
+            Accept
+          </orang-button>
+          <orang-button 
+            size="small" 
+            [isActive]="false"
+            (click)="rejectRequest(item); $event.stopPropagation()">
+            Decline
+          </orang-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sponsored Section -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-xl text-[var(--o-green)] m-0 font-bold">Sponsored</h3>
+      <span class="text-xs text-[var(--o-green)] opacity-60">Ad</span>
+    </div>
+    
+    <div class="rounded-lg overflow-hidden bg-[var(--o-beige)] cursor-pointer hover:opacity-90 transition-opacity duration-200">
+      <img 
+        src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=200&fit=crop" 
+        alt="Sponsored content"
+        class="w-full h-[120px] object-cover">
+      
+      <div class="p-3">
+        <h4 class="text-base text-[var(--o-green)] m-0 mb-1 font-semibold">
+          Fresh Organic Meals
+        </h4>
+        <p class="text-xs text-[var(--o-green)] opacity-70 m-0 mb-2">
+          Discover healthy recipes and get fresh ingredients delivered to your door.
+        </p>
+        <span class="text-xs text-[var(--o-green)] opacity-50">freshmeals.com</span>
+      </div>
+    </div>
+
+    <!-- Second Sponsored Item -->
+    <div class="rounded-lg overflow-hidden bg-[var(--o-beige)] cursor-pointer hover:opacity-90 transition-opacity duration-200 mt-3">
+      <img 
+        src="https://images.unsplash.com/photo-1483721310020-03333e577078?w=400&h=200&fit=crop" 
+        alt="Sponsored content"
+        class="w-full h-[120px] object-cover">
+      
+      <div class="p-3">
+        <h4 class="text-base text-[var(--o-green)] m-0 mb-1 font-semibold">
+          Learn Photography
+        </h4>
+        <p class="text-xs text-[var(--o-green)] opacity-70 m-0 mb-2">
+          Master the art of photography with our online courses. Start free today!
+        </p>
+        <span class="text-xs text-[var(--o-green)] opacity-50">photomaster.edu</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- People You May Know Section -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-xl text-[var(--o-green)] m-0 font-bold">People You May Know</h3>
+    </div>
+    
+    <div class="flex flex-col gap-1">
+      <div 
+        *ngIf="suggestedPeople.length === 0" 
+        class="p-3 text-[var(--o-green)] opacity-70 text-sm">
+        No suggestions available at the moment.
+      </div>
+      
+      <div 
+        *ngFor="let profile of suggestedPeople"
+        class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--o-beige)] cursor-pointer transition-colors duration-200"
+        (click)="goToProfile(profile.id)">
+        
+        <img 
+          [src]="profile.profileImageUrl || defaultAvatar" 
+          [alt]="profile.name" 
+          class="w-12 h-12 rounded-full object-cover border-none">
+        
+        <div class="flex-1 min-w-0">
+          <h4 class="text-lg text-[var(--o-green)] m-0 truncate max-w-[100px]">
+            {{ profile.name }} {{ profile.surname }}
+          </h4>
         </div>
         
-        <orang-button size="small"
-          (click)="sendMessage(friend.id); $event.stopPropagation()">
-          💬 Chat
+        <orang-button 
+          size="small"
+          (click)="sendFriendRequest(profile.id); $event.stopPropagation()">
+          Add
         </orang-button>
       </div>
     </div>
   </div>
-  
-  <!-- Friend Requests -->
-  <div class="section friend-requests" *ngIf="friendRequests.length > 0">
-    <div class="section-header">
-      <h3 class="section-title">Friend Requests</h3>
-      <span class="count">{{ friendRequests.length }} new</span>
-    </div>
-    
-    <div class="requests-list">
-      <div *ngFor="let request of friendRequests" class="request-item">
-        <img [src]="request.avatar" [alt]="request.name" class="request-avatar">
-        
-        <div class="request-info">
-          <h4 class="request-name">{{ request.name }}</h4>
-          <span class="mutual-friends">{{ request.mutualFriends }} mutual friends</span>
-        </div>
-        
-        <div class="request-actions">
-          <orang-button size="small"
-            (click)="acceptRequest(request.id)">
-            Confirm
-          </orang-button>
-          <orang-button size="small" [isActive]="false"
-            (click)="rejectRequest(request.id)">
-            Delete
-          </orang-button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Recent Profiles -->
-  <div class="section recent-profiles">
-    <div class="section-header">
-      <h3 class="section-title">People You May Know</h3>
-    </div>
-    
-    <div class="profiles-list">
-      <div 
-        *ngFor="let profile of recentProfiles"
-        class="profile-item"
-        (click)="onFriendClick(profile)">
-        
-        <img [src]="profile.avatar" [alt]="profile.name" class="profile-avatar">
-        
-        <div class="profile-info">
-          <h4 class="profile-name">{{ profile.name }}</h4>
-          <span class="profile-meta">
-            {{ profile.mutualFriends }} mutual friends
-          </span>
-        </div>
-        
-        <orang-button size="small">Add Friend</orang-button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Birthdays -->
-  <div class="section birthdays" *ngIf="birthdays.length > 0">
-    <div class="section-header">
-      <h3 class="section-title">🎉 Birthdays</h3>
-    </div>
-    
-    <div class="birthdays-list">
-      <div *ngFor="let birthday of birthdays" class="birthday-item">
-        <img [src]="birthday.avatar" [alt]="birthday.name" class="birthday-avatar">
-        
-        <div class="birthday-info">
-          <span class="birthday-text">
-            <strong>{{ birthday.name }}</strong>
-            {{ birthday.today ? 'has a birthday today!' : 'birthday is ' + birthday.date }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Sponsored -->
-  <div class="section sponsored" *ngIf="sponsored.length > 0">
-    <div class="section-header">
-      <h3 class="section-title">Sponsored</h3>
-    </div>
-    
-    <div class="sponsored-list">
-      <div *ngFor="let ad of sponsored" class="sponsored-item">
-        <img [src]="ad.image" [alt]="ad.title" class="sponsored-image">
-        
-        <div class="sponsored-info">
-          <h4 class="sponsored-title">{{ ad.title }}</h4>
-          <p class="sponsored-desc">{{ ad.description }}</p>
-          <a [href]="ad.link" class="sponsored-link">Learn More</a>
-        </div>
-      </div>
-    </div>
-  </div>
-  
+
   <!-- Footer -->
-  <div class="sidebar-footer">
-    <p class="copyright">© 2024 DEV 2 Social</p>
+  <div class="mt-5 pt-5 border-t border-[var(--o-dbeige)] flex flex-wrap gap-2">
+    <a href="#" class="text-xs text-[var(--o-green)] no-underline hover:underline">Privacy</a>
+    <a href="#" class="text-xs text-[var(--o-green)] no-underline hover:underline">Terms</a>
+    <a href="#" class="text-xs text-[var(--o-green)] no-underline hover:underline">Help</a>
+    <p class="w-full text-xs text-[var(--o-green)] mt-2">© 2024 DEV 2 Social</p>
   </div>
 </div>

@@ -10,6 +10,7 @@ export interface User {
   profile_picture_id?: string;
   profile_picture_url?: string;
   header_picture_url?: string;
+  avatar?: string;
 }
 
 export interface UserFollower {
