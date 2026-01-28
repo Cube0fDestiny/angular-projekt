@@ -3,6 +3,7 @@ import { CommonModule, NgIf } from "@angular/common";
 import { Router } from '@angular/router';
 import { UserService } from '../../../../core/user/user.service';
 import { AuthService } from '../../../../core/auth/auth.service'; // Added this
+import { ImageService } from '../../../../core/image/image.service';
 
 @Component({
   selector: 'profile-dropdown',
@@ -16,6 +17,8 @@ export class ProfileDropdownComponent implements OnInit {
   @Output() settingsClick = new EventEmitter<void>();
   @Output() logoutClick = new EventEmitter<void>();
   @Input() user: any;
+  currentUserProfile = 'assets/logo_icon.png';
+  showProfileImage = false;
   
   isOpen = false;
   currentUser: any;
@@ -23,11 +26,17 @@ export class ProfileDropdownComponent implements OnInit {
   // Injecting AuthService to handle the actual logout logic
   private authService = inject(AuthService);
 
-  constructor(private router: Router, private userService: UserService) {}
+  constructor(private router: Router, private userService: UserService, private imageService: ImageService) {}
  
   ngOnInit() {
     this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      this.imageService.getImage(user?.profile_picture_id!).subscribe({
+        next: (url) => {
+          this.currentUserProfile = url;
+          this.showProfileImage = true;
+        }
+      });
     });
   }
 

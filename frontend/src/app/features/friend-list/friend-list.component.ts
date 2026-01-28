@@ -7,9 +7,10 @@ import { UserService } from '../../core/user/user.service';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OrangButtonComponent } from '../../shared/components/orang-button/orang-button.component';
-import { FriendListItem, User } from '../../shared/models/user.model';
+import { FriendListItem, User, UserFriend } from '../../shared/models/user.model';
 import { catchError, forkJoin, map, of } from 'rxjs';
 import { ImageService } from '../../core/image/image.service';
+import { GroupService } from '../../core/group/group.service';
 
 @Component({
   selector: 'app-friend-list',
@@ -36,7 +37,8 @@ export class FriendListComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private groupService: GroupService
   ) {}
 
   ngOnInit(): void {
@@ -82,8 +84,11 @@ export class FriendListComponent implements OnInit {
   }
 
   loadFriends(): void {
-    this.userService.getAllFriends().subscribe({
-      next: (friendItems: FriendListItem[]) => {
+    this.groupService.getAllFriends(this.user!.id).subscribe({
+      next: (userFriends: UserFriend[]) => {
+        const friendItems: FriendListItem[] = userFriends.map(userFriend => ({
+          friend_id: userFriend.user_id
+        }));
         if (friendItems.length === 0) {
           this.friends = [];
           console.log('No friends loaded');

@@ -3,10 +3,11 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
-import { User, OutgoingFriendRequest } from '../../../shared/models/user.model';
+import { User, OutgoingFriendRequest, UserFriend, FriendListItem } from '../../../shared/models/user.model';
 import { ChatHttpService } from '../../../core/chat/chat-http.service';
 import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
 import { ImageService } from '../../../core/image/image.service';
+import { GroupService } from '../../../core/group/group.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -49,7 +50,8 @@ export class ProfilePageHeaderComponent implements OnInit {
     public userService: UserService,
     private router: Router,
     private chatHttpService: ChatHttpService,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private groupService: GroupService
   ) {}
 
   ngOnInit(): void {
@@ -156,8 +158,11 @@ export class ProfilePageHeaderComponent implements OnInit {
   }
 
   loadFriendStatus():void {
-    this.userService.getAllFriends().subscribe({
-      next: (friendItems) => {
+    this.groupService.getAllFriends(this.user!.id).subscribe({
+      next: (userFriends: UserFriend[]) => {
+        const friendItems: FriendListItem[] = userFriends.map(userFriend => ({
+          friend_id: userFriend.user_id
+        }));
         console.log('loaded friends list')
         friendItems.forEach(friendItem => {
           if (friendItem.friend_id==this.userId){

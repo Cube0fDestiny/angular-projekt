@@ -3,7 +3,7 @@ import { TextDisplayComponent } from '../../../shared/components/text-display/te
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { User, FriendListItem, UserFollower } from '../../../shared/models/user.model';
+import { User, FriendListItem, UserFollower, UserFriend } from '../../../shared/models/user.model';
 import { UserService } from '../../../core/user/user.service';
 import { OrangButtonComponent } from "../../../shared/components/orang-button/orang-button.component";
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -111,8 +111,11 @@ export class ProfilePageSidebarComponent implements OnInit {
   }
 
   loadFriends(): void {
-    this.userService.getAllFriends().subscribe({
-      next: (friendItems: FriendListItem[]) => {
+    this.groupService.getAllFriends(this.user!.id).subscribe({
+      next: (userFriends: UserFriend[]) => {
+        const friendItems: FriendListItem[] = userFriends.map(userFriend => ({
+          friend_id: userFriend.user_id
+        }));
         if (friendItems.length === 0) {
           this.friends = [];
           console.log('No friends loaded');

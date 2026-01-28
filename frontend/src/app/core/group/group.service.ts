@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Group, GroupMember, ApiResponse, UpdateGroupData, CreateGroupData, ChangeUserMemberStatus, GroupApplication } from '../../shared/models/group.model';
 import { environment } from '../../../environments/environment';
+import { FriendListItem, UserFriend } from '../../shared/models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +47,10 @@ export class GroupService {
   sendJoinGroupRequest(id: string): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.apiUrl}/${id}/join`, {});
   }
-
+  
+  getAllFriends(user_id: string): Observable<UserFriend[]> {
+    return this.http.get<UserFriend[]>(`${this.apiUrl}/user/${user_id}/friends`);
+  }
   // 8. Get group members
   getGroupMembers(id: string): Observable<GroupMember[]> {
     return this.http.get<GroupMember[]>(`${this.apiUrl}/${id}/get_members`);

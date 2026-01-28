@@ -48,3 +48,13 @@ export interface ApiResponse {
   message: string;
   data?: any;
 }
+
+export interface UserFriend {
+  user_id: string;
+  name: string;
+  surname: string;
+  profile_picture_id: string;
+  profile_header: string;
+  friends_since: Date;
+  status: string;
+}

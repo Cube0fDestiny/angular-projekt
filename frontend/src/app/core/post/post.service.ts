@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Post, Reaction } from '../../shared/models/post.model';
+import { Post, Reaction, PostImage } from '../../shared/models/post.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -42,7 +42,7 @@ export class PostService {
     return this.http.post<Post>(`${this.apiUrl}`, data);
   }
 
-  updatePost(id: string, data: {content?: string, main_image_id?: string}): Observable<any> {
+  updatePost(id: string, data: {content?: string, images?: PostImage[]}): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, data);
   }
 

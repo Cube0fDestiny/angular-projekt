@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
-import { Post } from '../../models/post.model';
+import { Post, PostImage } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -47,6 +47,8 @@ export class PostCardComponent implements OnInit, OnDestroy {
   @Output() like = new EventEmitter<string>();
   @Output() share = new EventEmitter<string>();
 
+  
+
   /* User & State */
   currentUser: User | null = null;
   user: User | null = null;
@@ -86,8 +88,11 @@ export class PostCardComponent implements OnInit, OnDestroy {
     private imageService: ImageService
   ) {}
 
+
+  newImage: PostImage = {image_id: '', image_order: 0};
   changeMainImage(imageId: string):void {
-    this.postService.updatePost(this.post.id, {main_image_id: imageId}).subscribe({
+    this.newImage.image_id = imageId;
+    this.postService.updatePost(this.post.id, {images: [this.newImage]}).subscribe({
       next: (res) => {
         console.log('succesfully updated main iamge: ', res);
         this.loadMainImage();
