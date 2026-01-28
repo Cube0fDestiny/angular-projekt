@@ -146,8 +146,7 @@ export class LeftSidebarComponent {
   ];
 
   onGroupClick(group: any): void {
-    console.log('Group clicked:', group.name);
-    // Navigate to group page or show details
+    this.router.navigate(['/group', group.id]);
   }
 
   onOrgClick(org: any): void {

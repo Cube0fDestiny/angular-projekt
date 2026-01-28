@@ -1,7 +1,16 @@
 /* Home Page Styles */
 body {
   background: var(--o-bwhite);
+  overflow-y: scroll; /* Keep scrolling enabled */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
+
+/* Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
 :host {
   display: block;
   min-height: 100vh;
