@@ -38,43 +38,43 @@ export class LeftSidebarComponent {
   ngOnInit() {
     this.userService.currentUser$.subscribe((user) => {
       this.currentUser = user;
-    });
-    this.groupService.getUserGroups().subscribe({
-      next: (groups) => {
-        if (!groups || groups.length === 0) {
+      this.groupService.getUserGroups(this.currentUser.id).subscribe({
+        next: (groups) => {
+          if (!groups || groups.length === 0) {
+            this.groups = [];
+            this.loadProposedGroups();
+            return;
+          }
+          // For each group, fetch member_data from getGroupById
+          const groupFetches = groups.map((group) =>
+            this.groupService
+              .getGroupById(group.id)
+              .toPromise()
+              .then((fullGroup) =>
+                fullGroup && fullGroup.member_data
+                  ? { ...group, member_data: fullGroup.member_data }
+                  : group,
+              ),
+          );
+          Promise.all(groupFetches)
+            .then((fullGroups) => {
+              this.groups = fullGroups;
+              this.loadGroupImages(this.groups);
+              this.loadProposedGroups();
+            })
+            .catch((err) => {
+              this.groups = groups; // fallback to basic data
+              this.loadGroupImages(this.groups);
+              this.loadProposedGroups();
+              console.error('Failed to fetch full group data:', err);
+            });
+        },
+        error: (err) => {
           this.groups = [];
           this.loadProposedGroups();
-          return;
-        }
-        // For each group, fetch member_data from getGroupById
-        const groupFetches = groups.map((group) =>
-          this.groupService
-            .getGroupById(group.id)
-            .toPromise()
-            .then((fullGroup) =>
-              fullGroup && fullGroup.member_data
-                ? { ...group, member_data: fullGroup.member_data }
-                : group,
-            ),
-        );
-        Promise.all(groupFetches)
-          .then((fullGroups) => {
-            this.groups = fullGroups;
-            this.loadGroupImages(this.groups);
-            this.loadProposedGroups();
-          })
-          .catch((err) => {
-            this.groups = groups; // fallback to basic data
-            this.loadGroupImages(this.groups);
-            this.loadProposedGroups();
-            console.error('Failed to fetch full group data:', err);
-          });
-      },
-      error: (err) => {
-        this.groups = [];
-        this.loadProposedGroups();
-        console.error('Failed to load user groups:', err);
-      },
+          console.error('Failed to load user groups:', err);
+        },
+      });
     });
   }
 
