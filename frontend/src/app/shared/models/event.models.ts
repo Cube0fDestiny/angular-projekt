@@ -22,6 +22,7 @@ export interface EventFollower {
   name: string;
   surname: string;
   profile_picture_id?: string;
+  profile_picture_url?: string;
   is_company: boolean;
 }
 

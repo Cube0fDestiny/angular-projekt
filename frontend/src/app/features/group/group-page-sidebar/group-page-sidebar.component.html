@@ -41,7 +41,7 @@
   </div>
 
   <!-- Friends Section -->
-  <div class="sidebar-section">
+  <div class="sidebar-section" *ngIf="loadedMembers">
     <div class="section-header">
       <h3 class="section-title">
         <span class="section-icon">👥</span>
@@ -59,7 +59,7 @@
         (click)="goToProfile(member.user_id)">
         
         <img 
-          [src]="getAvatarUrl(member)" 
+          [src]="member.profile_picture_url" 
           [alt]="member.name"
           class="friend-avatar">
         

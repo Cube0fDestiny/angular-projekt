@@ -7,8 +7,9 @@ import { UserService } from '../../core/user/user.service';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OrangButtonComponent } from '../../shared/components/orang-button/orang-button.component';
-import { User } from '../../shared/models/user.model';
-import { forkJoin } from 'rxjs';
+import { FriendListItem, User } from '../../shared/models/user.model';
+import { catchError, forkJoin, map, of } from 'rxjs';
+import { ImageService } from '../../core/image/image.service';
 
 @Component({
   selector: 'app-friend-list',
@@ -33,7 +34,8 @@ export class FriendListComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private userService: UserService
+    private userService: UserService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -75,27 +77,48 @@ export class FriendListComponent implements OnInit {
 
   loadFriends(): void {
     this.userService.getAllFriends().subscribe({
-      next: (friendItems) => {
+      next: (friendItems: FriendListItem[]) => {
         if (friendItems.length === 0) {
           this.friends = [];
           console.log('No friends loaded');
           return;
         }
         
-        // Extract just the IDs from the response objects
         const friendIds = friendItems.map(item => item.friend_id);
-        
-        // Create an array of observables
         const friendObservables = friendIds.map(id => 
           this.userService.getUserById(id)
         );
         
-        // Wait for all requests to complete
         forkJoin(friendObservables).subscribe({
           next: (users) => {
-            this.friends = users.filter(user => user !== null) as User[];
-            console.log('Loaded all friends successfully:', this.friends.length);
-            this.sectionTitle = `${this.user?.name}'s Friends`;
+            // Filter out null users first
+            const validUsers = users.filter(user => user !== null) as User[];
+            
+            // Load avatars for each user
+            const avatarObservables = validUsers.map(user => 
+              this.imageService.getImage(user.avatar).pipe(
+                map(avatarUrl => ({
+                  ...user,
+                  avatarUrl: avatarUrl || 'assets/logo_icon.png'
+                })),
+                catchError(() => of({
+                  ...user,
+                  avatarUrl: 'assets/logo_icon.png'
+                }))
+              )
+            );
+            
+            // Wait for all avatar requests
+            forkJoin(avatarObservables).subscribe({
+              next: (usersWithAvatars) => {
+                this.friends = usersWithAvatars;
+                console.log('Loaded all friends with avatars:', this.friends.length);
+              },
+              error: (error) => {
+                console.error('Error loading avatars:', error);
+                this.friends = validUsers; // Use users without avatars
+              }
+            });
           },
           error: (error) => {
             console.error('Error loading friends:', error);
