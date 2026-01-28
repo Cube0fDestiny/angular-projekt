@@ -1,0 +1,44 @@
+// image-upload.component.scss
+:host {
+  display: block;
+}
+
+// Custom backdrop styling
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+// Custom overlay panel styling
+.image-upload-overlay-panel {
+  z-index: 1000;
+}
+
+// Animation for modal entrance
+.cdk-overlay-container .cdk-overlay-connected-position-bounding-box {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Ensure modal content is visible
+.image-upload-overlay-panel .cdk-overlay-pane {
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+}
+
+// Fix for modal scrolling
+.cdk-global-scrollblock {
+  position: static !important;
+  width: initial !important;
+  overflow-y: hidden !important;
+}
