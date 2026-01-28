@@ -1,5 +1,5 @@
 import amqp from "amqplib";
-import { logger } from "./server.js";
+import { logger } from "../server.js";
 
 let channel = null;
 const exchange = "app_events";
