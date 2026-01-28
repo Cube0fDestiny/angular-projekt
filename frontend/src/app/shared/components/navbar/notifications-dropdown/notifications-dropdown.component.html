@@ -5,9 +5,9 @@
     (click)="toggleDropdown()">
     <img class="w-6 h-6 md:w-7 md:h-7 object-contain" [src]="getNotificationIcon()" alt="Notifications">
     <span
-      *ngIf="friendRequests.length > 0"
+      *ngIf="notifications.length > 0"
       class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-5 h-5 rounded-full flex items-center justify-center px-1 ring-2 ring-[#F4991A]">
-      {{ friendRequests.length }}
+      {{ notifications.length }}
     </span>
   </div>
 
@@ -36,10 +36,160 @@
         class="p-4 hover:bg-[#344F1F]/5 transition-all duration-200 border-b border-[#344F1F]/10"
         [class.border-b]="!last">
         
+        <!-- message created -->
+        <div *ngIf="notification.type=='message.created'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.creatorId)">
+            <div *ngIf="notification.data.senderProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.senderProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.senderName }} {{ notification.data.senderSurname }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Sent you a new message</span>
+            </div>
+          </div>
 
-        <!-- friend requests -->
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              (click)="goToChats(notification.id)">
+              Go to Chats
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              (click)="deleteNotification(notification.id)">
+              Remove Notification
+            </button>
+          </div>
+        </div>
+
+        <!-- chat created -->
+        <div *ngIf="notification.type=='chat.created'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.creatorId)">
+            <div *ngIf="notification.data.creatorProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.creatorProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.creatorName }} {{ notification.data.creatorSurname }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Created a new chat with you</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              (click)="goToChats(notification.id)">
+              Go to Chats
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              (click)="deleteNotification(notification.id)">
+              Remove Notification
+            </button>
+          </div>
+        </div>
+
+        <!-- group join requests -->
+        <div *ngIf="notification.type=='group.invited'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.userId)">
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.invitedUserId }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Wants to join "{{ notification.data.groupName }}"</span>
+            </div>
+            <!--<div *ngIf="notification.data.reactorProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.reactorProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>-->
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              >
+              Accept
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- post likes -->
+        <div *ngIf="notification.type=='post.liked'">
+          <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.userId)">
+            <div *ngIf="notification.data.reactorProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.reactorProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[#344F1F] font-bold block truncate">
+                {{ notification.data.reactorName }} {{ notification.data.reactorSurname }}
+              </span>
+              <span class="text-[#344F1F]/70 text-sm">Liked your post</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <!-- Accept Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
+              (click)="goToPost(notification.id, notification.data.postId)">
+              Go to Post
+            </button>
+            <!-- Reject Button -->
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-transparent text-[#344F1F] font-medium text-sm rounded-lg border-2 border-[#344F1F]/30 hover:bg-[#344F1F]/10 transition-colors"
+              (click)="deleteNotification(notification.id)">
+              Remove Notification
+            </button>
+          </div>
+        </div>
+
+        <!-- post comments -->
         <div *ngIf="notification.type=='post.commented'">
           <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.creatorId)">
+            <div *ngIf="notification.data.commenterProfilePicture">
+              <img
+                *ngIf="getImageUrl(notification.data.commenterProfilePicture) | async as imageUrl"
+                [src]="imageUrl"
+                alt="User avatar"
+                class="w-11 h-11 rounded-full object-cover ring-2 ring-[#F4991A]/50">
+            </div>
             <div class="flex-1 min-w-0">
               <span class="text-[#344F1F] font-bold block truncate">
                 {{ notification.data.commenterName }} {{ notification.data.commenterSurname }}
@@ -53,7 +203,7 @@
             <button
               type="button"
               class="flex-1 py-2 px-3 bg-[#344F1F] text-white font-medium text-sm rounded-lg hover:bg-[#2a3a14] transition-colors"
-              (click)="goToPost(notification.data.postId)">
+              (click)="goToPost(notification.id, notification.data.postId)">
               Go to Post
             </button>
             <!-- Reject Button -->
@@ -66,7 +216,7 @@
           </div>
         </div>
 
-        <!-- new messages -->
+        <!-- friend requests -->
          <div *ngIf="notification.type=='friend.request'">
           <div class="flex items-center gap-3 cursor-pointer" (click)="goToProfile(notification.data.requesterId)">
             <div *ngIf="notification.data.requesterProfilePicture">

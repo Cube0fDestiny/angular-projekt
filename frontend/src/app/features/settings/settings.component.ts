@@ -15,7 +15,6 @@ import { User } from '../../shared/models/user.model';
     CommonModule,
     NavbarComponent,
     FooterComponent,
-    TextDisplayComponent,
     OrangButtonComponent,
     FormsModule
   ],

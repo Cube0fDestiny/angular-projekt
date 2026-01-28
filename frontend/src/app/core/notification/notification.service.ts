@@ -11,7 +11,7 @@ import { io, Socket } from 'socket.io-client';
 })
 export class NotificationService {
   private readonly apiUrl = `${environment.apiUrl}/notifications`;
-  allowedTypes = ['post.commented', 'friend.request'];
+  allowedTypes = ['post.commented', 'friend.request', 'post.liked', 'group.invited', 'chat.created', 'message.created'];
   constructor(private http: HttpClient) {}
 
   getAllNotofications(limit: Number = 30, offset: Number = 0):Observable<NotificationList>{

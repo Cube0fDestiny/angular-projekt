@@ -14,7 +14,7 @@ import { ImageService } from '../../core/image/image.service';
 @Component({
   selector: 'events-page',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, TextDisplayComponent, OrangButtonComponent, CommonModule, NgIf],
+  imports: [FormsModule, NavbarComponent, OrangButtonComponent, CommonModule, NgIf],
   templateUrl: './events-page.component.html'
 })
 export class EventsPageComponent implements OnInit {

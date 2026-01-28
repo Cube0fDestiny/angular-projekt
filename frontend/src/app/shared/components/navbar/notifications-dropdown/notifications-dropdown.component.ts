@@ -25,8 +25,6 @@ export class NotificationsDropdownComponent implements OnInit {
   
   isOpen = false;
   
-  friendRequestsRaw: IncomingFriendRequest[] = [];
-  friendRequests: Array<[IncomingFriendRequest, User]> = [];
   currentUser: User | null = null;
 
   notifications: OrangNotification[] = [];
@@ -44,7 +42,6 @@ export class NotificationsDropdownComponent implements OnInit {
     this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
-    this.loadFriendRequestsWithUsers();
     this.notificationService.initializeSocket();
     this.subscriptions.push(
       this.notificationService.notifications$.subscribe(notifications => {
@@ -73,38 +70,10 @@ export class NotificationsDropdownComponent implements OnInit {
     return `assets/icons/notification_off.png`;
   }
 
-  loadFriendRequestsWithUsers(): void {
-    this.userService.getFriendRequestsIncoming().pipe(
-      switchMap(requests => {
-        this.friendRequestsRaw = requests;
-        if (requests.length === 0) {
-          return [];
-        }
-        
-        const userObservables = requests.map(request =>
-          this.userService.getUserById(request.from_user_id).pipe(
-            map(user => [request, user] as [IncomingFriendRequest, User])
-          )
-        );
-        
-        return forkJoin(userObservables);
-      })
-    ).subscribe({
-      next: (friendRequestsWithUsers) => {
-        this.friendRequests = friendRequestsWithUsers;
-      },
-      error: (error) => {
-        console.error('Error loading friend requests:', error);
-        this.friendRequests = [];
-      }
-    });
-  }
-
   acceptFriendRequest(notificationId: string, friendRequestId: string): void {
     this.userService.acceptFriendRequest(friendRequestId).subscribe({
       next: (response) => {
         console.log('Friend request accepted:', response.message);
-        this.removeRequestFromList(friendRequestId);
         this.notificationService.deleteNotification(notificationId).subscribe({
           next: (message) => {
             console.log('deleted notification: ', message);
@@ -121,11 +90,9 @@ export class NotificationsDropdownComponent implements OnInit {
   }
 
   rejectFriendRequest(notificationId: string, friendRequestId: string): void {
-    this.notificationService.deleteNotification(notificationId);
     this.userService.rejectFriendRequest(friendRequestId).subscribe({
       next: (response) => {
         console.log('Friend request rejected:', response.message);
-        this.removeRequestFromList(friendRequestId);
         this.notificationService.deleteNotification(notificationId).subscribe({
           next: (message) => {
             console.log('deleted notification: ', message);
@@ -141,23 +108,16 @@ export class NotificationsDropdownComponent implements OnInit {
     });
   }
 
-  private removeRequestFromList(userId: string): void {
-    this.friendRequestsRaw = this.friendRequestsRaw.filter(
-      req => req.from_user_id !== userId
-    );
-    this.friendRequests = this.friendRequests.filter(
-      ([req, user]) => req.from_user_id !== userId
-    );
-  }
 
   goToProfile(userId: string): void {
     this.userClick.emit(userId);
     this.router.navigate(['/']).then(() => { this.router.navigate(['/profile', userId]); });
   }
 
-  goToPost(postId: string):void {
+  goToPost(notificationId: string,postId: string):void {
     this.postService.getPostById(postId).subscribe({
       next: (post) => {
+        this.deleteNotification(notificationId);
         console.log('navigating to post...');
         this.router.navigate(['/']).then(() => { this.router.navigate([`/${post.location_type}/${post.location_id}/${post.id}`]); });
       },
@@ -175,5 +135,10 @@ export class NotificationsDropdownComponent implements OnInit {
         console.error('failed to delere notification: ', error);
       }
     });
+  }
+
+  goToChats(notificationId: string):void {
+    this.deleteNotification(notificationId);
+    this.router.navigate(['/chats']);
   }
 }
