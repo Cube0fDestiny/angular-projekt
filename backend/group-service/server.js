@@ -7,12 +7,12 @@ import groupRoutes from './routes/groupRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { connectRabbitMQ } from './utils/rabbitmq-client.js';
 
+dotenv.config();
+
 export const logger = pino({
   name: 'GroupService',
   transport: { target: 'pino-pretty' },
 });
-
-dotenv.config();
 
 const startServer = async () => {
   await connectRabbitMQ();
