@@ -1,3 +1,53 @@
+### Zaproszenie użytkownika do grupy
+`POST /:id/invite`
+
+**Wymagane uprawnienia:** admin/owner
+
+**Body:**
+```json
+{
+    "invitedUserId": "uuid-użytkownika"
+}
+```
+
+**Odpowiedź (200 OK):**
+```json
+{
+    "message": "Zaproszenie wysłane",
+    "event": {
+        "groupId": "uuid-group",
+        "groupName": "JavaScript",
+        "groupProfilePicture": "uuid-of-group-image",
+        "inviterId": "uuid-inviter",
+        "invitedUserId": "uuid-invited"
+    }
+}
+```
+
+#### Event: `group.invited`
+Publikowany, gdy użytkownik zostaje zaproszony do grupy.
+
+**Routing key:** `group.invited`
+
+**Payload:**
+```json
+{
+    "groupId": "uuid-group",
+    "groupName": "JavaScript",
+    "groupProfilePicture": "uuid-of-group-image",
+    "inviterId": "uuid-inviter",
+    "invitedUserId": "uuid-invited"
+}
+```
+
+**Fallback (brak danych grupy):**
+```json
+{
+    "groupId": "uuid-group",
+    "invitedUserId": "uuid-invited",
+    "inviterId": "uuid-inviter"
+}
+```
 ## 🚀 Istniejące Endpointy
 
 ### 1. Pobranie wszystkich grup

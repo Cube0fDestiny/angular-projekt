@@ -1,3 +1,40 @@
+// Invite a user to a group and publish group.invited event
+export const inviteUserToGroup = async (req, res) => {
+  const log = req.log;
+  const groupId = req.params.id;
+  const inviterId = req.user.id;
+  const { invitedUserId } = req.body;
+  try {
+    // Check if group exists
+    const groupRes = await db.query('SELECT id, name, profile_picture_id FROM "Groups" WHERE id = $1', [groupId]);
+    let groupName = null;
+    let groupProfilePicture = null;
+    if (groupRes.rows.length > 0) {
+      groupName = groupRes.rows[0].name;
+      groupProfilePicture = groupRes.rows[0].profile_picture_id;
+    }
+
+    // Optionally: Add invite record to DB (not implemented here)
+
+    // Build event payload
+    let eventPayload = {
+      groupId,
+      invitedUserId,
+      inviterId
+    };
+    if (groupName) {
+      eventPayload.groupName = groupName;
+      eventPayload.groupProfilePicture = groupProfilePicture;
+    }
+    // Publish event
+    publishEvent('group.invited', eventPayload);
+    log.info({ groupId, invitedUserId, inviterId }, 'Wysłano zaproszenie do grupy');
+    res.status(200).json({ message: 'Zaproszenie wysłane', event: eventPayload });
+  } catch (err) {
+    log.error({ err, groupId, inviterId, invitedUserId }, 'Błąd podczas zapraszania do grupy');
+    res.status(500).json({ error: err.message + ' Błąd podczas zapraszania do grupy' });
+  }
+};
 import * as db from "../db/index.js";
 import { publishEvent } from "../utils/rabbitmq-client.js";
 
