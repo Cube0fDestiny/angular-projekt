@@ -1,5 +1,7 @@
 import amqp from "amqplib";
 import { logger } from "../server.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 let channel = null;
 const exchange = "app_events";
@@ -14,8 +16,6 @@ export const connectRabbitMQ = async (retries = 10, delay = 5000) => {
 
   const url = process.env.RABBITMQ_URL;
   if (!url) {
-    // Log konkretny problem, ale nie wysadzaj całej aplikacji tutaj –
-    // startServer zdecyduje, czy to krytyczne.
     logger.error(
       "[Group-Service] RABBITMQ_URL environment variable is not set",
     );
