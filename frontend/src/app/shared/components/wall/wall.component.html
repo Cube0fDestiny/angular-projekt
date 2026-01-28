@@ -1,48 +1,70 @@
 <div class="wall-container">
-  <!-- Create New Post (optional) -->
+  <!-- Create New Post Section -->
   <div class="create-post-section" *ngIf="canPost">
-   <!-- <app-create-post (postCreated)="addPost($event)"></app-create-post>
-  --><app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
+    <app-text-display variant="beige" class="max-w-2xl w-full rounded-xl">
       
-      <div class="mb-6 text-center">
-        <div class="flex items-center justify-center gap-3 mb-2">
-          
-          <!-- Edit/Cancel Button -->
-          <orang-button 
-            (click)="toggleCreatingPost()"
-          >
-            {{ isCreatingPost ? 'Cancel' : 'Create New Post' }}
+      <!-- Collapsed State - Just the button -->
+      <div class="p-4" *ngIf="!isCreatingPost">
+        <div class="flex items-center justify-center">
+          <orang-button (click)="toggleCreatingPost()">
+            ✏️ Create New Post
           </orang-button>
-          
-          <!-- Content Area -->
-          <div class="flex-1" *ngIf="isCreatingPost">
-            <!-- Edit Mode -->
-            <form 
-               
-              (ngSubmit)="createPost()" 
-              class="flex items-center gap-3"
-            >
-              <app-text-display variant="white" class="text-lg flex-1">
-                <textarea
-                  [(ngModel)]="newPost"
-                  name="newPost"
-                  placeholder="Write something Orang!"
-                  rows="1"
-                  class="w-full bg-transparent border border-none rounded-lg p-3 focus:outline-none focus:ring-none focus:border-transparent resize-y"
-                ></textarea>
-              </app-text-display>
-              <orang-button 
-                type="submit" 
-                [istoggleable]="false"
-              >
-                Confirm
-              </orang-button>
-            </form>
-          </div>
         </div>
       </div>
-      </app-text-display>
+
+      <!-- Expanded State - Form -->
+      <div class="p-6" *ngIf="isCreatingPost">
+        <form (ngSubmit)="createPost()" class="space-y-4">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-700">
+              📝 What's on your mind?
+            </h3>
+            <button 
+              type="button"
+              (click)="toggleCreatingPost()"
+              class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Textarea -->
+          <app-text-display variant="white" class="block w-full rounded-lg overflow-hidden">
+            <textarea
+              [(ngModel)]="newPost"
+              name="newPost"
+              placeholder="Write something Orang! 🍊"
+              rows="4"
+              class="w-full bg-transparent border-none p-4 focus:outline-none resize-y min-h-[120px] text-gray-700 placeholder-gray-400"
+            ></textarea>
+          </app-text-display>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button 
+              type="button"
+              (click)="toggleCreatingPost()"
+              class="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+            >
+              Cancel
+            </button>
+            <orang-button 
+              type="submit" 
+              [istoggleable]="false"
+              [disabled]="!newPost.trim()"
+            >
+              🚀 Post
+            </orang-button>
+          </div>
+
+        </form>
+      </div>
+
+    </app-text-display>
   </div>
+</div>
   
   <!-- Posts List -->
   <div class="posts-list">
@@ -71,4 +93,3 @@
       <p>🎉 You've seen all {{ posts.length }} posts!</p>
     </div>
   </div>
-</div>
