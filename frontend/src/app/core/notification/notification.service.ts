@@ -57,7 +57,7 @@ export class NotificationService {
     const token = localStorage.getItem('token');
 
     this.socket = io(`${environment.apiUrl}`, {
-      path: '/notifications/socket',
+      path: '/api/notifications/socket',
       auth: { token },
       extraHeaders: {
       Authorization: `Bearer ${token}`

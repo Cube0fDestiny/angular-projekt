@@ -28,7 +28,7 @@ export class ChatSocketService implements OnDestroy {
     const token = localStorage.getItem('token');
     
     this.socket = io(`${environment.apiUrl}`, {
-      path: '/chats/socket',
+      path: '/api/chats/socket',
       auth: { token },
       extraHeaders: {
         Authorization: `Bearer ${token}`
