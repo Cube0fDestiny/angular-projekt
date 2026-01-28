@@ -236,12 +236,12 @@ export class ProfilePageHeaderComponent implements OnInit {
   }
 
   getProfileUrl(): void {
-    if (!this.user?.avatar) {
+    if (!this.user?.profile_picture_id) {
       this.profileImageUrl = this.profileImage;
       return;
     }
     
-    this.imageService.getImage(this.user.avatar).subscribe({
+    this.imageService.getImage(this.user.profile_picture_id).subscribe({
       next: (imageUrl) => {
         this.profileImageUrl = imageUrl;
         console.log('laoded profile image');
@@ -266,7 +266,7 @@ export class ProfilePageHeaderComponent implements OnInit {
   }
 
   onProfileImageUploaded(imageId: string): void{
-    this.userService.updateProfile(this.userId!, {avatar: imageId}).subscribe({
+    this.userService.updateProfile(this.userId!, {profile_picture_id: imageId}).subscribe({
       next: () => {
         console.log('changed profile picture');
         this.getProfileUrl();

@@ -83,32 +83,31 @@ export class ProfilePageSidebarComponent implements OnInit {
     });
   }
 
+  userId!: string | null;
+
   ngOnInit(): void {
-    const userId = this.route.snapshot.paramMap.get('id');
+    this.userId = this.route.snapshot.paramMap.get('id');
 
     // Subscribe to current user
     this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
 
-    // Load main profile (either from route or current user)
-    if (userId) {
-      this.userService.getUserById(userId).subscribe({
-        next: (u) => this.user = u,
-        error: (error) => console.error('Error loading user:', error)
-      });
-    } else {
-      this.user = this.currentUser!;
-    }
+    this.loadUser();
+  }
 
-    // Load friends
-    
-    this.loadAllGroups();
-    if(this.user?.is_company){
-      this.loadFollowers();
-    }else{
-      this.loadFriends();
-    }
+  loadUser(): void{
+    this.userService.getUserById(this.userId!).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.loadAllGroups();
+        if(user?.is_company){
+          this.loadFollowers();
+        }else{
+          this.loadFriends();
+        }
+      }
+    });
   }
 
   loadFriends(): void {
@@ -132,14 +131,14 @@ export class ProfilePageSidebarComponent implements OnInit {
             
             // Load avatars for each user
             const avatarObservables = validUsers.map(user => 
-              this.imageService.getImage(user.avatar).pipe(
-                map(avatarUrl => ({
+              this.imageService.getImage(user.profile_picture_id!).pipe(
+                map(profile_picture_url => ({
                   ...user,
-                  avatarUrl: avatarUrl || 'assets/logo_icon.png'
+                  profile_picture_url: profile_picture_url || 'assets/logo_icon.png'
                 })),
                 catchError(() => of({
                   ...user,
-                  avatarUrl: 'assets/logo_icon.png'
+                  profile_picture_url: 'assets/logo_icon.png'
                 }))
               )
             );
@@ -176,7 +175,7 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   goToFollowerList(): void {
     console.log('navigating to follower list...');
-    this.router.navigate(['/followerlist', this.user!.id]);
+    this.router.navigate(['/followerslist', this.user!.id]);
   }
 
   /** Navigate to another user's profile */
@@ -192,7 +191,7 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   loadAllGroups(): void {
     this.isLoading = true;
-    this.groupService.getAllGroups().subscribe({
+    this.groupService.getUserGroups(this.user?.id!).subscribe({
       next: (groups) => {
         this.groups = groups;
         this.isLoading = false;
@@ -231,22 +230,27 @@ export class ProfilePageSidebarComponent implements OnInit {
 
   loadFollowers():void {
     this.userService.getAllFollowers(this.user!.id).subscribe(followers => {
-      this.followers = followers;
-      console.log('loaded followers');
-      followers.forEach(follower => {
-        if(!follower.avatar){
-          follower.avatarUrl = 'assets/logo_icon.png';
-        }else{
-          this.imageService.getImage(follower.avatar).subscribe({
-            next: (url) => {
-              follower.avatarUrl = url;
-            }
-          });
-        }
-      });
-      this.followers = followers;
-      console.log('loaded follower profiles');
-      this.loadedFollowers = true;
+      if(followers.length==0){
+        this.loadedFollowers = true;
+        this.followers = [];
+        console.log('loaded empty follower list');
+      } else {
+        followers.forEach(follower => {
+          if(!follower.avatar){
+            follower.profile_picture_url = 'assets/logo_icon.png';
+          }else{
+            this.imageService.getImage(follower.avatar).subscribe({
+              next: (url) => {
+                follower.profile_picture_url = url;
+              }
+            });
+          }
+        });
+        this.followers = followers;
+        console.log('loaded follower profiles');
+        this.loadedFollowers = true;
+      }
+      
     })
   }
 }

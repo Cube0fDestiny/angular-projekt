@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { Post } from '../../models/post.model';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,24 @@ import { OrangButtonComponent } from '../../../shared/components/orang-button/or
 import { PostService } from '../../../core/post/post.service';
 import { UserService } from '../../../core/user/user.service';
 import { User } from '../../../shared/models/user.model';
+import { ImageService } from '../../../core/image/image.service';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+interface EnrichedComment {
+  id: string;
+  text: string;
+  creator_id: string;
+  created_at: string;
+  in_reply_to?: string;
+  displayDate?: string;
+  showReplyForm?: boolean;
+  showEditForm?: boolean;
+  editText?: string;
+  user?: User;
+  parentUser?: User;
+  isReply?: boolean;
+}
 
 @Component({
   selector: 'app-post-card',
@@ -16,13 +34,13 @@ import { User } from '../../../shared/models/user.model';
   standalone: true,
   imports: [NgIf, FormsModule, NgFor, TextDisplayComponent, OrangButtonComponent],
 })
-export class PostCardComponent implements OnInit {
+export class PostCardComponent implements OnInit, OnDestroy {
   @Input() post!: Post;
   @Input() showActions = true;
   @Input() currentUserId?: string;
   
   /* Events */
-  @Output() postDeleted = new EventEmitter<string>(); // Emit post ID when deleted
+  @Output() postDeleted = new EventEmitter<string>();
   @Output() like = new EventEmitter<string>();
   @Output() share = new EventEmitter<string>();
 
@@ -31,6 +49,7 @@ export class PostCardComponent implements OnInit {
   user: User | null = null;
   userReacted: boolean = false;
   isLoading = false;
+  userProfilePicture = 'assets/logo_icon.png';
 
   /* UI State: Copy/Share */
   copied = false;
@@ -44,7 +63,7 @@ export class PostCardComponent implements OnInit {
   /* Comments & Forms */
   newComment = '';
   showComments = false;
-  comments: any[] = [];
+  comments: EnrichedComment[] = [];
   loadingComments = false;
   replyText = '';
   
@@ -52,15 +71,17 @@ export class PostCardComponent implements OnInit {
   showEditPostForm = false;
   editPostText = '';
 
+  private subscriptions = new Subscription();
+
   constructor(
     private postService: PostService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private imageService: ImageService
   ) {}
 
   ngOnInit() {
     console.log(this.post);
-    // Initialize counters
     this.orang_count = this.post.orang_count;
     this.comment_count = this.post.comment_count;
 
@@ -77,22 +98,87 @@ export class PostCardComponent implements OnInit {
     this.getUserReaction();
   }
 
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
   /* ============================
-     User & Navigation
+     User & Profile Pictures
      ============================ */
 
   loadUser(id: string): void {
     this.isLoading = true;
-    this.userService.getUserById(id).subscribe({
-      next: (user) => {
-        this.user = user;
+    const sub = this.userService.getUserById(id).pipe(
+      switchMap(user => this.enrichUserWithProfilePicture(user))
+    ).subscribe({
+      next: (enrichedUser) => {
+        this.user = enrichedUser;
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Failed to load user:', error);
+        this.user = { id } as User;
         this.isLoading = false;
       }
     });
+    this.subscriptions.add(sub);
+  }
+
+  /**
+   * Enriches a user object with their profile picture URL
+   */
+  private enrichUserWithProfilePicture(user: User) {
+    if (!user.profile_picture_id) {
+      user.profile_picture_url = 'assets/logo_icon.png';
+      return of(user);
+    }
+    
+    return this.imageService.getImage(user.profile_picture_id).pipe(
+      map(url => {
+        user.profile_picture_url = url;
+        return user;
+      }),
+      catchError(() => {
+        user.profile_picture_url = 'assets/logo_icon.png';
+        return of(user);
+      })
+    );
+  }
+
+  /**
+   * Enriches multiple users with profile pictures
+   */
+  private enrichUsersWithProfilePictures(userIds: string[]) {
+    const uniqueIds = [...new Set(userIds)];
+    
+    const userObservables = uniqueIds.map(userId => 
+      this.userService.getUserById(userId).pipe(
+        switchMap(user => this.enrichUserWithProfilePicture(user)),
+        catchError(() => {
+          // Return a minimal user object if the request fails
+          const fallbackUser: User = {
+            id: userId,
+            name: 'Unknown',
+            surname: 'User',
+            email: '',
+            is_company: false,
+            profile_picture_url: 'assets/logo_icon.png'
+          };
+          return of(fallbackUser);
+        })
+      )
+    );
+
+    return userObservables.length > 0 
+      ? forkJoin(userObservables).pipe(
+          map(users => {
+            // Create a map for quick lookup
+            const userMap = new Map<string, User>();
+            users.forEach(user => userMap.set(user.id, user));
+            return userMap;
+          })
+        )
+      : of(new Map<string, User>());
   }
 
   goToProfile(id: string) {
@@ -118,21 +204,16 @@ export class PostCardComponent implements OnInit {
     return postDate.toLocaleDateString();
   }
 
-  /**
-   * FIX: Added missing copyPostLink method to resolve build error
-   */
   copyPostLink(postId: string): void {
     if (this.isCopying) return;
     
     this.isCopying = true;
-    // Construct the URL (adjust '/post/' path based on your routing)
     const url = `${window.location.origin}/post/${postId}`;
 
     navigator.clipboard.writeText(url).then(() => {
       this.copied = true;
       this.copyButtonText = '✅ Copied!';
       
-      // Reset after 2 seconds
       setTimeout(() => {
         this.copied = false;
         this.isCopying = false;
@@ -183,7 +264,6 @@ export class PostCardComponent implements OnInit {
   toggleEditPostForm(): void {
     this.showEditPostForm = !this.showEditPostForm;
     if (this.showEditPostForm) {
-      // Initialize with current post content
       this.editPostText = this.post.Text;
     } else {
       this.editPostText = '';
@@ -231,7 +311,7 @@ export class PostCardComponent implements OnInit {
   }
 
   /* ============================
-     Comments Logic
+     Comments Logic (REWRITTEN)
      ============================ */
 
   toggleComments(): void {
@@ -243,72 +323,87 @@ export class PostCardComponent implements OnInit {
 
   loadComments(): void {
     this.loadingComments = true;
+    this.showComments = false;
 
-    this.postService.getComments(this.post.id).subscribe({
-      next: (comments) => {
-        // Process synchronously - find parent users from the same batch
-        this.comments = comments.map(comment => {
-          const enrichedComment: any = {
-            ...comment,
-            showReplyForm: false
-          };
-
-          // If it's a reply, find parent comment and its user info
+    this.postService.getComments(this.post.id).pipe(
+      switchMap(comments => {
+        // First, collect all unique user IDs we need
+        const userIds = new Set<string>();
+        const parentUserIds = new Set<string>();
+        
+        const baseComments = comments.map(comment => {
+          userIds.add(comment.creator_id);
+          
           if (comment.in_reply_to) {
             const parentComment = comments.find(c => c.id === comment.in_reply_to);
             if (parentComment) {
-              enrichedComment.parentUserId = parentComment.creator_id;
+              parentUserIds.add(parentComment.creator_id);
             }
           }
-          return enrichedComment;
+          
+          return {
+            ...comment,
+            showReplyForm: false,
+            showEditForm: false
+          } as EnrichedComment;
         });
 
-        // Now fetch users and format times
-        this.fetchUsersForComments();
-        this.getTimeForComments();
+        // Combine all user IDs
+        const allUserIds = [...userIds, ...parentUserIds];
+        
+        // Fetch all users with their profile pictures
+        return this.enrichUsersWithProfilePictures([...allUserIds]).pipe(
+          map(userMap => ({ baseComments, userMap }))
+        );
+      })
+    ).subscribe({
+      next: ({ baseComments, userMap }) => {
+        // Enrich comments with user data
+        this.comments = baseComments.map(comment => {
+          const enrichedComment = { ...comment };
+          
+          // Add main user
+          enrichedComment.user = userMap.get(comment.creator_id);
+          
+          // Add parent user if this is a reply
+          if (comment.in_reply_to) {
+            const parentComment = baseComments.find(c => c.id === comment.in_reply_to);
+            if (parentComment) {
+              enrichedComment.parentUser = userMap.get(parentComment.creator_id);
+              enrichedComment.isReply = true;
+            }
+          }
+          
+          // Format display date
+          enrichedComment.displayDate = this.formatTimeAgo(comment.created_at);
+          
+          return enrichedComment;
+        });
+        
         this.loadingComments = false;
+        this.showComments = true;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Failed to load comments:', error);
         this.loadingComments = false;
+        this.showComments = true; // Show anyway even if profile pics failed
       }
     });
   }
 
-  private getTimeForComments(): void {
-    this.comments.forEach((comment) => {
-      const now = new Date();
-      const commentDate = new Date(comment.created_at);
-      const diffMs = now.getTime() - commentDate.getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
+  private formatTimeAgo(dateString: string): string {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
 
-      if (diffMins < 1) comment.displayDate = 'Just now';
-      else if (diffMins < 60) comment.displayDate = `${diffMins}m ago`;
-      else if (diffHours < 24) comment.displayDate = `${diffHours}h ago`;
-      else if (diffDays < 7) comment.displayDate = `${diffDays}d ago`;
-      else comment.displayDate = commentDate.toLocaleDateString();
-    });
-  }
-
-  private fetchUsersForComments(): void {
-    this.comments.forEach((comment, index) => {
-      // Fetch comment author
-      this.userService.getUserById(comment.creator_id).subscribe({
-        next: (user) => {
-          this.comments[index].user = user;
-          
-          // If we have a parent user ID, fetch that too
-          if (comment.parentUserId) {
-            this.userService.getUserById(comment.parentUserId).subscribe({
-              next: (parentUser) => {
-                this.comments[index].parentUser = parentUser;
-              }
-            });
-          }
-        }
-      });
-    });
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   }
 
   addComment(): void {
@@ -316,13 +411,25 @@ export class PostCardComponent implements OnInit {
     
     this.postService.addComment(this.post.id, {
       text: this.newComment,
-    }).subscribe({
-      next: (comment) => {
-        const enrichedComment = this.createLocalCommentObject(comment, false);
+    }).pipe(
+      switchMap(comment => {
+        return this.enrichUserWithProfilePicture(this.currentUser!).pipe(
+          map(enrichedUser => ({ comment, user: enrichedUser }))
+        );
+      })
+    ).subscribe({
+      next: ({ comment, user }) => {
+        const enrichedComment: EnrichedComment = {
+          ...comment,
+          user: user,
+          showReplyForm: false,
+          showEditForm: false,
+          displayDate: 'Just now'
+        };
+        
         this.comments.unshift(enrichedComment);
         this.newComment = '';
-        this.resetAllSubmitButtons();
-        this.comment_count = this.comment_count + 1;
+        this.comment_count++;
       },
       error: (error) => {
         console.error('Failed to add comment:', error);
@@ -330,30 +437,41 @@ export class PostCardComponent implements OnInit {
     });
   }
 
-  toggleReplyForm(comment: any): void {
+  toggleReplyForm(comment: EnrichedComment): void {
     comment.showReplyForm = !comment.showReplyForm;
     if (!comment.showReplyForm) {
       this.replyText = '';
     }
   }
 
-  addReply(comment: any): void {
+  addReply(parentComment: EnrichedComment): void {
     if (!this.replyText?.trim()) return;
     
     this.postService.addComment(this.post.id, {
       text: this.replyText,
-      in_reply_to: comment.id,
-    }).subscribe({
-      next: (reply) => {
-        const enrichedReply = this.createLocalCommentObject(reply, true, comment);
+      in_reply_to: parentComment.id,
+    }).pipe(
+      switchMap(comment => {
+        return this.enrichUserWithProfilePicture(this.currentUser!).pipe(
+          map(enrichedUser => ({ comment, user: enrichedUser }))
+        );
+      })
+    ).subscribe({
+      next: ({ comment, user }) => {
+        const enrichedReply: EnrichedComment = {
+          ...comment,
+          user: user,
+          parentUser: parentComment.user,
+          isReply: true,
+          showReplyForm: false,
+          showEditForm: false,
+          displayDate: 'Just now'
+        };
         
-        // Add to beginning of comments array
         this.comments.unshift(enrichedReply);
-        
-        this.resetAllSubmitButtons();
-        comment.showReplyForm = false;
         this.replyText = '';
-        this.comment_count = this.comment_count + 1;
+        parentComment.showReplyForm = false;
+        this.comment_count++;
       },
       error: (error) => {
         console.error('Failed to add reply:', error);
@@ -361,27 +479,7 @@ export class PostCardComponent implements OnInit {
     });
   }
 
-  // Helper to standardise comment object creation after posting
-  private createLocalCommentObject(apiResponse: any, isReply: boolean, parentComment: any = null): any {
-    const enriched: any = {
-      ...apiResponse,
-      user: this.userService.currentUser,
-      isReply: isReply,
-      showReplyForm: false,
-      showEditForm: false,
-      displayDate: 'Just now'
-    };
-
-    if (isReply && parentComment) {
-      enriched.parentUser = parentComment.user;
-      enriched.parentUserId = parentComment.creator_id;
-    } else {
-      enriched.parentUser = null;
-    }
-    return enriched;
-  }
-
-  toggleEditForm(comment: any): void {
+  toggleEditForm(comment: EnrichedComment): void {
     comment.showEditForm = !comment.showEditForm;
     if (comment.showEditForm) {
       comment.editText = comment.text;
@@ -390,7 +488,7 @@ export class PostCardComponent implements OnInit {
     }
   }
 
-  editComment(comment: any): void {
+  editComment(comment: EnrichedComment): void {
     if (!comment.editText?.trim() || comment.editText === comment.text) {
       comment.showEditForm = false;
       return;
@@ -401,7 +499,7 @@ export class PostCardComponent implements OnInit {
         comment.text = updatedComment.text;
         comment.editText = '';
         comment.showEditForm = false;
-        comment.displayDate = 'Just now'; // Update time indicator
+        comment.displayDate = 'Just now';
         console.log('Comment updated successfully');
       },
       error: (error) => {
@@ -410,7 +508,7 @@ export class PostCardComponent implements OnInit {
     });
   }
 
-  deleteComment(comment: any): void {
+  deleteComment(comment: EnrichedComment): void {
     if (!confirm('Are you sure you want to delete this comment?')) {
       return;
     }
@@ -422,7 +520,7 @@ export class PostCardComponent implements OnInit {
           this.comments.splice(index, 1);
         }
         console.log('Comment deleted successfully:', response.message);
-        this.comment_count = this.comment_count - 1;
+        this.comment_count--;
       },
       error: (error) => {
         console.error('Failed to delete comment:', error);
@@ -431,8 +529,6 @@ export class PostCardComponent implements OnInit {
   }
 
   resetAllSubmitButtons(): void {
-    // Note: accessing DOM directly in Angular is generally discouraged, 
-    // but preserving your existing logic here.
     const buttons = document.querySelectorAll('orang-button[type="submit"]');
     buttons.forEach(button => {
       (button as any).isActive = true;

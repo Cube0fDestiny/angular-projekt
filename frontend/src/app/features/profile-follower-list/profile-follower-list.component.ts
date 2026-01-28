@@ -73,11 +73,11 @@ export class ProfileFollowerListComponent implements OnInit {
       console.log('loaded followers');
       followers.forEach(follower => {
         if(!follower.avatar){
-          follower.avatarUrl = 'assets/logo_icon.png';
+          follower.profile_picture_url = 'assets/logo_icon.png';
         }else{
           this.imageService.getImage(follower.avatar).subscribe({
             next: (url) => {
-              follower.avatarUrl = url;
+              follower.profile_picture_url = url;
             }
           });
         }
