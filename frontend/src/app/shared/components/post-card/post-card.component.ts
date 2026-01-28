@@ -122,15 +122,16 @@ export class PostCardComponent implements OnInit, OnDestroy {
   }
 
   loadMainImage() {
-    if(!this.post.images?.[0]?.image_id){
-      this.mainImage = 'assets/images/orange-grove.png';
-      this.loadedMainImage = true;
-    } else {
-      this.imageService.getImage(this.post.images?.[0]?.image_id).subscribe({
+    console.log('image: ', this.post.images?.[0]?.image_id);
+    
+    // Check if image_id EXISTS and is truthy
+    if(this.post.images?.[0]?.image_id) {
+      // This runs when we HAVE a valid image_id
+      this.imageService.getImage(this.post.images[0].image_id).subscribe({
         next: (url) => {
           this.mainImage = url;
           this.loadedMainImage = true;
-          console.log('laoded main image: ', url);
+          console.log('loaded main image: ', url);
         },
         error: (error) => {
           console.error('failed to load main image: ', error);
@@ -138,8 +139,11 @@ export class PostCardComponent implements OnInit, OnDestroy {
           this.loadedMainImage = true;
         }
       });
+    } else {
+      // This runs when we DON'T have a valid image_id
+      this.mainImage = 'assets/images/orange-grove.png';
+      this.loadedMainImage = true;
     }
-    
   }
 
   /* ============================
