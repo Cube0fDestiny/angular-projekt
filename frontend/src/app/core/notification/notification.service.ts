@@ -54,14 +54,23 @@ export class NotificationService {
       console.log('Socket already initialized');
       return;
     }
+
     const token = localStorage.getItem('token');
 
-    this.socket = io(`${environment.apiUrl}`, {
-      path: '/api/notifications/socket',
+    // 1. EXTRACT THE ORIGIN (Remove '/api' from the connection URL)
+    // If environment.apiUrl is 'https://orang.studio/api', this gets 'https://orang.studio'
+    // Passing the full path forces Socket.IO to look for a namespace called "api"
+    const urlObj = new URL(environment.apiUrl);
+    const socketUrl = urlObj.origin;
+
+    // 2. CONNECT TO ROOT URL
+    this.socket = io(socketUrl, {
+      path: '/api/notifications/socket', // This handles the routing through Caddy -> Gateway
       auth: { token },
       extraHeaders: {
-      Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`
+      },
+      transports: ['websocket', 'polling'] // Optional: force stability
     });
 
     this.socket.on('connect', () => {
