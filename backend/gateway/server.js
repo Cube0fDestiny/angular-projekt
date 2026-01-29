@@ -46,7 +46,27 @@ const server = http.createServer(app);
 
 app.use(cors());
 app.use(pinoHttp({ logger }));
-app.use(gatewayVerifyToken);
+
+// --- FIX 1: Strip /api prefix from HTTP requests ---
+// This fixes the "404 Not Found" during Socket.IO polling on localhost
+app.use((req, res, next) => {
+  if (req.url.startsWith("/api")) {
+    req.url = req.url.replace("/api", "");
+  }
+  next();
+});
+
+// --- FIX 2: Skip Auth for Public Routes ---
+// This prevents the Gateway from blocking Login/Register or Socket Handshakes
+const publicRoutes = ["/users/login", "/users/register", "/chats/socket", "/notifications/socket"];
+
+app.use((req, res, next) => {
+  // Check if the current path (after stripping /api) matches a public route
+  if (publicRoutes.some((route) => req.url.startsWith(route))) {
+    return next();
+  }
+  return gatewayVerifyToken(req, res, next);
+});
 
 app.use("/", orchestrationRoutes);
 
@@ -71,11 +91,12 @@ services.forEach(({ route, target }) => {
   app.use(route, createProxyMiddleware(proxyOptions));
 });
 
+// --- CHAT PROXY ---
 const chatServiceProxy = createProxyMiddleware({
   target: "http://chat-service:3006",
   changeOrigin: true,
   ws: true,
-  // Express strips the mount path; add it back so Socket.IO path /chats/socket works
+  // Express strips '/chats', so we add it back because the backend expects /chats/socket
   pathRewrite: (path) => `/chats${path}`,
   onError: (err, req, res) => {
     req.log.error({ err, service: "/chats" }, "Bład proxy");
@@ -91,11 +112,12 @@ const chatServiceProxy = createProxyMiddleware({
 
 app.use("/chats", chatServiceProxy);
 
+// --- NOTIFICATION PROXY ---
 const notificationServiceProxy = createProxyMiddleware({
   target: "http://notification-service:3007",
   changeOrigin: true,
   ws: true,
-  // Restore mount path for Socket.IO at /notifications/socket
+  // Express strips '/notifications', so we add it back because the backend expects /notifications/socket
   pathRewrite: (path) => `/notifications${path}`,
   onError: (err, req, res) => {
     req.log.error({ err, service: "/notifications" }, "Błåd proxy");
@@ -115,8 +137,9 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => logger.info(`🚀 Gateway działa na porcie ${PORT}`));
 
+// --- FIX 3: WebSocket Upgrade Handling ---
 server.on("upgrade", (req, socket, head) => {
-  // 1. Strip '/api' if present (Fixes the issue when running locally)
+  // Strip /api if present (for local testing without Caddy)
   if (req.url.startsWith("/api")) {
     req.url = req.url.replace("/api", "");
   }
@@ -124,11 +147,12 @@ server.on("upgrade", (req, socket, head) => {
   logger.info({ url: req.url }, `Processing WebSocket Upgrade`);
 
   if (req.url.startsWith("/chats")) {
-    // 2. Strip '/chats' because the proxy 'pathRewrite' will add it back
+    // Strip '/chats' here. The proxy 'pathRewrite' above will add it back.
+    // This logic loop ensures the path is clean when it enters the proxy middleware.
     req.url = req.url.replace("/chats", ""); 
     chatServiceProxy.upgrade(req, socket, head);
   } else if (req.url.startsWith("/notifications")) {
-    // 2. Strip '/notifications' because the proxy 'pathRewrite' will add it back
+    // Strip '/notifications' here.
     req.url = req.url.replace("/notifications", "");
     notificationServiceProxy.upgrade(req, socket, head);
   } else {

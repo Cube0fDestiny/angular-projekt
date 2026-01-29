@@ -27,12 +27,18 @@ export class ChatSocketService implements OnDestroy {
     }
     const token = localStorage.getItem('token');
     
-    this.socket = io(`${environment.apiUrl}`, {
-      path: '/api/chats/socket',
+    // 1. Extract the origin (e.g., http://localhost:3000) to avoid Namespace errors
+    const urlObj = new URL(environment.apiUrl);
+    const socketUrl = urlObj.origin;
+
+    this.socket = io(socketUrl, {
+      path: '/api/chats/socket', // Keep this path so Gateway routing works
       auth: { token },
       extraHeaders: {
         Authorization: `Bearer ${token}`
-      }
+      },
+      // Optional: Force WebSocket to avoid polling issues if proxying is tricky
+      transports: ['websocket', 'polling'] 
     });
     
     this.socket.on('connect', () => {
