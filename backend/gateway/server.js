@@ -116,12 +116,23 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => logger.info(`🚀 Gateway działa na porcie ${PORT}`));
 
 server.on("upgrade", (req, socket, head) => {
-  logger.info({ url: req.url }, `Próba uaktualnienia połączenia do WebSocket`);
+  // 1. Strip '/api' if present (Fixes the issue when running locally)
+  if (req.url.startsWith("/api")) {
+    req.url = req.url.replace("/api", "");
+  }
+
+  logger.info({ url: req.url }, `Processing WebSocket Upgrade`);
+
   if (req.url.startsWith("/chats")) {
+    // 2. Strip '/chats' because the proxy 'pathRewrite' will add it back
+    req.url = req.url.replace("/chats", ""); 
     chatServiceProxy.upgrade(req, socket, head);
   } else if (req.url.startsWith("/notifications")) {
+    // 2. Strip '/notifications' because the proxy 'pathRewrite' will add it back
+    req.url = req.url.replace("/notifications", "");
     notificationServiceProxy.upgrade(req, socket, head);
   } else {
+    logger.warn({ url: req.url }, "WebSocket connection rejected: No matching route");
     socket.destroy();
   }
 });
