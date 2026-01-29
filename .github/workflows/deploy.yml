@@ -62,22 +62,31 @@ jobs:
           script: |
             cd ~/app
 
+            # 1. Fetch the latest history
+            git fetch origin main
+
+            # 2. Force reset local files to match the repository (Discards local changes/corruption)
+            git reset --hard origin/main
+
+            # 3. Configure sparse checkout
             git sparse-checkout init --cone
             git sparse-checkout set Caddyfile docker-compose.yml
-            git pull origin main
-            
-            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> .env
-            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> .env
-            echo "RABBITMQ_URL=amqp://${{ secrets.RABBITMQ_DEFAULT_USER }}:${{ secrets.RABBITMQ_DEFAULT_PASS }}@rabbitmq:5672" >> .env
-            echo "PBKDF2_ITERATIONS=${{ secrets.PBKDF2_ITERATIONS }}" >> .env
-            echo "PBKDF2_KEYLEN=${{ secrets.PBKDF2_KEYLEN }}" >> .env
-            echo "PBKDF2_DIGEST=${{ secrets.PBKDF2_DIGEST }}" >> .env
 
+            # 4. Create .env file
+            # Note: Ensure you are referencing the variables using $VARIABLE syntax
+            echo "DB_HOST=$DB_HOST" > .env
+            echo "DB_PORT=$DB_PORT" >> .env
+            echo "DB_USER=$DB_USER" >> .env
+            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+            echo "DB_NAME=$DB_NAME" >> .env
+            echo "JWT_SECRET=$JWT_SECRET" >> .env
+            echo "RABBITMQ_DEFAULT_USER=$RABBITMQ_DEFAULT_USER" >> .env
+            echo "RABBITMQ_DEFAULT_PASS=$RABBITMQ_DEFAULT_PASS" >> .env
+            echo "RABBITMQ_URL=rabbitmq:5672" >> .env
+            echo "PBKDF2_ITERATIONS=$PBKDF2_ITERATIONS" >> .env
+            echo "PBKDF2_KEYLEN=$PBKDF2_KEYLEN" >> .env
+            echo "PBKDF2_DIGEST=$PBKDF2_DIGEST" >> .env
+
+            # 5. Run Docker
             docker compose pull
             docker compose up -d --remove-orphans
