@@ -82,7 +82,7 @@ jobs:
             echo "JWT_SECRET=$JWT_SECRET" >> .env
             echo "RABBITMQ_DEFAULT_USER=$RABBITMQ_DEFAULT_USER" >> .env
             echo "RABBITMQ_DEFAULT_PASS=$RABBITMQ_DEFAULT_PASS" >> .env
-            echo "RABBITMQ_URL=rabbitmq:5672" >> .env
+            echo "RABBITMQ_URL=$RABBITMQ_URL" >> .env
             echo "PBKDF2_ITERATIONS=$PBKDF2_ITERATIONS" >> .env
             echo "PBKDF2_KEYLEN=$PBKDF2_KEYLEN" >> .env
             echo "PBKDF2_DIGEST=$PBKDF2_DIGEST" >> .env
