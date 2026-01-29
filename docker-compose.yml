@@ -25,8 +25,12 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
-    restart:
-      unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   gateway:
     image: noka993/gateway
@@ -59,7 +63,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   post-service:
     image: noka993/post-service
@@ -77,7 +82,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   event-service:
     image: noka993/event-service
@@ -95,7 +101,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     
   image-service:
     image: noka993/image-service
@@ -156,7 +163,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
   
   frontend:
     image: noka993/frontend
@@ -188,7 +196,8 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   caddy_data: {}
